@@ -46,25 +46,20 @@ class temp(object):
 
 
 async def pub_is_subscribed(bot, query, channel):
-    btn = []
+    keyboard = []
     for id in channel:
-        chat = await bot.get_chat(int(id))
         try:
+            chat = await bot.get_chat(id)
             user_membership = await bot.get_chat_member(id, query.from_user.id)
             if user_membership.status != enums.ChatMemberStatus.MEMBER:
-                buttons.append(
-                    [InlineKeyboardButton(f'Join {chat.title}', url=chat.invite_link)]
-                )
-        except UserNotParticipant:
-            buttons.append(
-                [InlineKeyboardButton(f'Join {chat.title}', url=chat.invite_link)]
-            )
+                keyboard.append([InlineKeyboardButton(f'Join {chat.title}', url=chat.invite_link)])
         except Exception as e:
-            logger.exception(f"Error checking membership for channel {channel_id}: {e}")
-            # Consider adding a generic "Error fetching info" button here
+            # Log the error for debugging
+            print(f"Error checking membership for channel {id}: {e}")
+            keyboard.append([InlineKeyboardButton("Please try again later", callback_data="error")])
 
-    return btn
-
+    return keyboard
+    
 async def is_subscribed(bot, query):
     if REQUEST_TO_JOIN_MODE == True and join_db().isActive():
         try:
