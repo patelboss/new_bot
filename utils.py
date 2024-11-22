@@ -135,8 +135,9 @@ async def is_subscribed(bot, query):
                 if missing_channels:
                     logger.info("User %s is missing subscriptions for channels. Sending join buttons.", query.from_user.id)
                     reply_markup = InlineKeyboardMarkup([missing_channels])
-                    await query.message.reply_text(
-                        "Please join all the required channels to use the bot. You can join using the buttons below:",
+                    # Use query.answer() instead of query.message.reply_text()
+                    await query.answer(
+                        text="Please join all the required channels to use the bot. You can join using the buttons below:",
                         reply_markup=reply_markup
                     )
                     return False  # User is not subscribed to all channels
@@ -173,15 +174,17 @@ async def is_subscribed(bot, query):
                     InlineKeyboardButton(f"Join {channel.title}", url=channel.invite_link)
                 )
             reply_markup = InlineKeyboardMarkup([join_buttons])
-            await query.message.reply_text(
-                "You need to join the following channels to use the bot. Click on the buttons below to join:",
+            # Use query.answer() instead of query.message.reply_text()
+            await query.answer(
+                text="You need to join the following channels to use the bot. Click on the buttons below to join:",
                 reply_markup=reply_markup
             )
             return False  # User hasn't joined all channels
 
     logger.info("User %s is subscribed to all required channels.", query.from_user.id)
     return True
-    
+
+
 async def get_poster(query, bulk=False, id=False, file=None):
     if not id:
         query = (query.strip()).lower()
