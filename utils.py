@@ -181,7 +181,7 @@ async def is_subscribed(bot, query):
 
     logger.info("User %s is subscribed to all required channels.", query.from_user.id)
     return True
-        
+    
 async def get_poster(query, bulk=False, id=False, file=None):
     if not id:
         query = (query.strip()).lower()
