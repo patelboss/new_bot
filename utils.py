@@ -94,12 +94,16 @@ async def pub_is_subscribed(bot, query, channel):
 import os
 from pyrogram.errors import UserNotParticipant
 from pyrogram import enums
+from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 # Fetch the channel IDs from environment variables
 AUTH_CHANNELS = os.getenv("AUTH_CHANNELS", "").split(",")  # Get the list of channel IDs
 
 async def is_subscribed(bot, query):
     logger.info("Checking subscription by is_subscribe status for user %s", query.from_user.id)
+
+    # Collecting channels that the user isn't subscribed to
+    missing_channels = []
     
     if REQUEST_TO_JOIN_MODE == True and join_db().isActive():
         logger.info("Request-to-join mode is active.")
@@ -119,42 +123,64 @@ async def is_subscribed(bot, query):
                         user_data = await bot.get_chat_member(int(channel_id), query.from_user.id)
                     except UserNotParticipant:
                         logger.warning("User %s is not a participant in channel %s.", query.from_user.id, channel_id)
-                        return False  # Return False if not a participant in any of the channels
+                        channel = await bot.get_chat(int(channel_id))  # Get channel info to include in button
+                        missing_channels.append(
+                            InlineKeyboardButton(f"Join {channel.title}", url=channel.invite_link)
+                        )
                     except Exception as e:
                         logger.exception("Error while awaiting `bot.get_chat_member` for user %s: %s", query.from_user.id, e)
                         return False  # Return False if there's an error in checking the subscription
-                    else:
-                        if user_data.status != enums.ChatMemberStatus.BANNED:
-                            logger.info("User %s is not banned in channel %s.", query.from_user.id, channel_id)
-                        else:
-                            logger.warning("User %s is banned in channel %s.", query.from_user.id, channel_id)
-                            return False  # Return False if the user is banned in any channel
-                # If the user is subscribed to all channels
+
+                # If there are missing channels, send them a list to join
+                if missing_channels:
+                    logger.info("User %s is missing subscriptions for channels. Sending join buttons.", query.from_user.id)
+                    reply_markup = InlineKeyboardMarkup([missing_channels])
+                    await query.message.reply_text(
+                        "Please join all the required channels to use the bot. You can join using the buttons below:",
+                        reply_markup=reply_markup
+                    )
+                    return False  # User is not subscribed to all channels
+
                 logger.info("User %s is subscribed to all required channels.", query.from_user.id)
                 return True
+
         except Exception as e:
             logger.exception("Error in request-to-join mode for user %s: %s", query.from_user.id, e)
             return False
     else:
         logger.info("Request-to-join mode is inactive.")
-        try:
-            # Loop through each channel ID to check if the user is subscribed
-            for channel_id in AUTH_CHANNELS:
-                logger.info("Awaiting `bot.get_chat_member` for user %s in channel %s.", query.from_user.id, channel_id)
+        
+        # Loop through each channel ID to check if the user is subscribed
+        for channel_id in AUTH_CHANNELS:
+            logger.info("Awaiting `bot.get_chat_member` for user %s in channel %s.", query.from_user.id, channel_id)
+            try:
                 user = await bot.get_chat_member(int(channel_id), query.from_user.id)
-                
                 if user.status == enums.ChatMemberStatus.BANNED:
                     logger.warning("User %s is banned in channel %s.", query.from_user.id, channel_id)
                     return False  # Return False if the user is banned in any channel
-        except UserNotParticipant:
-            logger.warning("User %s is not a participant in the required channels.", query.from_user.id)
-            return False  # If the user is not subscribed to any of the required channels
-        except Exception as e:
-            logger.exception("Error while awaiting `bot.get_chat_member` for user %s: %s", query.from_user.id, e)
-            return False  # Return False if there's an error in checking the subscription
+            except UserNotParticipant:
+                logger.warning("User %s is not a participant in channel %s.", query.from_user.id, channel_id)
+                missing_channels.append(channel_id)  # Track missing channels for later message
+                continue  # Continue checking other channels
 
-    logger.info("User %s is not subscribed to all required channels.", query.from_user.id)
-    return False
+        # If the user is missing any channels, return False and show them the missing channels
+        if missing_channels:
+            logger.info("User %s is missing subscriptions for channels. Sending join buttons.", query.from_user.id)
+            join_buttons = []
+            for channel_id in missing_channels:
+                channel = await bot.get_chat(int(channel_id))  # Get channel info to include in button
+                join_buttons.append(
+                    InlineKeyboardButton(f"Join {channel.title}", url=channel.invite_link)
+                )
+            reply_markup = InlineKeyboardMarkup([join_buttons])
+            await query.message.reply_text(
+                "You need to join the following channels to use the bot. Click on the buttons below to join:",
+                reply_markup=reply_markup
+            )
+            return False  # User hasn't joined all channels
+
+    logger.info("User %s is subscribed to all required channels.", query.from_user.id)
+    return True
         
 async def get_poster(query, bulk=False, id=False, file=None):
     if not id:
