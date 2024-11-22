@@ -62,8 +62,7 @@ channels = channel_ids.split(" ") if channel_ids else []
 logging.info(f"Loaded channels: {channels}")
 
 async def pub_is_subscribed(bot, query, channels):
-      btn = []
-    user_id = query.from_user.id
+    btn = []
     logging.info(f"Checking subscription for user: {user_id}")
 
     for channel_id in channels:
@@ -75,7 +74,7 @@ async def pub_is_subscribed(bot, query, channels):
 
             # Check if the user is a member of the channel
             logging.info(f"Checking if user {user_id} is a member of {chat.title}.")
-            await bot.get_chat_member(channel_id, user_id)
+            await bot.get_chat_member(channel_id, query.from_user.id)
             logging.info(f"User {user_id} is a member of {chat.title}.")
         except UserNotParticipant:
             # If the user is not subscribed, add a button to join
@@ -95,27 +94,6 @@ async def pub_is_subscribed(bot, query, channels):
     logging.info(f"User {user_id} is subscribed to all channels.")
     return True, None
 
-async def handle_user_query(bot, query):
-      user_id = query.from_user.id
-    logging.info(f"Handling query from user: {user_id}")
-
-    # Check subscription status
-    is_subscribeb, join_buttons = await pub_is_subscribed(bot, query)
-
-    if not is_subscribeb:
-        # If the user is not subscribed, send them the join buttons
-        logging.info(f"Prompting user {user_id} to join required channels.")
-        await query.message.reply_text(
-            "Please join all the channels below to use the bot:",
-            reply_markup=join_buttons
-        )
-        return
-
-    # Proceed with the bot's functionality if the user is subscribed
-    logging.info(f"User {user_id} has joined all required channels. Proceeding...")
-    await query.message.reply_text("Thank you for joining all channels!")
-
-    
 async def is_subscribed(bot, query):
     if REQUEST_TO_JOIN_MODE == True and join_db().isActive():
         try:
