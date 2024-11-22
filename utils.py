@@ -50,6 +50,21 @@ logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s",
     handlers=[logging.StreamHandler()]
 )
+import logging
+import sys
+
+# Set up logging to stream to stdout (required for Koyeb)
+logging.basicConfig(
+    level=logging.INFO,               # Set the log level (INFO in this case)
+    format="%(asctime)s - %(levelname)s - %(message)s",  # Log message format
+    stream=sys.stdout  # Ensure logs go to stdout (so Koyeb captures it)
+)
+
+# Create a logger
+logger = logging.getLogger()
+
+# Test log to ensure it's working
+logger.info("Logging setup complete. Logs are now streamed to stdout.")
 
 async def pub_is_subscribed(bot, query, channel):
     logger.info(f"Starting pub subscription check for user {query.from_user.id} in channels: {channel}.")
