@@ -61,7 +61,7 @@ channel_ids = os.getenv("AUTH_CHANNELS", "-1001576283111 -1002421602833 -1001418
 channels = channel_ids.split(" ") if channel_ids else []
 logging.info(f"Loaded channels: {channels}")
 
-async def pub_is_subscribed(bot, query):
+async def pub_is_subscribed(bot, query, channels):
     """
     Check if the user is subscribed to all required channels.
 
