@@ -44,56 +44,96 @@ class temp(object):
     SETTINGS = {}
     IMDB_CAP = {}
 
-
+import os
+import logging
 from pyrogram.errors import UserNotParticipant
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-import os
-channel_ids = environ.get("AUTH_CHANNELS", "-1001576283111,-1002421602833,-1001418743105")
-channels = channel_ids.split(",") if channel_ids else []
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    handlers=[logging.StreamHandler()]
+)
+
+# Fetch channel IDs from environment variables (comma-separated)
+channel_ids = os.getenv("AUTH_CHANNELS", "-1001576283111 -1002421602833 -1001418743105")
+channels = channel_ids.split(" ") if channel_ids else []
+logging.info(f"Loaded channels: {channels}")
+
 async def pub_is_subscribed(bot, query):
-        # Fetch channel IDs from environment variables (comma-separated)
-    channel_ids = os.getenv("AUTH_CHANNELS", "")
-    channels = channel_ids.split(",") if channel_ids else []
-    
+    """
+    Check if the user is subscribed to all required channels.
+
+    Parameters:
+    - bot: The bot instance.
+    - query: The user's query (e.g., button click or command).
+
+    Returns:
+    - A tuple: (bool, InlineKeyboardMarkup or None)
+        - bool: True if subscribed to all channels, False otherwise.
+        - InlineKeyboardMarkup: A markup with buttons for channels to join (if needed).
+    """
     btn = []
+    user_id = query.from_user.id
+    logging.info(f"Checking subscription for user: {user_id}")
+
     for channel_id in channels:
         try:
-            # Fetch the chat details
-            chat = await bot.get_chat(int(channel_id.strip()))
-            
+            channel_id = channel_id.strip()
+            logging.info(f"Fetching details for channel: {channel_id}")
+            chat = await bot.get_chat(int(channel_id))
+            logging.info(f"Channel '{chat.title}' fetched successfully.")
+
             # Check if the user is a member of the channel
-            await bot.get_chat_member(channel_id, query.from_user.id)
+            logging.info(f"Checking if user {user_id} is a member of {chat.title}.")
+            await bot.get_chat_member(channel_id, user_id)
+            logging.info(f"User {user_id} is a member of {chat.title}.")
         except UserNotParticipant:
             # If the user is not subscribed, add a button to join
+            logging.warning(f"User {user_id} is not a member of {channel_id}.")
             btn.append(
                 [InlineKeyboardButton(f'Join {chat.title}', url=chat.invite_link)]
             )
         except Exception as e:
-            # Handle other errors silently (optional: log them for debugging)
-            pass
-    
+            # Log other errors for debugging
+            logging.error(f"Error with channel {channel_id}: {e}")
+
     # If there are any buttons, the user is not subscribed to all channels
     if btn:
+        logging.info(f"User {user_id} is not subscribed to all channels.")
         return False, InlineKeyboardMarkup(btn)
-    
-    # User is subscribed to all channels
+
+    logging.info(f"User {user_id} is subscribed to all channels.")
     return True, None
 
-
 async def handle_user_query(bot, query):
+    """
+    Handle the user's query and ensure they are subscribed to required channels.
+
+    Parameters:
+    - bot: The bot instance.
+    - query: The user's query (e.g., button click or command).
+    """
+    user_id = query.from_user.id
+    logging.info(f"Handling query from user: {user_id}")
+
     # Check subscription status
-    is_subscribeb, join_buttons = await pub_is_subscribed(bot, query)
-    
-    if not is_subscribeb:
+    is_subscribed, join_buttons = await pub_is_subscribed(bot, query)
+
+    if not is_subscribed:
         # If the user is not subscribed, send them the join buttons
+        logging.info(f"Prompting user {user_id} to join required channels.")
         await query.message.reply_text(
             "Please join all the channels below to use the bot:",
             reply_markup=join_buttons
         )
         return
-    
+
     # Proceed with the bot's functionality if the user is subscribed
+    logging.info(f"User {user_id} has joined all required channels. Proceeding...")
     await query.message.reply_text("Thank you for joining all channels!")
+
     
 async def is_subscribed(bot, query):
     if REQUEST_TO_JOIN_MODE == True and join_db().isActive():
