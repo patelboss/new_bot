@@ -91,9 +91,15 @@ async def pub_is_subscribed(bot, query, channel):
     logger.info(f"Completed subscription check for user {query.from_user.id}. Buttons created: {len(btn)}.")
     return btn
 
+import os
+from pyrogram.errors import UserNotParticipant
+from pyrogram import enums
+
+# Fetch the channel IDs from environment variables
+AUTH_CHANNELS = os.getenv("AUTH_CHANNELS", "").split(",")  # Get the list of channel IDs
 
 async def is_subscribed(bot, query):
-    logger.info("Checking subscription by is_subcribe status for user %s", query.from_user.id)
+    logger.info("Checking subscription by is_subscribe status for user %s", query.from_user.id)
     
     if REQUEST_TO_JOIN_MODE == True and join_db().isActive():
         logger.info("Request-to-join mode is active.")
@@ -105,37 +111,49 @@ async def is_subscribed(bot, query):
                 return True
             else:
                 logger.info("User %s not found in join_db. Checking via bot.get_chat_member.", query.from_user.id)
-                try:
-                    logger.info("Awaiting `bot.get_chat_member` for user %s in channel %s.", query.from_user.id, AUTH_CHANNEL)
-                    user_data = await bot.get_chat_member(AUTH_CHANNEL, query.from_user.id)
-                except UserNotParticipant:
-                    logger.warning("User %s is not a participant in channel %s.", query.from_user.id, AUTH_CHANNEL)
-                    pass
-                except Exception as e:
-                    logger.exception("Error while awaiting `bot.get_chat_member` for user %s: %s", query.from_user.id, e)
-                else:
-                    if user_data.status != enums.ChatMemberStatus.BANNED:
-                        logger.info("User %s is not banned in channel %s.", query.from_user.id, AUTH_CHANNEL)
-                        return True
+                
+                # Loop through each channel ID to check if the user is subscribed
+                for channel_id in AUTH_CHANNELS:
+                    try:
+                        logger.info("Awaiting `bot.get_chat_member` for user %s in channel %s.", query.from_user.id, channel_id)
+                        user_data = await bot.get_chat_member(int(channel_id), query.from_user.id)
+                    except UserNotParticipant:
+                        logger.warning("User %s is not a participant in channel %s.", query.from_user.id, channel_id)
+                        return False  # Return False if not a participant in any of the channels
+                    except Exception as e:
+                        logger.exception("Error while awaiting `bot.get_chat_member` for user %s: %s", query.from_user.id, e)
+                        return False  # Return False if there's an error in checking the subscription
+                    else:
+                        if user_data.status != enums.ChatMemberStatus.BANNED:
+                            logger.info("User %s is not banned in channel %s.", query.from_user.id, channel_id)
+                        else:
+                            logger.warning("User %s is banned in channel %s.", query.from_user.id, channel_id)
+                            return False  # Return False if the user is banned in any channel
+                # If the user is subscribed to all channels
+                logger.info("User %s is subscribed to all required channels.", query.from_user.id)
+                return True
         except Exception as e:
             logger.exception("Error in request-to-join mode for user %s: %s", query.from_user.id, e)
             return False
     else:
         logger.info("Request-to-join mode is inactive.")
         try:
-            logger.info("Awaiting `bot.get_chat_member` for user %s in channel %s.", query.from_user.id, AUTH_CHANNEL)
-            user = await bot.get_chat_member(AUTH_CHANNEL, query.from_user.id)
+            # Loop through each channel ID to check if the user is subscribed
+            for channel_id in AUTH_CHANNELS:
+                logger.info("Awaiting `bot.get_chat_member` for user %s in channel %s.", query.from_user.id, channel_id)
+                user = await bot.get_chat_member(int(channel_id), query.from_user.id)
+                
+                if user.status == enums.ChatMemberStatus.BANNED:
+                    logger.warning("User %s is banned in channel %s.", query.from_user.id, channel_id)
+                    return False  # Return False if the user is banned in any channel
         except UserNotParticipant:
-            logger.warning("User %s is not a participant in channel %s.", query.from_user.id, AUTH_CHANNEL)
-            pass
+            logger.warning("User %s is not a participant in the required channels.", query.from_user.id)
+            return False  # If the user is not subscribed to any of the required channels
         except Exception as e:
             logger.exception("Error while awaiting `bot.get_chat_member` for user %s: %s", query.from_user.id, e)
-        else:
-            if user.status != enums.ChatMemberStatus.BANNED:
-                logger.info("User %s is not banned in channel %s.", query.from_user.id, AUTH_CHANNEL)
-                return True
+            return False  # Return False if there's an error in checking the subscription
 
-    logger.info("User %s is not subscribed.", query.from_user.id)
+    logger.info("User %s is not subscribed to all required channels.", query.from_user.id)
     return False
         
 async def get_poster(query, bulk=False, id=False, file=None):
