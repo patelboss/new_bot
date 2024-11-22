@@ -44,11 +44,6 @@ class temp(object):
     SETTINGS = {}
     IMDB_CAP = {}
 
-import os
-import logging
-from pyrogram.errors import UserNotParticipant
-from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
@@ -56,75 +51,75 @@ logging.basicConfig(
     handlers=[logging.StreamHandler()]
 )
 
-# Fetch channel IDs from environment variables (comma-separated)
-channel_ids = os.getenv("AUTH_CHANNELS", "-1001576283111 -1002421602833 -1001418743105")
-channels = channel_ids.split(" ") if channel_ids else []
-logging.info(f"Loaded channels: {channels}")
-
-async def pub_is_subscribed(bot, query, channels):
+async def pub_is_subscribed(bot, query, channel):
+    logger.info(f"Starting pub subscription check for user {query.from_user.id} in channels: {channel}.")
     btn = []
-    logging.info(f"Checking subscription for user: {user_id}")
-
-    for channel_id in channels:
+    
+    for id in channel:
         try:
-            channel_id = channel_id.strip()
-            logging.info(f"Fetching details for channel: {channel_id}")
-            chat = await bot.get_chat(int(channel_id))
-            logging.info(f"Channel '{chat.title}' fetched successfully.")
-
-            # Check if the user is a member of the channel
-            logging.info(f"Checking if user {user_id} is a member of {chat.title}.")
-            await bot.get_chat_member(channel_id, query.from_user.id)
-            logging.info(f"User {user_id} is a member of {chat.title}.")
-        except UserNotParticipant:
-            # If the user is not subscribed, add a button to join
-            logging.warning(f"User {user_id} is not a member of {channel_id}.")
-            btn.append(
-                [InlineKeyboardButton(f'Join {chat.title}', url=chat.invite_link)]
-            )
+            logger.info(f"Awaiting `bot.get_chat` to fetch chat details for channel ID {id}.")
+            chat = await bot.get_chat(int(id))  # Awaiting chat details
+            
+            try:
+                logger.info(f"Awaiting `bot.get_chat_member` to check membership for user {query.from_user.id} in channel ID {id}.")
+                await bot.get_chat_member(id, query.from_user.id)  # Awaiting membership check
+            except UserNotParticipant:
+                logger.warning(f"User {query.from_user.id} is not a participant in channel ID {id}.")
+                btn.append(
+                    [InlineKeyboardButton(f'Join {chat.title}', url=chat.invite_link)]
+                )
+            except Exception as e:
+                logger.exception(f"Unexpected error while awaiting `bot.get_chat_member` for user {query.from_user.id} in channel ID {id}: {e}")
         except Exception as e:
-            # Log other errors for debugging
-            logging.error(f"Error with channel {channel_id}: {e}")
-
-    # If there are any buttons, the user is not subscribed to all channels
-    if btn:
-        logging.info(f"User {user_id} is not subscribed to all channels.")
-        return False, InlineKeyboardMarkup(btn)
-
-    logging.info(f"User {user_id} is subscribed to all channels.")
-    return True, None
-
+            logger.exception(f"Error while awaiting `bot.get_chat` for channel ID {id}: {e}")
+    
+    logger.info(f"Completed subscription check for user {query.from_user.id}. Buttons created: {len(btn)}.")
+    return btn
+    
 async def is_subscribed(bot, query):
+       logger.info(f"Starting is subscription check for user {query.from_user.id} in channels: {channel}.")
+    
     if REQUEST_TO_JOIN_MODE == True and join_db().isActive():
+        logger.info("Request-to-join mode is active.")
         try:
+            logger.info(f"Checking user {query.from_user.id} in join_db.")
             user = await join_db().get_user(query.from_user.id)
             if user and user["user_id"] == query.from_user.id:
+                logger.info(f"User {query.from_user.id} found in join_db.")
                 return True
             else:
+                logger.info(f"User {query.from_user.id} not found in join_db. Checking bot for chat member status.")
                 try:
                     user_data = await bot.get_chat_member(AUTH_CHANNEL, query.from_user.id)
                 except UserNotParticipant:
+                    logger.warning(f"User {query.from_user.id} is not a participant in {AUTH_CHANNEL}.")
                     pass
                 except Exception as e:
-                    logger.exception(e)
+                    logger.exception(f"Error while fetching chat member status for {query.from_user.id}: {e}")
                 else:
                     if user_data.status != enums.ChatMemberStatus.BANNED:
+                        logger.info(f"User {query.from_user.id} is not banned in {AUTH_CHANNEL}.")
                         return True
         except Exception as e:
-            logger.exception(e)
+            logger.exception(f"Error in request-to-join mode for user {query.from_user.id}: {e}")
             return False
     else:
+        logger.info("Request-to-join mode is inactive.")
         try:
+            logger.info(f"Checking user {query.from_user.id} chat member status in {AUTH_CHANNEL}.")
             user = await bot.get_chat_member(AUTH_CHANNEL, query.from_user.id)
         except UserNotParticipant:
+            logger.warning(f"User {query.from_user.id} is not a participant in {AUTH_CHANNEL}.")
             pass
         except Exception as e:
-            logger.exception(e)
+            logger.exception(f"Error while fetching chat member status for {query.from_user.id}: {e}")
         else:
             if user.status != enums.ChatMemberStatus.BANNED:
+                logger.info(f"User {query.from_user.id} is not banned in {AUTH_CHANNEL}.")
                 return True
+        logger.info(f"User {query.from_user.id} is not subscribed.")
         return False
-
+        
 async def get_poster(query, bulk=False, id=False, file=None):
     if not id:
         query = (query.strip()).lower()
