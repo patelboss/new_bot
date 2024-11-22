@@ -20,6 +20,10 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.ERROR)
 lock = asyncio.Lock()
 
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 BUTTON = {}
 BUTTONS = {}
 FRESH = {}
@@ -1422,25 +1426,39 @@ async def cb_handler(client: Client, query: CallbackQuery):
             logger.exception(e)
             await query.answer(url=f"https://telegram.me/{temp.U_NAME}?start=sendfiles4_{key}")
 
+    
     elif query.data.startswith("unmuteme"):
         ident, userid = query.data.split("#")
         user_id = query.from_user.id
+        logger.info("Received unmute request from user %s with target user %s", user_id, userid)
+    
         settings = await get_settings(int(query.message.chat.id))
         if userid == 0:
-            await query.answer("You are anonymous admin !", show_alert=True)
+            logger.info("User %s is an anonymous admin. No unmute action performed.", user_id)
+            await query.answer("You are anonymous admin!", show_alert=True)
             return
+    
         try:
+            # Check if the user is subscribed to required channels
+            logger.info("Checking subscription status for user %s in required channels", user_id)
             btn = await pub_is_subscribed(client, query, settings['fsub'])
+        
             if btn:
-                await query.answer("Kindly Join Given Channel Then Click On Unmute Button", show_alert=True)
+                logger.warning("User %s is not subscribed to the required channels. Prompting them to join.", user_id)
+                await query.answer("Kindly join the given channel then click on unmute button", show_alert=True)
             else:
-                await client.unban_chat_member(query.message.chat.id, user_id)
-                await query.answer("Unmuted Successfully !", show_alert=True)
+                logger.info("User %s is subscribed to the required channels. Proceeding with unmute.", user_id)
+                await client.unban_chat_member(query.message.chat.id, int(userid))
+                await query.answer("Unmuted successfully!", show_alert=True)
+
                 try:
                     await query.message.delete()
-                except:
-                    return
-        except:
+                    logger.info("Successfully deleted the query message after unmute action.")
+                except Exception as e:
+                    logger.error("Error deleting the query message: %s", str(e))
+
+        except Exception as e:
+            logger.error("An error occurred while processing unmute for user %s: %s", user_id, str(e))
             await query.answer("Not For Your My Dear", show_alert=True)
    
     elif query.data.startswith("del"):
@@ -1465,12 +1483,28 @@ async def cb_handler(client: Client, query: CallbackQuery):
             f_caption = f"{files['file_name']}"
         await query.answer(url=f"https://telegram.me/{temp.U_NAME}?start=file_{file_id}")
     
+    
     elif query.data.startswith("checksub"):
+        user_id = query.from_user.id
+        logger.info("Received checksub request from user %s", user_id)
+    
+        # Check if the user is subscribed to the required channel
+        logger.info("Checking subscription status for user %s", user_id)
         if AUTH_CHANNEL and not await is_subscribed(client, query):
+            logger.warning("User %s is not subscribed to the AUTH_CHANNEL %s.", user_id, AUTH_CHANNEL)
             await query.answer("Jᴏɪɴ ᴏᴜʀ Bᴀᴄᴋ-ᴜᴘ ᴄʜᴀɴɴᴇʟ ᴍᴀʜɴ! 😒", show_alert=True)
             return
+
+        # Process the data if the user is subscribed
         ident, kk, file_id = query.data.split("#")
-        await query.answer(url=f"https://t.me/{temp.U_NAME}?start={kk}_{file_id}")
+        logger.info("User %s is subscribed. Redirecting to URL with data: ident=%s, kk=%s, file_id=%s", user_id, ident, kk, file_id)
+    
+        # Send the URL
+        try:
+            await query.answer(url=f"https://t.me/{temp.U_NAME}?start={kk}_{file_id}")
+            logger.info("Sent URL to user %s: https://t.me/{temp.U_NAME}?start={kk}_{file_id}", user_id)
+        except Exception as e:
+            logger.error("Error sending URL to user %s: %s", user_id, str(e))
     
     elif query.data == "pages":
         await query.answer()
