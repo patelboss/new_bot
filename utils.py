@@ -45,28 +45,12 @@ class temp(object):
     IMDB_CAP = {}
 
 
-#async def pub_is_subscribed(bot, query, channel):
- #   btn = []
-  #  for id in channel:
-   #     chat = await bot.get_chat(int(id))
-    #    try:
-     #       await bot.get_chat_member(id, query.from_user.id)
-      #  except UserNotParticipant:
-       #     btn.append(
-        #        [InlineKeyboardButton(f'Join {chat.title}', url=chat.invite_link)]
-         #   )
-#        except Exception as e:
- #           pass
-  #  return btn
-
-#import logging
-
 async def pub_is_subscribed(bot, query, channel):
-  
-    for channel_id in channel:
+    btn = []
+    for id in channel:
+        chat = await bot.get_chat(int(id))
         try:
-            chat = await bot.get_chat(channel_id)
-            user_membership = await bot.get_chat_member(channel_id, query.from_user.id)
+            user_membership = await bot.get_chat_member(id, query.from_user.id)
             if user_membership.status != enums.ChatMemberStatus.MEMBER:
                 buttons.append(
                     [InlineKeyboardButton(f'Join {chat.title}', url=chat.invite_link)]
@@ -79,7 +63,7 @@ async def pub_is_subscribed(bot, query, channel):
             logger.exception(f"Error checking membership for channel {channel_id}: {e}")
             # Consider adding a generic "Error fetching info" button here
 
-    return buttons
+    return btn
 
 async def is_subscribed(bot, query):
     if REQUEST_TO_JOIN_MODE == True and join_db().isActive():
