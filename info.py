@@ -36,7 +36,7 @@ AUTH_USERS = (auth_users + ADMINS) if auth_users else []
 REQUEST_TO_JOIN_MODE = bool(environ.get('REQUEST_TO_JOIN_MODE', False)) # Set True Or False
 TRY_AGAIN_BTN = bool(environ.get('TRY_AGAIN_BTN', True)) # Set True Or False (This try again button is only for request to join fsub not for normal fsub)
 auth_channel = [int(ch) for ch in environ.get('AUTH_CHANNEL', '').split() if ch.isdigit() and id_pattern.search(ch)]
-AUTH_CHANNEL = [int(ch) for ch in environ.get('AUTH_CHANNEL', '').split() if ch.isdigit() and id_pattern.search(ch)]
+AUTH_CHANNEL = int(auth_channel) if auth_channel and id_pattern.search(auth_channel) else None
 
 reqst_channel = environ.get('REQST_CHANNEL_ID', '')
 REQST_CHANNEL = int(reqst_channel) if reqst_channel and id_pattern.search(reqst_channel) else None
