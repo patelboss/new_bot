@@ -62,19 +62,7 @@ channels = channel_ids.split(" ") if channel_ids else []
 logging.info(f"Loaded channels: {channels}")
 
 async def pub_is_subscribed(bot, query, channels):
-    """
-    Check if the user is subscribed to all required channels.
-
-    Parameters:
-    - bot: The bot instance.
-    - query: The user's query (e.g., button click or command).
-
-    Returns:
-    - A tuple: (bool, InlineKeyboardMarkup or None)
-        - bool: True if subscribed to all channels, False otherwise.
-        - InlineKeyboardMarkup: A markup with buttons for channels to join (if needed).
-    """
-    btn = []
+      btn = []
     user_id = query.from_user.id
     logging.info(f"Checking subscription for user: {user_id}")
 
@@ -108,20 +96,13 @@ async def pub_is_subscribed(bot, query, channels):
     return True, None
 
 async def handle_user_query(bot, query):
-    """
-    Handle the user's query and ensure they are subscribed to required channels.
-
-    Parameters:
-    - bot: The bot instance.
-    - query: The user's query (e.g., button click or command).
-    """
-    user_id = query.from_user.id
+      user_id = query.from_user.id
     logging.info(f"Handling query from user: {user_id}")
 
     # Check subscription status
-    is_subscribed, join_buttons = await pub_is_subscribed(bot, query)
+    is_subscribeb, join_buttons = await pub_is_subscribed(bot, query)
 
-    if not is_subscribed:
+    if not is_subscribeb:
         # If the user is not subscribed, send them the join buttons
         logging.info(f"Prompting user {user_id} to join required channels.")
         await query.message.reply_text(
