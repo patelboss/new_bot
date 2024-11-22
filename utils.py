@@ -45,20 +45,54 @@ class temp(object):
     IMDB_CAP = {}
 
 
-async def pub_is_subscribed(bot, query, channel):
-    keyboard = []
-    for id in channel:
+from pyrogram.errors import UserNotParticipant
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+import os
+export AUTH_CHANNELS="-1001576283111,-1002421602833,-1001418743105"
+async def pub_is_subscribed(bot, query):
+        # Fetch channel IDs from environment variables (comma-separated)
+    channel_ids = os.getenv("AUTH_CHANNELS", "")
+    channels = channel_ids.split(",") if channel_ids else []
+    
+    btn = []
+    for channel_id in channels:
         try:
-            chat = await bot.get_chat(id)
-            user_membership = await bot.get_chat_member(id, query.from_user.id)
-            if user_membership.status != enums.ChatMemberStatus.MEMBER:
-                keyboard.append([InlineKeyboardButton(f'Join {chat.title}', url=chat.invite_link)])
+            # Fetch the chat details
+            chat = await bot.get_chat(int(channel_id.strip()))
+            
+            # Check if the user is a member of the channel
+            await bot.get_chat_member(channel_id, query.from_user.id)
+        except UserNotParticipant:
+            # If the user is not subscribed, add a button to join
+            btn.append(
+                [InlineKeyboardButton(f'Join {chat.title}', url=chat.invite_link)]
+            )
         except Exception as e:
-            # Log the error for debugging
-            print(f"Error checking membership for channel {id}: {e}")
-            keyboard.append([InlineKeyboardButton("Please try again later", callback_data="error")])
+            # Handle other errors silently (optional: log them for debugging)
+            pass
+    
+    # If there are any buttons, the user is not subscribed to all channels
+    if btn:
+        return False, InlineKeyboardMarkup(btn)
+    
+    # User is subscribed to all channels
+    return True, None
 
-    return keyboard
+
+async def handle_user_query(bot, query):
+    # Check subscription status
+    is_subscribeb, join_buttons = await pub_is_subscribed(bot, query)
+    
+    if not is_subscribeb:
+        # If the user is not subscribed, send them the join buttons
+        await query.message.reply_text(
+            "Please join all the channels below to use the bot:",
+            reply_markup=join_buttons
+        )
+        return
+    
+    # Proceed with the bot's functionality if the user is subscribed
+    await query.message.reply_text("Thank you for joining all channels!")
     
 async def is_subscribed(bot, query):
     if REQUEST_TO_JOIN_MODE == True and join_db().isActive():
