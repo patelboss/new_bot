@@ -75,50 +75,53 @@ async def pub_is_subscribed(bot, query, channel):
     
     logger.info(f"Completed subscription check for user {query.from_user.id}. Buttons created: {len(btn)}.")
     return btn
-    
+
+
 async def is_subscribed(bot, query):
-       logger.info(f"Starting is subscription check for user {query.from_user.id} in channels: {channel}.")
+    logger.info("Checking subscription by is_subcribe status for user %s", query.from_user.id)
     
     if REQUEST_TO_JOIN_MODE == True and join_db().isActive():
         logger.info("Request-to-join mode is active.")
         try:
-            logger.info(f"Checking user {query.from_user.id} in join_db.")
+            logger.info("Awaiting `join_db().get_user` for user %s.", query.from_user.id)
             user = await join_db().get_user(query.from_user.id)
             if user and user["user_id"] == query.from_user.id:
-                logger.info(f"User {query.from_user.id} found in join_db.")
+                logger.info("User %s found in join_db and matches ID.", query.from_user.id)
                 return True
             else:
-                logger.info(f"User {query.from_user.id} not found in join_db. Checking bot for chat member status.")
+                logger.info("User %s not found in join_db. Checking via bot.get_chat_member.", query.from_user.id)
                 try:
+                    logger.info("Awaiting `bot.get_chat_member` for user %s in channel %s.", query.from_user.id, AUTH_CHANNEL)
                     user_data = await bot.get_chat_member(AUTH_CHANNEL, query.from_user.id)
                 except UserNotParticipant:
-                    logger.warning(f"User {query.from_user.id} is not a participant in {AUTH_CHANNEL}.")
+                    logger.warning("User %s is not a participant in channel %s.", query.from_user.id, AUTH_CHANNEL)
                     pass
                 except Exception as e:
-                    logger.exception(f"Error while fetching chat member status for {query.from_user.id}: {e}")
+                    logger.exception("Error while awaiting `bot.get_chat_member` for user %s: %s", query.from_user.id, e)
                 else:
                     if user_data.status != enums.ChatMemberStatus.BANNED:
-                        logger.info(f"User {query.from_user.id} is not banned in {AUTH_CHANNEL}.")
+                        logger.info("User %s is not banned in channel %s.", query.from_user.id, AUTH_CHANNEL)
                         return True
         except Exception as e:
-            logger.exception(f"Error in request-to-join mode for user {query.from_user.id}: {e}")
+            logger.exception("Error in request-to-join mode for user %s: %s", query.from_user.id, e)
             return False
     else:
         logger.info("Request-to-join mode is inactive.")
         try:
-            logger.info(f"Checking user {query.from_user.id} chat member status in {AUTH_CHANNEL}.")
+            logger.info("Awaiting `bot.get_chat_member` for user %s in channel %s.", query.from_user.id, AUTH_CHANNEL)
             user = await bot.get_chat_member(AUTH_CHANNEL, query.from_user.id)
         except UserNotParticipant:
-            logger.warning(f"User {query.from_user.id} is not a participant in {AUTH_CHANNEL}.")
+            logger.warning("User %s is not a participant in channel %s.", query.from_user.id, AUTH_CHANNEL)
             pass
         except Exception as e:
-            logger.exception(f"Error while fetching chat member status for {query.from_user.id}: {e}")
+            logger.exception("Error while awaiting `bot.get_chat_member` for user %s: %s", query.from_user.id, e)
         else:
             if user.status != enums.ChatMemberStatus.BANNED:
-                logger.info(f"User {query.from_user.id} is not banned in {AUTH_CHANNEL}.")
+                logger.info("User %s is not banned in channel %s.", query.from_user.id, AUTH_CHANNEL)
                 return True
-        logger.info(f"User {query.from_user.id} is not subscribed.")
-        return False
+
+    logger.info("User %s is not subscribed.", query.from_user.id)
+    return False
         
 async def get_poster(query, bulk=False, id=False, file=None):
     if not id:
