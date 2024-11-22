@@ -48,7 +48,8 @@ class temp(object):
 from pyrogram.errors import UserNotParticipant
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 import os
-export AUTH_CHANNELS="-1001576283111,-1002421602833,-1001418743105"
+channel_ids = os.getenv("AUTH_CHANNELS", -1001576283111,-1002421602833,-1001418743105"")
+channels = channel_ids.split(",") if channel_ids else []
 async def pub_is_subscribed(bot, query):
         # Fetch channel IDs from environment variables (comma-separated)
     channel_ids = os.getenv("AUTH_CHANNELS", "")
