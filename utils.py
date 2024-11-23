@@ -59,36 +59,91 @@ async def pub_is_subscribed(bot, query, channel):
             pass
     return btn
 
+import os
+from pyrogram.errors import UserNotParticipant
+from pyrogram import enums
+from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+
+# Fetch the channel IDs from environment variables
+AUTH_CHANNELS = os.getenv("AUTH_CHANNELS", "").split(",")  # Get the list of channel IDs
+
 async def is_subscribed(bot, query):
+    missing_channels = []
+    
     if REQUEST_TO_JOIN_MODE == True and join_db().isActive():
         try:
             user = await join_db().get_user(query.from_user.id)
             if user and user["user_id"] == query.from_user.id:
                 return True
             else:
-                try:
-                    user_data = await bot.get_chat_member(AUTH_CHANNEL, query.from_user.id)
-                except UserNotParticipant:
-                    pass
-                except Exception as e:
-                    logger.exception(e)
-                else:
-                    if user_data.status != enums.ChatMemberStatus.BANNED:
-                        return True
+                for channel_id in AUTH_CHANNELS:
+                    try:
+                        user_data = await bot.get_chat_member(int(channel_id), query.from_user.id)
+                    except UserNotParticipant:
+                        channel = await bot.get_chat(int(channel_id))
+                        missing_channels.append(
+                            InlineKeyboardButton(f"Join {channel.title}", url=channel.invite_link)
+                        )
+                    except Exception as e:
+                        return False  # Return False if there's an error
+
+                # Send missing channels if needed
+                if missing_channels:
+                    reply_markup = InlineKeyboardMarkup([missing_channels])
+                    
+                    # Adjust based on object type
+                    if isinstance(query, CallbackQuery):
+                        await query.answer(
+                            text="Please join all required channels & Unmute Them to use the bot.\nTap on Files Again",
+                            show_alert=True
+                        )
+                        await query.message.reply("Join the channels using the buttons below.\nTap on Join Then Unmute\nTap On Files Again To Get Files", reply_markup=reply_markup)
+                    else:
+                        await query.reply(
+                            "You need to join all the required channels & Unmute Them to get the files.",
+                            reply_markup=reply_markup
+                        )
+                    return False
+
+                return True
+
         except Exception as e:
-            logger.exception(e)
             return False
     else:
-        try:
-            user = await bot.get_chat_member(AUTH_CHANNEL, query.from_user.id)
-        except UserNotParticipant:
-            pass
-        except Exception as e:
-            logger.exception(e)
-        else:
-            if user.status != enums.ChatMemberStatus.BANNED:
-                return True
-        return False
+        for channel_id in AUTH_CHANNELS:
+            try:
+                user = await bot.get_chat_member(int(channel_id), query.from_user.id)
+                if user.status == enums.ChatMemberStatus.BANNED:
+                    return False
+            except UserNotParticipant:
+                missing_channels.append(channel_id)
+                continue
+
+        if missing_channels:
+            join_buttons = []
+            for channel_id in missing_channels:
+                channel = await bot.get_chat(int(channel_id))
+                join_buttons.append(
+                    InlineKeyboardButton(f"Join {channel.title}", url=channel.invite_link)
+                )
+            reply_markup = InlineKeyboardMarkup([join_buttons])
+
+            # Adjust based on object type
+            if isinstance(query, CallbackQuery):
+                await query.answer(
+                    text="Please join all required channels & Unmute Them to use the bot.\nTap on Files Again",
+                    show_alert=True
+                )
+                await query.message.reply("Join the channels using the buttons below.\nTap on Join Then Unmute\nTap On Files Again To Get Files", reply_markup=reply_markup)
+            else:
+                await query.reply(
+                    "You need to join all the required channels & Unmute Them to get the files.",
+                    reply_markup=reply_markup
+                )
+            return False
+
+    return True
+                
 
 async def get_poster(query, bulk=False, id=False, file=None):
     if not id:
