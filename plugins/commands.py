@@ -75,119 +75,53 @@ async def start(client, message):
             parse_mode=enums.ParseMode.HTML
         )
         return
-    if AUTH_CHANNELS and not await is_subscribed(client, message):
-    try:
-        logger.info("User %s is not subscribed. Checking subscription for channels.", message.from_user.id)
-
-        # List to hold invite links for missing channels
-        invite_links = []
-
-        for channel_id in AUTH_CHANNELS:
-            try:
-                logger.info("Creating invite link for channel %s", channel_id)
-
-                if REQUEST_TO_JOIN_MODE:
-                    invite_link = await client.create_chat_invite_link(
-                        chat_id=int(channel_id), creates_join_request=True
-                    )
-                else:
-                    invite_link = await client.create_chat_invite_link(int(channel_id))
-                invite_links.append(
-                    InlineKeyboardButton(
-                        f"Join Channel {channel_id}",
-                        url=invite_link.invite_link
-                    )
-                )
-                logger.info("Invite link created for channel %s: %s", channel_id, invite_link.invite_link)
-            except ChatAdminRequired:
-                logger.error("Bot is not an admin in channel %s. Cannot create invite link.", channel_id)
-                await message.reply_text(
-                    f"Make sure Bot is an admin in channel {channel_id} to generate invite links."
-                )
-                return
-            except Exception as e:
-                logger.exception("Error creating invite link for channel %s: %s", channel_id, e)
-
-        if not invite_links:
-            logger.warning("No invite links generated. Possibly all channels are joined.")
-            await message.reply_text("All channels are correctly joined. If you see this message, there may be an issue.")
+    
+    if AUTH_CHANNEL and not await is_subscribed(client, message):
+        try:
+            if REQUEST_TO_JOIN_MODE == True:
+                invite_link = await client.create_chat_invite_link(chat_id=(int(AUTH_CHANNEL)), creates_join_request=True)
+            else:
+                invite_link = await client.create_chat_invite_link(int(AUTH_CHANNELS))
+        except ChatAdminRequired:
+            await message.reply_text("Make sure Bot is admin in Forcesub channel")
             return
-
-        # Adding "Try Again" buttons for commands if needed
-        try_again_button = []
-        if message.command[1] != "subscribe":
-            logger.info("Adding Try Again button for user %s.", message.from_user.id)
-            if REQUEST_TO_JOIN_MODE:
-                if TRY_AGAIN_BTN:
+        try:
+            btn = [[
+                InlineKeyboardButton("❆ Jᴏɪɴ Uᴘᴅᴀᴛᴇ Cʜᴀɴɴᴇʟ ❆", url=invite_link.invite_link)
+            ]]
+            if message.command[1] != "subscribe":
+                if REQUEST_TO_JOIN_MODE == True:
+                    if TRY_AGAIN_BTN == True:
+                        try:
+                            kk, file_id = message.command[1].split("_", 1)
+                            btn.append([InlineKeyboardButton("↻ Tʀʏ Aɢᴀɪɴ", callback_data=f"checksub#{kk}#{file_id}")])
+                        except (IndexError, ValueError):
+                            btn.append([InlineKeyboardButton("↻ Tʀʏ Aɢᴀɪɴ", url=f"https://t.me/{temp.U_NAME}?start={message.command[1]}")])
+                else:
                     try:
                         kk, file_id = message.command[1].split("_", 1)
-                        try_again_button.append(
-                            InlineKeyboardButton(
-                                "↻ Try Again",
-                                callback_data=f"checksub#{kk}#{file_id}"
-                            )
-                        )
-                        logger.info("Try Again button added with callback_data: checksub#%s#%s", kk, file_id)
+                        btn.append([InlineKeyboardButton("↻ Tʀʏ Aɢᴀɪɴ", callback_data=f"checksub#{kk}#{file_id}")])
                     except (IndexError, ValueError):
-                        try_again_button.append(
-                            InlineKeyboardButton(
-                                "↻ Try Again",
-                                url=f"https://t.me/{temp.U_NAME}?start={message.command[1]}"
-                            )
-                        )
-                        logger.info("Try Again button added with URL: https://t.me/%s?start=%s", temp.U_NAME, message.command[1])
+                        btn.append([InlineKeyboardButton("↻ Tʀʏ Aɢᴀɪɴ", url=f"https://t.me/{temp.U_NAME}?start={message.command[1]}")])
+            if REQUEST_TO_JOIN_MODE == True:
+                if TRY_AGAIN_BTN == True:
+                    text = "**🕵️ Jᴏɪɴ Tʜᴇ Uᴘᴅᴀᴛᴇ Cʜᴀɴɴᴇʟ Tᴏ Gᴇᴛ Mᴏᴠɪᴇ Fɪʟᴇ\n\n👨‍💻 Fɪʀsᴛ Cʟɪᴄᴋ Oɴ Jᴏɪɴ Uᴘᴅᴀᴛᴇ Cʜᴀɴɴᴇʟ Bᴜᴛᴛᴏɴ, Tʜᴇɴ Cʟɪᴄᴋ Oɴ Rᴇǫᴜᴇsᴛ Tᴏ Jᴏɪɴ Bᴜᴛᴛᴏɴ Aғᴛᴇʀ Cʟɪᴄᴋ Oɴ Tʀʏ Aɢᴀɪɴ Bᴜᴛᴛᴏɴ.**"
+                else:
+                    await db.set_msg_command(message.from_user.id, com=message.command[1])
+                    text = "**🕵️ Jᴏɪɴ Tʜᴇ Uᴘᴅᴀᴛᴇ Cʜᴀɴɴᴇʟ Tᴏ Gᴇᴛ Mᴏᴠɪᴇ Fɪʟᴇ\n\n👨‍💻 Fɪʀsᴛ Cʟɪᴄᴋ Oɴ Jᴏɪɴ Uᴘᴅᴀᴛᴇ Cʜᴀɴɴᴇʟ Bᴜᴛᴛᴏɴ, Tʜᴇɴ Cʟɪᴄᴋ Oɴ Rᴇǫᴜᴇsᴛ Tᴏ Jᴏɪɴ Bᴜᴛᴛᴏɴ.**"
             else:
-                try:
-                    kk, file_id = message.command[1].split("_", 1)
-                    try_again_button.append(
-                        InlineKeyboardButton(
-                            "↻ Try Again",
-                            callback_data=f"checksub#{kk}#{file_id}"
-                        )
-                    )
-                    logger.info("Try Again button added with callback_data: checksub#%s#%s", kk, file_id)
-                except (IndexError, ValueError):
-                    try_again_button.append(
-                        InlineKeyboardButton(
-                            "↻ Try Again",
-                            url=f"https://t.me/{temp.U_NAME}?start={message.command[1]}"
-                        )
-                    )
-                    logger.info("Try Again button added with URL: https://t.me/%s?start=%s", temp.U_NAME, message.command[1])
-
-        # Prepare the message content
-        if REQUEST_TO_JOIN_MODE:
-            text = (
-                "**🕵️ Please Join All Update Channels to Access the Files**\n\n"
-                "👨‍💻 **Click on the Join Channel Buttons Below.** Then, click 'Request to Join' in the Telegram channel. After that, click on the 'Try Again' button."
-            )
-            logger.info("Prepared text for REQUEST_TO_JOIN_MODE=True.")
-        else:
-            text = (
-                "**🕵️ Please Join All Update Channels to Access the Files**\n\n"
-                "👨‍💻 **Click on the Join Channel Buttons Below** and then click 'Try Again'."
-            )
-            logger.info("Prepared text for REQUEST_TO_JOIN_MODE=False.")
-
-        # Combine buttons and send the message
-        reply_markup = InlineKeyboardMarkup(
-            [invite_links] + ([try_again_button] if try_again_button else [])
-        )
-        logger.info("Sending message with invite links and buttons to user %s.", message.from_user.id)
-
-        await client.send_message(
-            chat_id=message.from_user.id,
-            text=text,
-            reply_markup=reply_markup,
-            parse_mode=enums.ParseMode.MARKDOWN
-        )
-        logger.info("Message sent to user %s.", message.from_user.id)
-        return
-    except Exception as e:
-        logger.exception("Error in force-subscription flow: %s", e)
-        await message.reply_text("Something went wrong with force subscription.")
+                text = "**🕵️ Jᴏɪɴ Tʜᴇ Uᴘᴅᴀᴛᴇ Cʜᴀɴɴᴇʟ Tᴏ Gᴇᴛ Mᴏᴠɪᴇ Fɪʟᴇ\n\n👨‍💻 Fɪʀsᴛ  Cʟɪᴄᴋ Oɴ Jᴏɪɴ Uᴘᴅᴀᴛᴇ Cʜᴀɴɴᴇʟ Bᴜᴛᴛᴏɴ, Tʜᴇɴ Jᴏɪɴ Cʜᴀɴɴᴇʟ Aғᴛᴇʀ Cʟɪᴄᴋ Oɴ Tʀʏ Aɢᴀɪɴ Bᴜᴛᴛᴏɴ**"
+            await client.send_message(
+                chat_id=message.from_user.id,
+                text=text,
+                reply_markup=InlineKeyboardMarkup(btn),
+                parse_mode=enums.ParseMode.MARKDOWN
+                )
+            return
+        except:
+            await message.reply_text("something wrong with force subscribe.")
     
-            
+    
     if len(message.command) == 2 and message.command[1] in ["subscribe", "error", "okay", "help"]:
         if PREMIUM_AND_REFERAL_MODE == True:
             buttons = [[
