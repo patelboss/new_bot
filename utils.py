@@ -138,13 +138,13 @@ async def is_subscribed(bot, query):
                     # Adjust based on object type
                     if isinstance(query, CallbackQuery):
                         await query.answer(
-                            text="Please join all required channels to use the bot.",
+                            text="Please join all required channels & Unmute Them to use the bot.\nTap on Files Again",
                             show_alert=True
                         )
-                        await query.message.reply("Join the channels using the buttons below.", reply_markup=reply_markup)
+                        await query.message.reply("Join the channels using the buttons below.\nTap on Join Then Unmute\nTap On Files Again To Get Files", reply_markup=reply_markup)
                     else:
                         await query.reply(
-                            "You need to join all the required channels to use the bot.",
+                            "You need to join all the required channels & Unmute Them to get the files.",
                             reply_markup=reply_markup
                         )
                     return False
@@ -183,13 +183,13 @@ async def is_subscribed(bot, query):
             # Adjust based on object type
             if isinstance(query, CallbackQuery):
                 await query.answer(
-                    text="You need to join the following channels to use the bot.",
+                    text="Please join all required channels & Unmute Them to use the bot.\nTap on Files Again",
                     show_alert=True
                 )
-                await query.message.reply("Join the channels using the buttons below.", reply_markup=reply_markup)
+                await query.message.reply("Join the channels using the buttons below.\nTap on Join Then Unmute\nTap On Files Again To Get Files", reply_markup=reply_markup)
             else:
                 await query.reply(
-                    "You need to join all the required channels to use the bot.",
+                    "You need to join all the required channels & Unmute Them to get the files.",
                     reply_markup=reply_markup
                 )
             return False
