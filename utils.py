@@ -116,31 +116,38 @@ async def is_subscribed(bot, query):
             else:
                 logger.info("User %s not found in join_db. Checking via bot.get_chat_member.", query.from_user.id)
                 
-                # Loop through each channel ID to check if the user is subscribed
                 for channel_id in AUTH_CHANNELS:
                     try:
                         logger.info("Awaiting `bot.get_chat_member` for user %s in channel %s.", query.from_user.id, channel_id)
                         user_data = await bot.get_chat_member(int(channel_id), query.from_user.id)
                     except UserNotParticipant:
                         logger.warning("User %s is not a participant in channel %s.", query.from_user.id, channel_id)
-                        channel = await bot.get_chat(int(channel_id))  # Get channel info to include in button
+                        channel = await bot.get_chat(int(channel_id))
                         missing_channels.append(
                             InlineKeyboardButton(f"Join {channel.title}", url=channel.invite_link)
                         )
                     except Exception as e:
                         logger.exception("Error while awaiting `bot.get_chat_member` for user %s: %s", query.from_user.id, e)
-                        return False  # Return False if there's an error in checking the subscription
+                        return False  # Return False if there's an error
 
-                # If there are missing channels, send them a list to join
+                # Send missing channels if needed
                 if missing_channels:
-                    logger.info("User %s is missing subscriptions for channels. Sending join buttons.", query.from_user.id)
+                    logger.info("User %s is missing subscriptions. Sending join buttons.", query.from_user.id)
                     reply_markup = InlineKeyboardMarkup([missing_channels])
-                    # Use query.answer() instead of query.message.reply_text()
-                    await query.answer(
-                        text="Please join all the required channels to use the bot. You can join using the buttons below:",
-                        reply_markup=reply_markup
-                    )
-                    return False  # User is not subscribed to all channels
+                    
+                    # Adjust based on object type
+                    if isinstance(query, CallbackQuery):
+                        await query.answer(
+                            text="Please join all required channels to use the bot.",
+                            show_alert=True
+                        )
+                        await query.message.reply("Join the channels using the buttons below.", reply_markup=reply_markup)
+                    else:
+                        await query.reply(
+                            "You need to join all the required channels to use the bot.",
+                            reply_markup=reply_markup
+                        )
+                    return False
 
                 logger.info("User %s is subscribed to all required channels.", query.from_user.id)
                 return True
@@ -151,39 +158,44 @@ async def is_subscribed(bot, query):
     else:
         logger.info("Request-to-join mode is inactive.")
         
-        # Loop through each channel ID to check if the user is subscribed
         for channel_id in AUTH_CHANNELS:
             logger.info("Awaiting `bot.get_chat_member` for user %s in channel %s.", query.from_user.id, channel_id)
             try:
                 user = await bot.get_chat_member(int(channel_id), query.from_user.id)
                 if user.status == enums.ChatMemberStatus.BANNED:
                     logger.warning("User %s is banned in channel %s.", query.from_user.id, channel_id)
-                    return False  # Return False if the user is banned in any channel
+                    return False
             except UserNotParticipant:
                 logger.warning("User %s is not a participant in channel %s.", query.from_user.id, channel_id)
-                missing_channels.append(channel_id)  # Track missing channels for later message
-                continue  # Continue checking other channels
+                missing_channels.append(channel_id)
+                continue
 
-        # If the user is missing any channels, return False and show them the missing channels
         if missing_channels:
-            logger.info("User %s is missing subscriptions for channels. Sending join buttons.", query.from_user.id)
+            logger.info("User %s is missing subscriptions. Sending join buttons.", query.from_user.id)
             join_buttons = []
             for channel_id in missing_channels:
-                channel = await bot.get_chat(int(channel_id))  # Get channel info to include in button
+                channel = await bot.get_chat(int(channel_id))
                 join_buttons.append(
                     InlineKeyboardButton(f"Join {channel.title}", url=channel.invite_link)
                 )
             reply_markup = InlineKeyboardMarkup([join_buttons])
-            # Use query.answer() instead of query.message.reply_text()
-            await query.answer(
-                text="You need to join the following channels to use the bot. Click on the buttons below to join:",
-                reply_markup=reply_markup
-            )
-            return False  # User hasn't joined all channels
+
+            # Adjust based on object type
+            if isinstance(query, CallbackQuery):
+                await query.answer(
+                    text="You need to join the following channels to use the bot.",
+                    show_alert=True
+                )
+                await query.message.reply("Join the channels using the buttons below.", reply_markup=reply_markup)
+            else:
+                await query.reply(
+                    "You need to join all the required channels to use the bot.",
+                    reply_markup=reply_markup
+                )
+            return False
 
     logger.info("User %s is subscribed to all required channels.", query.from_user.id)
     return True
-
 
 async def get_poster(query, bulk=False, id=False, file=None):
     if not id:
