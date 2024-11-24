@@ -1,7 +1,6 @@
 from pyrogram import Client, filters
 from info import ADMINS
 from database.users_chats_db import db
-from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 import datetime
 import time
 import asyncio
@@ -15,31 +14,25 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(
 async def pm_broadcast(bot, message):
     logging.info("PM Broadcast initiated by admin.")
     try:
-        # Show inline buttons for broadcast method
-        buttons = InlineKeyboardMarkup([
-            [InlineKeyboardButton("Forward Message", callback_data="pm_broadcast_forward"),
-             InlineKeyboardButton("Type New Message", callback_data="pm_broadcast_type")]
-        ])
-        ask_msg = await message.reply_text("Choose how you want to broadcast your message to PM users:", reply_markup=buttons)
-
-        @Client.on_callback_query(filters.regex(r"pm_broadcast_"))
-        async def handle_pm_choice(bot, query):
-            await query.message.delete()  # Remove buttons after selection
-            if query.data == "pm_broadcast_forward":
-                forward_msg = await bot.ask(chat_id=query.from_user.id, text="Please forward the message you want to broadcast.")
-                if not forward_msg.forward_from and not forward_msg.forward_from_chat:
-                    await query.message.reply_text("You need to forward a valid message. Aborting broadcast.")
-                    logging.warning("Invalid forward message for PM broadcast. Aborted.")
-                    return
-                await start_pm_broadcast(bot, forward_msg=forward_msg)
-            elif query.data == "pm_broadcast_type":
-                text_msg = await bot.ask(chat_id=query.from_user.id, text="Now type the message you want to broadcast.")
-                if not text_msg.text.strip():
-                    await query.message.reply_text("Broadcast message cannot be empty. Aborting broadcast.")
-                    logging.warning("Empty typed message for PM broadcast. Aborted.")
-                    return
-                await start_pm_broadcast(bot, text_msg=text_msg)
-
+        # Ask admin for broadcast type
+        choice_msg = await bot.ask(chat_id=message.from_user.id, text="Send 1 to forward a message or 2 to type a new one.")
+        if choice_msg.text.strip() == "1":
+            forward_msg = await bot.ask(chat_id=message.from_user.id, text="Please forward the message you want to broadcast.")
+            if not forward_msg.forward_from and not forward_msg.forward_from_chat:
+                await message.reply_text("You need to forward a valid message. Aborting broadcast.")
+                logging.warning("Invalid forward message for PM broadcast. Aborted.")
+                return
+            await start_pm_broadcast(bot, forward_msg=forward_msg)
+        elif choice_msg.text.strip() == "2":
+            text_msg = await bot.ask(chat_id=message.from_user.id, text="Now type the message you want to broadcast.")
+            if not text_msg.text.strip():
+                await message.reply_text("Broadcast message cannot be empty. Aborting broadcast.")
+                logging.warning("Empty typed message for PM broadcast. Aborted.")
+                return
+            await start_pm_broadcast(bot, text_msg=text_msg)
+        else:
+            await message.reply_text("Invalid choice. Please restart the broadcast command.")
+            logging.warning("Invalid choice for PM broadcast. Aborted.")
     except Exception as e:
         logging.error(f"Error in pm_broadcast: {e}")
         await message.reply_text("An error occurred during the PM broadcast.")
@@ -97,31 +90,25 @@ async def start_pm_broadcast(bot, forward_msg=None, text_msg=None):
 async def group_broadcast(bot, message):
     logging.info("Group Broadcast initiated by admin.")
     try:
-        # Show inline buttons for broadcast method
-        buttons = InlineKeyboardMarkup([
-            [InlineKeyboardButton("Forward Message", callback_data="grp_broadcast_forward"),
-             InlineKeyboardButton("Type New Message", callback_data="grp_broadcast_type")]
-        ])
-        ask_msg = await message.reply_text("Choose how you want to broadcast your message to Groups:", reply_markup=buttons)
-
-        @Client.on_callback_query(filters.regex(r"grp_broadcast_"))
-        async def handle_grp_choice(bot, query):
-            await query.message.delete()  # Remove buttons after selection
-            if query.data == "grp_broadcast_forward":
-                forward_msg = await bot.ask(chat_id=query.from_user.id, text="Please forward the message you want to broadcast to groups.")
-                if not forward_msg.forward_from and not forward_msg.forward_from_chat:
-                    await query.message.reply_text("You need to forward a valid message. Aborting broadcast.")
-                    logging.warning("Invalid forward message for group broadcast. Aborted.")
-                    return
-                await start_group_broadcast(bot, forward_msg=forward_msg)
-            elif query.data == "grp_broadcast_type":
-                text_msg = await bot.ask(chat_id=query.from_user.id, text="Now type the message you want to broadcast to groups.")
-                if not text_msg.text.strip():
-                    await query.message.reply_text("Broadcast message cannot be empty. Aborting broadcast.")
-                    logging.warning("Empty typed message for group broadcast. Aborted.")
-                    return
-                await start_group_broadcast(bot, text_msg=text_msg)
-
+        # Ask admin for broadcast type
+        choice_msg = await bot.ask(chat_id=message.from_user.id, text="Send 1 to forward a message or 2 to type a new one.")
+        if choice_msg.text.strip() == "1":
+            forward_msg = await bot.ask(chat_id=message.from_user.id, text="Please forward the message you want to broadcast to groups.")
+            if not forward_msg.forward_from and not forward_msg.forward_from_chat:
+                await message.reply_text("You need to forward a valid message. Aborting broadcast.")
+                logging.warning("Invalid forward message for group broadcast. Aborted.")
+                return
+            await start_group_broadcast(bot, forward_msg=forward_msg)
+        elif choice_msg.text.strip() == "2":
+            text_msg = await bot.ask(chat_id=message.from_user.id, text="Now type the message you want to broadcast to groups.")
+            if not text_msg.text.strip():
+                await message.reply_text("Broadcast message cannot be empty. Aborting broadcast.")
+                logging.warning("Empty typed message for group broadcast. Aborted.")
+                return
+            await start_group_broadcast(bot, text_msg=text_msg)
+        else:
+            await message.reply_text("Invalid choice. Please restart the broadcast command.")
+            logging.warning("Invalid choice for group broadcast. Aborted.")
     except Exception as e:
         logging.error(f"Error in group_broadcast: {e}")
         await message.reply_text("An error occurred during the Group broadcast.")
