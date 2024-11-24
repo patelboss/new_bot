@@ -39,7 +39,8 @@ async def pm_broadcast(bot, message):
 
 async def start_pm_broadcast(bot, forward_msg=None, text_msg=None):
     try:
-        users_cursor = db.get_all_users()  # Cursor for all users
+        # Await the result of get_all_users, it returns a list of users (after awaiting it)
+        users = await db.get_all_users()  # Awaiting the coroutine to get the users
         sts = await bot.send_message(chat_id=ADMINS[0], text='Broadcasting your messages to PM users...')
         start_time = time.time()
         total_users = await db.total_users_count()
@@ -47,6 +48,7 @@ async def start_pm_broadcast(bot, forward_msg=None, text_msg=None):
         done = success = blocked = deleted = failed = 0
         semaphore = asyncio.Semaphore(10)  # Limit concurrency to 10
 
+        # Make sure you use 'async for' only after getting the result
         async def broadcast_user(user):
             nonlocal done, success, blocked, deleted, failed
             async with semaphore:
@@ -71,7 +73,8 @@ async def start_pm_broadcast(bot, forward_msg=None, text_msg=None):
                 if done % 20 == 0:
                     await update_status(sts, done, total_users, success, blocked, deleted, failed)
 
-        await asyncio.gather(*(broadcast_user(user) async for user in users_cursor))
+        # Use async for after getting the actual list of users
+        await asyncio.gather(*(broadcast_user(user) for user in users))
 
         time_taken = datetime.timedelta(seconds=int(time.time() - start_time))
         completion_msg = (
@@ -84,7 +87,7 @@ async def start_pm_broadcast(bot, forward_msg=None, text_msg=None):
     except Exception as e:
         logging.error(f"Error in start_pm_broadcast: {e}")
         await bot.send_message(chat_id=ADMINS[0], text="An error occurred during the PM broadcast.")
-
+        
 # Group Broadcast
 @Client.on_message(filters.command("grp_broadcast") & filters.user(ADMINS))
 async def group_broadcast(bot, message):
