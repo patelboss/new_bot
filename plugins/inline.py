@@ -1,5 +1,4 @@
 import logging
-import asyncio
 from pyrogram import Client, emoji, filters
 from pyrogram.errors.exceptions.bad_request_400 import QueryIdInvalid
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, InlineQueryResultCachedDocument, InlineQuery
@@ -10,24 +9,17 @@ from database.connections_mdb import active_connection
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
+  
+from pyrogram import Client, InlineQueryResultArticle, InputTextMessageContent, InlineKeyboardButton, InlineKeyboardMarkup
+from pyrogram.types import CallbackQuery
+import asyncio
+import logging
 
-cache_time = 0 if AUTH_USERS or AUTH_CHANNEL else CACHE_TIME
+# Initialize logger
+logger = logging.getLogger(__name__)
 
-async def inline_users(query: InlineQuery):
-    """Check if the user is allowed to use the inline query."""
-    logger.info(f"Checking access for user: {query.from_user.id}")
-    if AUTH_USERS:
-        if query.from_user and query.from_user.id in AUTH_USERS:
-            logger.info(f"User {query.from_user.id} is authorized.")
-            return True
-        else:
-            logger.info(f"User {query.from_user.id} is unauthorized.")
-            return False
-    if query.from_user and query.from_user.id not in temp.BANNED_USERS:
-        logger.info(f"User {query.from_user.id} is not banned.")
-        return True
-    logger.info(f"User {query.from_user.id} is banned.")
-    return False
+# Time delay for deleting the sent file
+DELETE_FILE_DELAY = 600  # 10 minutes in seconds
 
 @Client.on_inline_query()
 async def answer(bot, query):
@@ -53,24 +45,15 @@ async def answer(bot, query):
         return
 
     results = []
-    if '|' in query.query:
-        string, file_type = query.query.split('|', maxsplit=1)
-        string = string.strip()
-        file_type = file_type.strip().lower()
-    else:
-        string = query.query.strip()
-        file_type = None
+    string = query.query.strip()
 
     offset = int(query.offset or 0)
     logger.info(f"Query offset: {offset}")
-
-    reply_markup = get_reply_markup(query=string)
 
     try:
         files, next_offset, total_results = await get_search_results(
             chat_id,
             string,
-            file_type=file_type,
             max_results=10,
             offset=offset
         )
@@ -80,52 +63,35 @@ async def answer(bot, query):
         await query.answer(results=[], cache_time=cache_time, switch_pm_text="Error occurred", switch_pm_parameter="error")
         return
 
-    for file in files:
+    for idx, file in enumerate(files):
         try:
             title = file.get("file_name", "Unknown Title")
             size = get_size(file.get("file_size", 0))
             f_caption = file.get("caption", "")
-            if CUSTOM_FILE_CAPTION:
-                try:
-                    f_caption = CUSTOM_FILE_CAPTION.format(
-                        file_name=title,
-                        file_size=size,
-                        file_caption=f_caption
-                    )
-                except Exception as e:
-                    logger.exception(f"Error formatting custom caption: {e}")
-            if not f_caption:
-                f_caption = title
-
-            sent_message = await bot.send_document(
-                chat_id=query.from_user.id,
-                document=file["file_id"],
-                caption=f_caption,
-                reply_markup=reply_markup
+            button = InlineKeyboardButton(
+                text=f"Send {title}",
+                callback_data=f"send_{file['file_id']}"
             )
 
-            # Warn the user about file deletion
-            await bot.send_message(
-                chat_id=query.from_user.id,
-                text="⚠️ Files sent by this bot will be deleted after 10 minutes to comply with copyright regulations."
+            results.append(
+                InlineQueryResultArticle(
+                    id=str(idx),
+                    title=title,
+                    description=f"{size} - {f_caption}",
+                    input_message_content=InputTextMessageContent(f"File selected: {title}"),
+                    reply_markup=InlineKeyboardMarkup([[button]])
+                )
             )
-
-            # Schedule deletion of the file in 10 minutes
-            await schedule_deletion(bot, sent_message.chat.id, sent_message.message_id, delay=600)
-
         except Exception as e:
             logger.exception(f"Error processing file: {file}. Exception: {e}")
 
     if results:
-        switch_pm_text = f"{emoji.FILE_FOLDER} Results - {total_results}"
-        if string:
-            switch_pm_text += f" for '{string}'"
         try:
             await query.answer(
                 results=results,
                 is_personal=True,
                 cache_time=cache_time,
-                switch_pm_text=switch_pm_text,
+                switch_pm_text=f"Results for '{string}'",
                 switch_pm_parameter="start",
                 next_offset=str(next_offset)
             )
@@ -135,19 +101,14 @@ async def answer(bot, query):
             logger.exception(f"Error sending query answer: {e}")
     else:
         # When no results are found
-        switch_pm_text = f"{emoji.CROSS_MARK} No results found"
-        if string:
-            switch_pm_text += f" for '{string}'"
-
-        # Redirect user to support group
+        switch_pm_text = f"No results found for '{string}'."
         reply_markup = InlineKeyboardMarkup(
             [
                 [
-                    InlineKeyboardButton('Request in Support Group', url="https://t.me/your_support_group_link")
+                    InlineKeyboardButton('Request in Support Group', url="https://t.me/iAmRashmibot")
                 ]
             ]
         )
-
         await query.answer(
             results=[],
             is_personal=True,
@@ -156,25 +117,44 @@ async def answer(bot, query):
             switch_pm_parameter="no_results"
         )
         await query.message.reply_text(
-            text=f"We couldn't find any results for '{string}'. You can request the movie in our [Support Group](https://t.me/your_support_group_link).",
+            text=f"We couldn't find any results for '{string}'. You can request the movie in our [Support Group](https://t.me/iAmRashmibot).",
             reply_markup=reply_markup,
             disable_web_page_preview=True
         )
 
-def get_reply_markup(query):
-    """Generate reply markup for inline results."""
-    buttons = [
-        [
-            InlineKeyboardButton('Search again', switch_inline_query_current_chat=query)
-        ]
-    ]
-    return InlineKeyboardMarkup(buttons)
+# Handle callback queries when user selects a file
+@Client.on_callback_query()
+async def handle_callback_query(bot, query: CallbackQuery):
+    """Handle user selecting a file from the inline query results."""
+    file_id = query.data.replace("send_", "")  # Extract file_id from callback_data
+    user_id = query.from_user.id
 
-async def schedule_deletion(bot, chat_id, message_id, delay=600):
-    """Schedule deletion of a message after a delay."""
-    await asyncio.sleep(delay)
+    # Retrieve file information based on file_id
+    file = await get_file_by_id(file_id)  # Your method to get file info by file_id
+
+    if not file:
+        await bot.answer_callback_query(query.id, text="File not found!", show_alert=True)
+        return
+
     try:
-        await bot.delete_messages(chat_id=chat_id, message_ids=message_id)
-        await bot.send_message(chat_id, "⚠️ File deleted after 10 minutes to prevent copyright issues.")
+        # Send the selected file
+        title = file.get("file_name", "Unknown Title")
+        size = get_size(file.get("file_size", 0))
+        caption = file.get("caption", title)
+
+        # Send the file (video/document)
+        if file.get("mime_type", "").startswith("video/"):
+            message = await bot.send_video(user_id, file["file_id"], caption=caption)
+        else:
+            message = await bot.send_document(user_id, file["file_id"], caption=caption)
+
+        # Delete the file after 10 minutes
+        await asyncio.sleep(DELETE_FILE_DELAY)
+        await bot.delete_message(user_id, message.message_id)
+        logger.info(f"File {title} deleted after 10 minutes.")
+
+        await bot.answer_callback_query(query.id, text="File sent and will be deleted after 10 minutes.", show_alert=True)
+
     except Exception as e:
-        logger.error(f"Error deleting message: {e}")
+        logger.exception(f"Error sending file: {e}")
+        await bot.answer_callback_query(query.id, text="Error occurred while sending the file.", show_alert=True)
