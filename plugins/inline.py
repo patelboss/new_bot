@@ -5,6 +5,7 @@ from database.ia_filterdb import get_search_results
 from utils import is_subscribed, get_size, temp
 from info import CACHE_TIME, AUTH_USERS, AUTH_CHANNEL, CUSTOM_FILE_CAPTION
 from database.connections_mdb import active_connection
+import asyncio
 
 cache_time = 0 if AUTH_USERS or AUTH_CHANNEL else CACHE_TIME
 
@@ -16,6 +17,14 @@ async def inline_users(query: InlineQuery):
         else:
             return False
     return query.from_user and query.from_user.id not in temp.BANNED_USERS
+
+async def delete_message_after_delay(bot, user_id, message_id, delay=600):
+    """Deletes a message after the specified delay (default is 10 minutes)."""
+    await asyncio.sleep(delay)
+    try:
+        await bot.delete_message(user_id, message_id)
+    except Exception as e:
+        print(f"Error deleting message: {e}")
 
 @Client.on_inline_query()
 async def answer(bot, query):
@@ -95,7 +104,7 @@ async def answer(bot, query):
         if string:
             switch_pm_text += f" for '{string}'"
         try:
-            await query.answer(
+            query_result = await query.answer(
                 results=results,
                 is_personal=True,
                 cache_time=cache_time,
@@ -103,9 +112,16 @@ async def answer(bot, query):
                 switch_pm_parameter="start",
                 next_offset=str(next_offset)
             )
+            
+            # Start a task to delete the file after 10 minutes (if sent)
+            if query_result:
+                message_id = query_result.result_id  # The message sent with the results
+                await delete_message_after_delay(bot, query.from_user.id, message_id, 600)
+                
         except QueryIdInvalid:
             pass
     else:
+        # When no results are found
         switch_pm_text = f"{emoji.CROSS_MARK} No results"
         if string:
             switch_pm_text += f" for '{string}'"
@@ -118,6 +134,13 @@ async def answer(bot, query):
             switch_pm_parameter="no_results"
         )
 
+        # Send message about support group when no results
+        support_group_url = "https://t.me/iAmRashmibot"
+        await query.message.reply_text(
+            text=f"We couldn't find any results for '{string}'. You can request the movie in our [Support Group]({support_group_url}).",
+            disable_web_page_preview=True
+        )
+
 def get_reply_markup(query):
     """Generate reply markup for inline results."""
     buttons = [
@@ -125,4 +148,5 @@ def get_reply_markup(query):
             InlineKeyboardButton('Search again', switch_inline_query_current_chat=query)
         ]
     ]
+    return InlineKeyboardMarkup(buttons)  ]
     return InlineKeyboardMarkup(buttons)
