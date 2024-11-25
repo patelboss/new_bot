@@ -135,7 +135,7 @@ async def answer(bot, query):
         )
 
         # Send message about support group when no results
-        support_group_url = "https://t.me/iAmRashmibot"
+        support_group_url = "https://t.me/iAmRashmibot"  # Updated with your support group link
         await query.message.reply_text(
             text=f"We couldn't find any results for '{string}'. You can request the movie in our [Support Group]({support_group_url}).",
             disable_web_page_preview=True
@@ -148,5 +148,4 @@ def get_reply_markup(query):
             InlineKeyboardButton('Search again', switch_inline_query_current_chat=query)
         ]
     ]
-    return InlineKeyboardMarkup(buttons)  ]
-    return InlineKeyboardMarkup(buttons)
+    return InlineKeyboardMarkup(buttons)  # Fixed unmatched ']'
