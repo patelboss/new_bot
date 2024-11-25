@@ -168,6 +168,8 @@ async def index_files_to_db(lst_msg_id, chat, msg, bot):
 
     start_time = time.time()  # Start time tracking
 
+    last_message_text = ""  # To store the last edited message content
+
     async with lock:
         try:
             current = temp.CURRENT
@@ -177,30 +179,43 @@ async def index_files_to_db(lst_msg_id, chat, msg, bot):
                 if temp.CANCEL:
                     elapsed_time = round(time.time() - start_time)  # Calculate elapsed time
                     formatted_time = format_time(elapsed_time)  # Format the time
-                    await msg.edit(f"Successfully Cancelled!!\n\nSaved <code>{total_files}</code> files to dataBase!\n"
-                                   f"Duplicate Files Skipped: <code>{duplicate}</code>\nDeleted Messages Skipped: <code>{deleted}</code>\n"
-                                   f"Non-Media messages skipped: <code>{no_media + unsupported}</code> (Unsupported Media - `<code>{unsupported}</code>`)\n"
-                                   f"Errors Occurred: <code>{errors}</code>\n"
-                                   f"Elapsed Time: <code>{formatted_time}</code>")
+                    await msg.edit(
+                        f"Successfully Cancelled!!\n\nSaved <code>{total_files}</code> files to dataBase!\n"
+                        f"Duplicate Files Skipped: <code>{duplicate}</code>\nDeleted Messages Skipped: <code>{deleted}</code>\n"
+                        f"Non-Media messages skipped: <code>{no_media + unsupported}</code> (Unsupported Media - `<code>{unsupported}</code>`)\n"
+                        f"Errors Occurred: <code>{errors}</code>\n"
+                        f"Elapsed Time: <code>{formatted_time}</code>"
+                    )
                     break
 
                 current += 1
                 if current % 20 == 0:
-                    can = [[InlineKeyboardButton('Cancel', callback_data='index_cancel')]]
-                    reply = InlineKeyboardMarkup(can)
+                    elapsed_time = round(time.time() - start_time)  # Calculate elapsed time
+                    formatted_time = format_time(elapsed_time)  # Format the time
 
-                    # Calculate elapsed time after processing each batch of 20 messages
-                    elapsed_time = round(time.time() - start_time)
-                    formatted_time = format_time(elapsed_time)
+                    # New message content to be sent
+                    new_message_text = (
+                        f"Total messages fetched: <code>{current}</code>\nTotal messages saved: <code>{total_files}</code>\n"
+                        f"Duplicate Files Skipped: <code>{duplicate}</code>\nDeleted Messages Skipped: <code>{deleted}</code>\n"
+                        f"Non-Media messages skipped: <code>{no_media + unsupported}</code> (Unsupported Media - `<code>{unsupported}</code>`)\n"
+                        f"Errors Occurred: <code>{errors}</code>\n"
+                        f"Elapsed Time: <code>{formatted_time}</code>"
+                    )
 
-                    # Update message with files indexed so far and elapsed time
-                    await msg.edit_text(
-                        text=f"Total messages fetched: <code>{current}</code>\nTotal messages saved: <code>{total_files}</code>\n"
-                             f"Duplicate Files Skipped: <code>{duplicate}</code>\nDeleted Messages Skipped: <code>{deleted}</code>\n"
-                             f"Non-Media messages skipped: <code>{no_media + unsupported}</code> (Unsupported Media - `<code>{unsupported}</code>`)\n"
-                             f"Errors Occurred: <code>{errors}</code>\n"
-                             f"Elapsed Time: <code>{formatted_time}</code>",
-                        reply_markup=reply)
+                    # Only edit the message if the content is different
+                    if new_message_text != last_message_text:
+                        retry_count = 0
+                        while retry_count < 5:  # Retry logic for editing the message
+                            try:
+                                await msg.edit_text(new_message_text)
+                                last_message_text = new_message_text  # Update last message content
+                                break
+                            except TimeoutError:
+                                retry_count += 1
+                                await asyncio.sleep(1)
+                            except Exception as e:
+                                logger.exception(f"Error while editing message: {e}")
+                                break
 
                 if message.empty:
                     deleted += 1
@@ -220,9 +235,8 @@ async def index_files_to_db(lst_msg_id, chat, msg, bot):
                 media.file_type = message.media.value
                 media.caption = message.caption
 
-                # Retry mechanism for handling flood wait and other errors
                 retry_count = 0
-                while retry_count < 5:  # Retry 5 times
+                while retry_count < 5:  # Retry 5 times for save_file
                     try:
                         aynav, vnay = await save_file(media)
                         if aynav:
@@ -231,27 +245,28 @@ async def index_files_to_db(lst_msg_id, chat, msg, bot):
                             duplicate += 1
                         elif vnay == 2:
                             errors += 1
-                        break  # Exit loop if save is successful
+                        break
                     except FloodWait as e:
                         logger.warning(f"Flood wait encountered. Retrying after {e.x} seconds.")
                         await asyncio.sleep(e.x)
                         retry_count += 1
-                        continue  # Retry after the wait
+                        continue
                     except Exception as e:
                         logger.exception(f"Error during file save: {e}")
                         errors += 1
-                        break  # Exit loop after the exception is logged
+                        break
 
         except Exception as e:
             logger.exception(e)
             await msg.edit(f"Error: {e}")
         else:
-            # Final time after all messages are processed
             elapsed_time = round(time.time() - start_time)  # Calculate elapsed time
             formatted_time = format_time(elapsed_time)  # Format the time
-            await msg.edit(f"Successfully saved <code>{total_files}</code> to dataBase!\n"
-                           f"Duplicate Files Skipped: <code>{duplicate}</code>\n"
-                           f"Deleted Messages Skipped: <code>{deleted}</code>\n"
-                           f"Non-Media messages skipped: <code>{no_media + unsupported}</code> (Unsupported Media - `<code>{unsupported}</code>`)\n"
-                           f"Errors Occurred: <code>{errors}</code>\n"
-                           f"Elapsed Time: <code>{formatted_time}</code>")
+            await msg.edit(
+                f"Successfully saved <code>{total_files}</code> to dataBase!\n"
+                f"Duplicate Files Skipped: <code>{duplicate}</code>\n"
+                f"Deleted Messages Skipped: <code>{deleted}</code>\n"
+                f"Non-Media messages skipped: <code>{no_media + unsupported}</code> (Unsupported Media - `<code>{unsupported}</code>`)\n"
+                f"Errors Occurred: <code>{errors}</code>\n"
+                f"Elapsed Time: <code>{formatted_time}</code>"
+            )
