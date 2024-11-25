@@ -1,16 +1,18 @@
-import logging, re, asyncio
-from utils import temp
-from info import ADMINS
+import logging
+import asyncio
 from pyrogram import Client, filters, enums
 from pyrogram.errors import FloodWait
 from pyrogram.errors.exceptions.bad_request_400 import ChannelInvalid, ChatAdminRequired, UsernameInvalid, UsernameNotModified
+from info import ADMINS
 from info import INDEX_REQ_CHANNEL as LOG_CHANNEL
 from database.ia_filterdb import save_file
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-
+from utils import temp
+import re
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 lock = asyncio.Lock()
+
 
 @Client.on_callback_query(filters.regex(r'^index'))
 async def index_files(bot, query):
@@ -47,38 +49,37 @@ async def index_files(bot, query):
     await index_files_to_db(int(lst_msg_id), chat, msg, bot)
 
 
-@Client.on_message(filters.private & filters.command('index'))
+@Client.on_message((filters.forwarded | (filters.regex("(https://)?(t\.me/|telegram\.me/|telegram\.dog/)(c/)?(\d+|[a-zA-Z_0-9]+)/(\d+)$")) & filters.text ) & filters.private & filters.incoming)
 async def send_for_index(bot, message):
-    vj = await bot.ask(message.chat.id, "**Now Send Me Your Channel Last Post Link Or Forward A Last Message From Your Index Channel.\n\nAnd You Can Set Skip Number By - /setskip yourskipnumber**")
-    if vj.forward_from_chat.type == enums.ChatType.CHANNEL:
-        last_msg_id = vj.forward_from_message_id
-        chat_id = vj.forward_from_chat.username or vj.forward_from_chat.id
-    elif vj.text:
+    if message.text:
         regex = re.compile("(https://)?(t\.me/|telegram\.me/|telegram\.dog/)(c/)?(\d+|[a-zA-Z_0-9]+)/(\d+)$")
-        match = regex.match(vj.text)
+        match = regex.match(message.text)
         if not match:
-            return await vj.reply('Invalid link\n\nTry again by /index')
+            return await message.reply('Invalid link')
         chat_id = match.group(4)
         last_msg_id = int(match.group(5))
         if chat_id.isnumeric():
             chat_id  = int(("-100" + chat_id))
+    elif message.forward_from_chat.type == enums.ChatType.CHANNEL:
+        last_msg_id = message.forward_from_message_id
+        chat_id = message.forward_from_chat.username or message.forward_from_chat.id
     else:
         return
     try:
         await bot.get_chat(chat_id)
     except ChannelInvalid:
-        return await vj.reply('This may be a private channel / group. Make me an admin over there to index the files.')
+        return await message.reply('This may be a private channel / group. Make me an admin over there to index the files.')
     except (UsernameInvalid, UsernameNotModified):
-        return await vj.reply('Invalid Link specified.')
+        return await message.reply('Invalid Link specified.')
     except Exception as e:
         logger.exception(e)
-        return await vj.reply(f'Errors - {e}')
+        return await message.reply(f'Errors - {e}')
     try:
         k = await bot.get_messages(chat_id, last_msg_id)
     except:
-        return await message.reply('Make Sure That Iam An Admin In The Channel, if channel is private')
+        return await message.reply('Make Sure That i am An Admin In The Channel, if channel is private')
     if k.empty:
-        return await message.reply('This may be group and iam not a admin of the group.')
+        return await message.reply('This may be group and i am not a admin of the group.')
 
     if message.from_user.id in ADMINS:
         buttons = [
@@ -99,7 +100,7 @@ async def send_for_index(bot, message):
         try:
             link = (await bot.create_chat_invite_link(chat_id)).invite_link
         except ChatAdminRequired:
-            return await message.reply('Make sure iam an admin in the chat and have permission to invite users.')
+            return await message.reply('Make sure i am an admin in the chat and have permission to invite users.')
     else:
         link = f"@{message.forward_from_chat.username}"
     buttons = [
@@ -149,7 +150,7 @@ async def index_files_to_db(lst_msg_id, chat, msg, bot):
                     await msg.edit(f"Successfully Cancelled!!\n\nSaved <code>{total_files}</code> files to dataBase!\nDuplicate Files Skipped: <code>{duplicate}</code>\nDeleted Messages Skipped: <code>{deleted}</code>\nNon-Media messages skipped: <code>{no_media + unsupported}</code>(Unsupported Media - `{unsupported}` )\nErrors Occurred: <code>{errors}</code>")
                     break
                 current += 1
-                if current % 50 == 0:
+                if current % 20 == 0:
                     can = [[InlineKeyboardButton('Cancel', callback_data='index_cancel')]]
                     reply = InlineKeyboardMarkup(can)
                     await msg.edit_text(
