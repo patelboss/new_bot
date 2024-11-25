@@ -1,4 +1,5 @@
 import logging
+import asyncio
 from pyrogram import Client, emoji, filters
 from pyrogram.errors.exceptions.bad_request_400 import QueryIdInvalid
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, InlineQueryResultCachedDocument, InlineQuery
@@ -96,15 +97,22 @@ async def answer(bot, query):
             if not f_caption:
                 f_caption = title
 
-            results.append(
-                InlineQueryResultCachedDocument(
-                    title=title,
-                    document_file_id=file["file_id"],
-                    caption=f_caption,
-                    description=f"Size: {size}\nType: {file.get('file_type', 'Unknown')}",
-                    reply_markup=reply_markup
-                )
+            sent_message = await bot.send_document(
+                chat_id=query.from_user.id,
+                document=file["file_id"],
+                caption=f_caption,
+                reply_markup=reply_markup
             )
+
+            # Warn the user about file deletion
+            await bot.send_message(
+                chat_id=query.from_user.id,
+                text="⚠️ Files sent by this bot will be deleted after 10 minutes to comply with copyright regulations."
+            )
+
+            # Schedule deletion of the file in 10 minutes
+            await schedule_deletion(bot, sent_message.chat.id, sent_message.message_id, delay=600)
+
         except Exception as e:
             logger.exception(f"Error processing file: {file}. Exception: {e}")
 
@@ -126,9 +134,19 @@ async def answer(bot, query):
         except Exception as e:
             logger.exception(f"Error sending query answer: {e}")
     else:
-        switch_pm_text = f"{emoji.CROSS_MARK} No results"
+        # When no results are found
+        switch_pm_text = f"{emoji.CROSS_MARK} No results found"
         if string:
             switch_pm_text += f" for '{string}'"
+
+        # Redirect user to support group
+        reply_markup = InlineKeyboardMarkup(
+            [
+                [
+                    InlineKeyboardButton('Request in Support Group', url="https://t.me/your_support_group_link")
+                ]
+            ]
+        )
 
         await query.answer(
             results=[],
@@ -136,6 +154,11 @@ async def answer(bot, query):
             cache_time=cache_time,
             switch_pm_text=switch_pm_text,
             switch_pm_parameter="no_results"
+        )
+        await query.message.reply_text(
+            text=f"We couldn't find any results for '{string}'. You can request the movie in our [Support Group](https://t.me/your_support_group_link).",
+            reply_markup=reply_markup,
+            disable_web_page_preview=True
         )
 
 def get_reply_markup(query):
@@ -146,3 +169,12 @@ def get_reply_markup(query):
         ]
     ]
     return InlineKeyboardMarkup(buttons)
+
+async def schedule_deletion(bot, chat_id, message_id, delay=600):
+    """Schedule deletion of a message after a delay."""
+    await asyncio.sleep(delay)
+    try:
+        await bot.delete_messages(chat_id=chat_id, message_ids=message_id)
+        await bot.send_message(chat_id, "⚠️ File deleted after 10 minutes to prevent copyright issues.")
+    except Exception as e:
+        logger.error(f"Error deleting message: {e}")
