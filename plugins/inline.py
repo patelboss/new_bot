@@ -1,4 +1,3 @@
-import asyncio
 from pyrogram import Client, emoji, filters
 from pyrogram.errors.exceptions.bad_request_400 import QueryIdInvalid
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, InlineQueryResultCachedDocument, InlineQuery
@@ -107,7 +106,6 @@ async def answer(bot, query):
         except QueryIdInvalid:
             pass
     else:
-        # No results found
         switch_pm_text = f"{emoji.CROSS_MARK} No results"
         if string:
             switch_pm_text += f" for '{string}'"
@@ -120,20 +118,6 @@ async def answer(bot, query):
             switch_pm_parameter="no_results"
         )
 
-        # Send a private message to the user about the support group
-        support_group_url = "https://t.me/iAmRashmibot"  # Replace with your support group link
-        try:
-            sent_message = await bot.send_message(
-                chat_id=query.from_user.id,
-                text=f"We couldn't find any results for '{string}'. You can request the movie in our [Support Group]({support_group_url}).",
-                disable_web_page_preview=True
-            )
-            # Delete the message after 30 seconds
-            await delete_message_after_delay(bot, sent_message.chat.id, sent_message.message_id, 30)
-        except Exception as e:
-            print(f"Error sending private message: {e}")
-
-
 def get_reply_markup(query):
     """Generate reply markup for inline results."""
     buttons = [
@@ -142,12 +126,3 @@ def get_reply_markup(query):
         ]
     ]
     return InlineKeyboardMarkup(buttons)
-
-
-async def delete_message_after_delay(bot, chat_id, message_id, delay=30):
-    """Deletes a private message after the specified delay."""
-    await asyncio.sleep(delay)
-    try:
-        await bot.delete_messages(chat_id, message_id)
-    except Exception as e:
-        print(f"Error deleting message: {e}")
