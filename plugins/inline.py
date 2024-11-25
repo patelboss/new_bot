@@ -18,11 +18,11 @@ async def inline_users(query: InlineQuery):
             return False
     return query.from_user and query.from_user.id not in temp.BANNED_USERS
 
-async def delete_message_after_delay(bot, user_id, message_id, delay=30):
+async def delete_message_after_delay(bot, chat_id, message_id, delay=30):
     """Deletes a message after the specified delay (default is 30 seconds)."""
     await asyncio.sleep(delay)
     try:
-        await bot.delete_message(user_id, message_id)
+        await bot.delete_message(chat_id, message_id)
     except Exception as e:
         print(f"Error deleting message: {e}")
 
@@ -113,11 +113,20 @@ async def answer(bot, query):
                 next_offset=str(next_offset)
             )
             
-            # Start a task to delete the message after 30 seconds (if sent)
-            # In this case, the message id is taken from query_result which is the sent inline query result.
-            # Since query_result is not returning result_id, you can skip checking that.
+            # Since inline query results are not sent as a message directly, 
+            # we need to manually send the result as a message.
+            # Inline query results don't contain a message_id, so we need to handle it in a different way.
+            # Create an inline result and delete it later.
+
+            # For now, as inline results are not sent as regular messages, we will just send a reply.
+            await query.message.reply_text(
+                text="You can select the files from the results below.",
+                disable_web_page_preview=True
+            )
+
+            # Use the `query.message.message_id` to delete the message after 30 seconds.
             await delete_message_after_delay(bot, query.from_user.id, query.message.message_id, 30)
-                
+
         except QueryIdInvalid:
             pass
     else:
