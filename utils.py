@@ -224,42 +224,52 @@ async def get_poster(query, bulk=False, id=False, file=None):
         'rating': str(movie.get("rating")),
         'url':f'https://www.imdb.com/title/tt{movieid}'
     }
-
-async def broadcast_messages(user_id, message):
+async def broadcast_messages(user_id, message, forward=False):
     try:
-        await message.copy(chat_id=user_id)
+        if forward:
+            await message.forward(chat_id=user_id)
+        else:
+            await message.copy(chat_id=user_id)
         return True, "Success"
     except FloodWait as e:
+        logger.warning(f"FloodWait: Sleeping for {e.x} seconds.")
         await asyncio.sleep(e.x)
-        return await broadcast_messages(user_id, message)
+        return await broadcast_messages(user_id, message, forward)
     except InputUserDeactivated:
         await db.delete_user(int(user_id))
-        logging.info(f"{user_id}-Removed from Database, since deleted account.")
+        logger.info(f"{user_id} - Removed from database (deleted account).")
         return False, "Deleted"
     except UserIsBlocked:
         await db.delete_user(int(user_id))
-        logging.info(f"{user_id} -Blocked the bot.")
+        logger.info(f"{user_id} - Blocked the bot.")
         return False, "Blocked"
     except PeerIdInvalid:
         await db.delete_user(int(user_id))
-        logging.info(f"{user_id} - PeerIdInvalid")
+        logger.info(f"{user_id} - PeerIdInvalid.")
         return False, "Error"
     except Exception as e:
+        logger.error(f"Error broadcasting to {user_id}: {e}")
         return False, "Error"
 
-async def broadcast_messages_group(chat_id, message):
+async def broadcast_messages_group(chat_id, message, forward=False):
     try:
-        kd = await message.copy(chat_id=chat_id)
-        try:
-            await kd.pin()
-        except:
-            pass
+        if forward:
+            await message.forward(chat_id=chat_id)
+        else:
+            msg = await message.copy(chat_id=chat_id)
+            try:
+                await msg.pin()  # Attempt to pin the message
+            except Exception as e:
+                logger.warning(f"Could not pin message in group {chat_id}: {e}")
         return True, "Success"
     except FloodWait as e:
+        logger.warning(f"FloodWait: Sleeping for {e.x} seconds.")
         await asyncio.sleep(e.x)
-        return await broadcast_messages_group(chat_id, message)
+        return await broadcast_messages_group(chat_id, message, forward)
     except Exception as e:
+        logger.error(f"Error broadcasting to group {chat_id}: {e}")
         return False, "Error"
+    
     
 async def search_gagala(text):
     usr_agent = {
