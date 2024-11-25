@@ -146,9 +146,17 @@ async def set_skip_number(bot, message):
         await message.reply("Give me a skip number.")
 
 
-import time
-import asyncio
-from pyrogram.errors import FloodWait
+import time  # Importing the time module
+
+# Function to format time in human-readable format: e.g., 1m 10s or 12h 20m 30s
+def format_time(seconds):
+    hours = seconds // 3600
+    minutes = (seconds % 3600) // 60
+    seconds = seconds % 60
+    # Return formatted time, based on whether it's over an hour or not
+    if hours > 0:
+        return f"{hours}h {minutes}m {seconds}s"
+    return f"{minutes}m {seconds}s"
 
 async def index_files_to_db(lst_msg_id, chat, msg, bot):
     total_files = 0
@@ -167,22 +175,31 @@ async def index_files_to_db(lst_msg_id, chat, msg, bot):
 
             async for message in bot.iter_messages(chat, lst_msg_id, temp.CURRENT):
                 if temp.CANCEL:
-                    elapsed_time = round(time.time() - start_time)
+                    elapsed_time = round(time.time() - start_time)  # Calculate elapsed time
+                    formatted_time = format_time(elapsed_time)  # Format the time
                     await msg.edit(f"Successfully Cancelled!!\n\nSaved <code>{total_files}</code> files to dataBase!\n"
                                    f"Duplicate Files Skipped: <code>{duplicate}</code>\nDeleted Messages Skipped: <code>{deleted}</code>\n"
                                    f"Non-Media messages skipped: <code>{no_media + unsupported}</code> (Unsupported Media - `<code>{unsupported}</code>`)\n"
-                                   f"Errors Occurred: <code>{errors}</code>\nElapsed Time: <code>{elapsed_time} seconds</code>")
+                                   f"Errors Occurred: <code>{errors}</code>\n"
+                                   f"Elapsed Time: <code>{formatted_time}</code>")
                     break
 
                 current += 1
                 if current % 20 == 0:
                     can = [[InlineKeyboardButton('Cancel', callback_data='index_cancel')]]
                     reply = InlineKeyboardMarkup(can)
+
+                    # Calculate elapsed time after processing each batch of 20 messages
+                    elapsed_time = round(time.time() - start_time)
+                    formatted_time = format_time(elapsed_time)
+
+                    # Update message with files indexed so far and elapsed time
                     await msg.edit_text(
                         text=f"Total messages fetched: <code>{current}</code>\nTotal messages saved: <code>{total_files}</code>\n"
                              f"Duplicate Files Skipped: <code>{duplicate}</code>\nDeleted Messages Skipped: <code>{deleted}</code>\n"
                              f"Non-Media messages skipped: <code>{no_media + unsupported}</code> (Unsupported Media - `<code>{unsupported}</code>`)\n"
-                             f"Errors Occurred: <code>{errors}</code>",
+                             f"Errors Occurred: <code>{errors}</code>\n"
+                             f"Elapsed Time: <code>{formatted_time}</code>",
                         reply_markup=reply)
 
                 if message.empty:
@@ -227,11 +244,14 @@ async def index_files_to_db(lst_msg_id, chat, msg, bot):
 
         except Exception as e:
             logger.exception(e)
-            await msg.edit(f'Error: {e}')
+            await msg.edit(f"Error: {e}")
         else:
+            # Final time after all messages are processed
             elapsed_time = round(time.time() - start_time)  # Calculate elapsed time
-            await msg.edit(f'Successfully saved <code>{total_files}</code> to dataBase!\n'
-                           f'Duplicate Files Skipped: <code>{duplicate}</code>\n'
-                           f'Deleted Messages Skipped: <code>{deleted}</code>\n'
-                           f'Non-Media messages skipped: <code>{no_media + unsupported}</code> (Unsupported Media - `<code>{unsupported}</code>`)\n'
-                           f'Errors Occurred: <code>{errors}</code>\nElapsed Time: <code>{elapsed_time} seconds</code>')
+            formatted_time = format_time(elapsed_time)  # Format the time
+            await msg.edit(f"Successfully saved <code>{total_files}</code> to dataBase!\n"
+                           f"Duplicate Files Skipped: <code>{duplicate}</code>\n"
+                           f"Deleted Messages Skipped: <code>{deleted}</code>\n"
+                           f"Non-Media messages skipped: <code>{no_media + unsupported}</code> (Unsupported Media - `<code>{unsupported}</code>`)\n"
+                           f"Errors Occurred: <code>{errors}</code>\n"
+                           f"Elapsed Time: <code>{formatted_time}</code>")
