@@ -147,6 +147,8 @@ async def set_skip_number(bot, message):
 
 
 import time
+import asyncio
+from pyrogram.errors import FloodWait
 
 async def index_files_to_db(lst_msg_id, chat, msg, bot):
     total_files = 0
@@ -168,7 +170,7 @@ async def index_files_to_db(lst_msg_id, chat, msg, bot):
                     elapsed_time = round(time.time() - start_time)
                     await msg.edit(f"Successfully Cancelled!!\n\nSaved <code>{total_files}</code> files to dataBase!\n"
                                    f"Duplicate Files Skipped: <code>{duplicate}</code>\nDeleted Messages Skipped: <code>{deleted}</code>\n"
-                                   f"Non-Media messages skipped: <code>{no_media + unsupported}</code>(Unsupported Media - `{unsupported}` )\n"
+                                   f"Non-Media messages skipped: <code>{no_media + unsupported}</code> (Unsupported Media - `<code>{unsupported}</code>`)\n"
                                    f"Errors Occurred: <code>{errors}</code>\nElapsed Time: <code>{elapsed_time} seconds</code>")
                     break
 
@@ -179,8 +181,8 @@ async def index_files_to_db(lst_msg_id, chat, msg, bot):
                     await msg.edit_text(
                         text=f"Total messages fetched: <code>{current}</code>\nTotal messages saved: <code>{total_files}</code>\n"
                              f"Duplicate Files Skipped: <code>{duplicate}</code>\nDeleted Messages Skipped: <code>{deleted}</code>\n"
-                             f"Non-Media messages skipped: <code>{no_media + unsupported}</code>(Unsupported Media - `{unsupported}` )\n"
-                             f"Errors Occurred: <code>{errors}</code}",
+                             f"Non-Media messages skipped: <code>{no_media + unsupported}</code> (Unsupported Media - `<code>{unsupported}</code>`)\n"
+                             f"Errors Occurred: <code>{errors}</code>",
                         reply_markup=reply)
 
                 if message.empty:
@@ -202,21 +204,26 @@ async def index_files_to_db(lst_msg_id, chat, msg, bot):
                 media.caption = message.caption
 
                 # Retry mechanism for handling flood wait and other errors
-                try:
-                    aynav, vnay = await save_file(media)
-                    if aynav:
-                        total_files += 1
-                    elif vnay == 0:
-                        duplicate += 1
-                    elif vnay == 2:
+                retry_count = 0
+                while retry_count < 5:  # Retry 5 times
+                    try:
+                        aynav, vnay = await save_file(media)
+                        if aynav:
+                            total_files += 1
+                        elif vnay == 0:
+                            duplicate += 1
+                        elif vnay == 2:
+                            errors += 1
+                        break  # Exit loop if save is successful
+                    except FloodWait as e:
+                        logger.warning(f"Flood wait encountered. Retrying after {e.x} seconds.")
+                        await asyncio.sleep(e.x)
+                        retry_count += 1
+                        continue  # Retry after the wait
+                    except Exception as e:
+                        logger.exception(f"Error during file save: {e}")
                         errors += 1
-                except FloodWait as e:
-                    logger.warning(f"Flood wait encountered. Retrying after {e.x} seconds.")
-                    await asyncio.sleep(e.x)
-                    continue  # Retry after the wait
-                except Exception as e:
-                    logger.exception(f"Error during file save: {e}")
-                    errors += 1
+                        break  # Exit loop after the exception is logged
 
         except Exception as e:
             logger.exception(e)
@@ -226,5 +233,5 @@ async def index_files_to_db(lst_msg_id, chat, msg, bot):
             await msg.edit(f'Successfully saved <code>{total_files}</code> to dataBase!\n'
                            f'Duplicate Files Skipped: <code>{duplicate}</code>\n'
                            f'Deleted Messages Skipped: <code>{deleted}</code>\n'
-                           f'Non-Media messages skipped: <code>{no_media + unsupported}</code>(Unsupported Media - `{unsupported}` )\n'
+                           f'Non-Media messages skipped: <code>{no_media + unsupported}</code> (Unsupported Media - `<code>{unsupported}</code>`)\n'
                            f'Errors Occurred: <code>{errors}</code>\nElapsed Time: <code>{elapsed_time} seconds</code>')
