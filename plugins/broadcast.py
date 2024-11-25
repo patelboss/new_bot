@@ -1,71 +1,94 @@
-import datetime, time, asyncio
+import asyncio
+import logging
+import datetime
 from pyrogram import Client, filters
-from database.users_chats_db import db
+from pyrogram.errors import FloodWait, InputUserDeactivated, UserIsBlocked, PeerIdInvalid
 from info import ADMINS
+from database.users_chats_db import db
 from utils import broadcast_messages, broadcast_messages_group
-        
+
+logger = logging.getLogger("broadcast")
+
 @Client.on_message(filters.command("broadcast") & filters.user(ADMINS))
 async def pm_broadcast(bot, message):
-    b_msg = await bot.ask(chat_id = message.from_user.id, text = "Now Send Me Your Broadcast Message")
     try:
-        users = await db.get_all_users()
+        logger.info("PM Broadcast initiated by admin.")
+        b_msg = await bot.ask(chat_id=message.from_user.id, text="Send your broadcast message (type or forward).")
+
+        forward_msg = b_msg.forward_from or b_msg.forward_from_chat
+        users = await db.get_all_users()  # Cursor for users
         sts = await message.reply_text('Broadcasting your messages...')
-        start_time = time.time()
         total_users = await db.total_users_count()
-        done = 0
-        blocked = 0
-        deleted = 0
-        failed = 0
-        success = 0
+        done, blocked, deleted, failed, success = 0, 0, 0, 0, 0
+
+        start_time = datetime.datetime.now()
+
         async for user in users:
             if 'id' in user:
-                pti, sh = await broadcast_messages(int(user['id']), b_msg)
-                if pti:
-                    success += 1
-                elif pti == False:
-                    if sh == "Blocked":
+                try:
+                    if forward_msg:
+                        status, error = await broadcast_messages(user_id=int(user['id']), message=b_msg, forward=True)
+                    else:
+                        status, error = await broadcast_messages(user_id=int(user['id']), message=b_msg, forward=False)
+
+                    if status:
+                        success += 1
+                    elif error == "Blocked":
                         blocked += 1
-                    elif sh == "Deleted":
+                    elif error == "Deleted":
                         deleted += 1
-                    elif sh == "Error":
+                    else:
                         failed += 1
+                except Exception as e:
+                    logger.error(f"Error broadcasting to user {user['id']}: {e}")
+                    failed += 1
+
                 done += 1
                 if not done % 20:
-                    await sts.edit(f"Broadcast in progress:\n\nTotal Users {total_users}\nCompleted: {done} / {total_users}\nSuccess: {success}\nBlocked: {blocked}\nDeleted: {deleted}")    
-            else:
-                # Handle the case where 'id' key is missing in the user dictionary 
-                done += 1
-                failed += 1
-                if not done % 20:
-                    await sts.edit(f"Broadcast in progress:\n\nTotal Users {total_users}\nCompleted: {done} / {total_users}\nSuccess: {success}\nBlocked: {blocked}\nDeleted: {deleted}")    
-    
-        time_taken = datetime.timedelta(seconds=int(time.time()-start_time))
-        await sts.edit(f"Broadcast Completed:\nCompleted in {time_taken} seconds.\n\nTotal Users: {total_users}\nCompleted: {done} / {total_users}\nSuccess: {success}\nBlocked: {blocked}\nDeleted: {deleted}")
+                    await sts.edit(f"Broadcast in progress:\n\nTotal Users: {total_users}\nCompleted: {done}\nSuccess: {success}\nBlocked: {blocked}\nDeleted: {deleted}\nFailed: {failed}")
+
+        time_taken = datetime.datetime.now() - start_time
+        await sts.edit(f"Broadcast Completed:\n\nTime Taken: {time_taken}\n\nTotal Users: {total_users}\nCompleted: {done}\nSuccess: {success}\nBlocked: {blocked}\nDeleted: {deleted}\nFailed: {failed}")
     except Exception as e:
-        print(f"error: {e}")
+        logger.error(f"Error in pm_broadcast: {e}")
+        await message.reply_text("An error occurred during the PM broadcast.")
 
 @Client.on_message(filters.command("grp_broadcast") & filters.user(ADMINS))
 async def broadcast_group(bot, message):
-    b_msg = await bot.ask(chat_id = message.from_user.id, text = "Now Send Me Your Broadcast Message")
-    groups = await db.get_all_chats()
-    sts = await message.reply_text(
-        text='Broadcasting your messages To Groups...'
-    )
-    start_time = time.time()
-    total_groups = await db.total_chat_count()
-    done = 0
-    failed = 0
+    try:
+        logger.info("Group Broadcast initiated by admin.")
+        b_msg = await bot.ask(chat_id=message.from_user.id, text="Send your broadcast message (type or forward).")
 
-    success = 0
-    async for group in groups:
-        pti, sh = await broadcast_messages_group(int(group['id']), b_msg)
-        if pti:
-            success += 1
-        elif sh == "Error":
-                failed += 1
-        done += 1
-        if not done % 20:
-            await sts.edit(f"Broadcast in progress:\n\nTotal Groups {total_groups}\nCompleted: {done} / {total_groups}\nSuccess: {success}")    
-    time_taken = datetime.timedelta(seconds=int(time.time()-start_time))
-    await sts.edit(f"Broadcast Completed:\nCompleted in {time_taken} seconds.\n\nTotal Groups {total_groups}\nCompleted: {done} / {total_groups}\nSuccess: {success}")
-        
+        forward_msg = b_msg.forward_from or b_msg.forward_from_chat
+        groups = await db.get_all_chats()  # Cursor for groups
+        sts = await message.reply_text('Broadcasting your messages...')
+        total_groups = await db.total_chat_count()
+        done, failed, success = 0, 0, 0
+
+        start_time = datetime.datetime.now()
+
+        async for group in groups:
+            if 'id' in group:
+                try:
+                    if forward_msg:
+                        status, error = await broadcast_messages_group(chat_id=int(group['id']), message=b_msg, forward=True)
+                    else:
+                        status, error = await broadcast_messages_group(chat_id=int(group['id']), message=b_msg, forward=False)
+
+                    if status:
+                        success += 1
+                    else:
+                        failed += 1
+                except Exception as e:
+                    logger.error(f"Error broadcasting to group {group['id']}: {e}")
+                    failed += 1
+
+                done += 1
+                if not done % 20:
+                    await sts.edit(f"Broadcast in progress:\n\nTotal Groups: {total_groups}\nCompleted: {done}\nSuccess: {success}\nFailed: {failed}")
+
+        time_taken = datetime.datetime.now() - start_time
+        await sts.edit(f"Broadcast Completed:\n\nTime Taken: {time_taken}\n\nTotal Groups: {total_groups}\nCompleted: {done}\nSuccess: {success}\nFailed: {failed}")
+    except Exception as e:
+        logger.error(f"Error in broadcast_group: {e}")
+        await message.reply_text("An error occurred during the Group broadcast.")
