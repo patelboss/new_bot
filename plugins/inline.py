@@ -1,3 +1,4 @@
+import asyncio
 from pyrogram import Client, emoji, filters
 from pyrogram.errors.exceptions.bad_request_400 import QueryIdInvalid
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, InlineQueryResultCachedDocument, InlineQuery
@@ -5,7 +6,6 @@ from database.ia_filterdb import get_search_results
 from utils import is_subscribed, get_size, temp
 from info import CACHE_TIME, AUTH_USERS, AUTH_CHANNEL, CUSTOM_FILE_CAPTION
 from database.connections_mdb import active_connection
-import asyncio
 
 cache_time = 0 if AUTH_USERS or AUTH_CHANNEL else CACHE_TIME
 
@@ -17,14 +17,6 @@ async def inline_users(query: InlineQuery):
         else:
             return False
     return query.from_user and query.from_user.id not in temp.BANNED_USERS
-
-async def delete_message_after_delay(bot, chat_id, message_id, delay=30):
-    """Deletes a message after the specified delay (default is 30 seconds)."""
-    await asyncio.sleep(delay)
-    try:
-        await bot.delete_message(chat_id, message_id)
-    except Exception as e:
-        print(f"Error deleting message: {e}")
 
 @Client.on_inline_query()
 async def answer(bot, query):
@@ -104,7 +96,7 @@ async def answer(bot, query):
         if string:
             switch_pm_text += f" for '{string}'"
         try:
-            query_result = await query.answer(
+            await query.answer(
                 results=results,
                 is_personal=True,
                 cache_time=cache_time,
@@ -112,25 +104,10 @@ async def answer(bot, query):
                 switch_pm_parameter="start",
                 next_offset=str(next_offset)
             )
-            
-            # Since inline query results are not sent as a message directly, 
-            # we need to manually send the result as a message.
-            # Inline query results don't contain a message_id, so we need to handle it in a different way.
-            # Create an inline result and delete it later.
-
-            # For now, as inline results are not sent as regular messages, we will just send a reply.
-            await query.message.reply_text(
-                text="You can select the files from the results below.",
-                disable_web_page_preview=True
-            )
-
-            # Use the `query.message.message_id` to delete the message after 30 seconds.
-            await delete_message_after_delay(bot, query.from_user.id, query.message.message_id, 30)
-
         except QueryIdInvalid:
             pass
     else:
-        # When no results are found
+        # No results found
         switch_pm_text = f"{emoji.CROSS_MARK} No results"
         if string:
             switch_pm_text += f" for '{string}'"
@@ -143,12 +120,19 @@ async def answer(bot, query):
             switch_pm_parameter="no_results"
         )
 
-        # Send message about support group when no results
-        support_group_url = "https://t.me/iAmRashmibot"  # Updated with your support group link
-        await query.message.reply_text(
-            text=f"We couldn't find any results for '{string}'. You can request the movie in our [Support Group]({support_group_url}).",
-            disable_web_page_preview=True
-        )
+        # Send a private message to the user about the support group
+        support_group_url = "https://t.me/iAmRashmibot"  # Replace with your support group link
+        try:
+            sent_message = await bot.send_message(
+                chat_id=query.from_user.id,
+                text=f"We couldn't find any results for '{string}'. You can request the movie in our [Support Group]({support_group_url}).",
+                disable_web_page_preview=True
+            )
+            # Delete the message after 30 seconds
+            await delete_message_after_delay(bot, sent_message.chat.id, sent_message.message_id, 30)
+        except Exception as e:
+            print(f"Error sending private message: {e}")
+
 
 def get_reply_markup(query):
     """Generate reply markup for inline results."""
@@ -157,4 +141,13 @@ def get_reply_markup(query):
             InlineKeyboardButton('Search again', switch_inline_query_current_chat=query)
         ]
     ]
-    return InlineKeyboardMarkup(buttons)  # Fixed unmatched ']'
+    return InlineKeyboardMarkup(buttons)
+
+
+async def delete_message_after_delay(bot, chat_id, message_id, delay=30):
+    """Deletes a private message after the specified delay."""
+    await asyncio.sleep(delay)
+    try:
+        await bot.delete_messages(chat_id, message_id)
+    except Exception as e:
+        print(f"Error deleting message: {e}")
