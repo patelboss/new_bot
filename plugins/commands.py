@@ -365,37 +365,25 @@ async def start(client, message):
         return await sts.delete()
 
     elif data.split("-", 1)[0] == "verify":
-    userid = data.split("-", 2)[1]
-    token = data.split("-", 3)[2]
-    
-    # Log the attempt to verify a user
-    logger.info(f"User {message.from_user.id} is attempting to verify with link: {data}")
-
-    if str(message.from_user.id) != str(userid):
-        # Log the mismatch between user ID and the provided user ID in the verification link
-        logger.warning(f"User ID mismatch: {message.from_user.id} != {userid}")
-        return await message.reply_text(
-            text="<b>Invalid link or Expired link !</b>",
-            protect_content=True
-        )
-
-    is_valid = await check_token(client, userid, token)
-
-    if is_valid == True:
-        # Log successful verification
-        logger.info(f"User {message.from_user.id} successfully verified. Granting access.")
-        await message.reply_text(
-            text=f"<b>Hey {message.from_user.mention}, You are successfully verified !\nNow you have unlimited access for all movies till today midnight.</b>",
-            protect_content=True
-        )
-        await verify_user(client, userid, token)
-    else:
-        # Log invalid or expired token attempt
-        logger.warning(f"Invalid or expired token for user {message.from_user.id}. Token: {token}")
-        return await message.reply_text(
-            text="<b>Invalid link or Expired link !</b>",
-            protect_content=True
-        )
+        userid = data.split("-", 2)[1]
+        token = data.split("-", 3)[2]
+        if str(message.from_user.id) != str(userid):
+            return await message.reply_text(
+                text="<b>Invalid link or Expired link !</b>",
+                protect_content=True
+            )
+        is_valid = await check_token(client, userid, token)
+        if is_valid == True:
+            await message.reply_text(
+                text=f"<b>Hey {message.from_user.mention}, You are successfully verified !\nNow you have unlimited access for all movies till today midnight.</b>",
+                protect_content=True
+            )
+            await verify_user(client, userid, token)
+        else:
+            return await message.reply_text(
+                text="<b>Invalid link or Expired link !</b>",
+                protect_content=True
+            )
     if data.startswith("sendfiles"):
         chat_id = int("-" + file_id.split("-")[1])
         userid = message.from_user.id if message.from_user else None
@@ -458,44 +446,18 @@ async def start(client, message):
             if f_caption is None:
                 f_caption = f"{' '.join(filter(lambda x: not x.startswith('[') and not x.startswith('@'), files1['file_name'].split()))}"
             if not await db.has_premium_access(message.from_user.id):
-    # Log when the user doesn't have premium access
-                logger.info(f"User {message.from_user.id} does not have premium access.")
-    
-    # Log the verification process check
-                logger.info(f"Checking verification status for user {message.from_user.id}. VERIFY flag is set to {VERIFY}.")
-    
-                if VERIFY == True:
-        # Log that the verification process is enabled
-                    logger.info(f"Verification system is enabled. Checking if user {message.from_user.id} is verified.")
-        
-                    is_verified = await check_verification(client, message.from_user.id)
-                    logger.info(f"Verification check result for user {message.from_user.id}: {is_verified}")
-
-                    if not is_verified:
-            # Log when the user is not verified
-                        logger.info(f"User {message.from_user.id} is not verified. Sending verification request.")
-            
-                        btn = [[
-                            InlineKeyboardButton("Verify", url=await get_token(client, message.from_user.id, f"https://telegram.me/{temp.U_NAME}?start="))
-                        ], [
-                            InlineKeyboardButton("How To Open Link & Verify", url=VERIFY_TUTORIAL)
-                        ]]
-
-                        # Log the verification tutorial button
-                        logger.info(f"Sending verification tutorial link to user {message.from_user.id}.")
-            
-                        await message.reply_text(
-                            text="<b>You are not verified !\nKindly verify to continue !</b>",
-                            protect_content=True,
-                            reply_markup=InlineKeyboardMarkup(btn)
-                        )
-                        return
-                    else:
-            # Log that the user is verified and will continue
-                        logger.info(f"User {message.from_user.id} is already verified. Allowing access.")
-    else:
-        # Log that verification is disabled
-        logger.info(f"Verification system is disabled. Skipping verification check for user {message.from_user.id}.")
+                if not await check_verification(client, message.from_user.id) and VERIFY == True:
+                    btn = [[
+                        InlineKeyboardButton("Verify", url=await get_token(client, message.from_user.id, f"https://telegram.me/{temp.U_NAME}?start="))
+                    ],[
+                        InlineKeyboardButton("How To Open Link & Verify", url=VERIFY_TUTORIAL)
+                    ]]
+                    await message.reply_text(
+                        text="<b>You are not verified !\nKindly verify to continue !</b>",
+                        protect_content=True,
+                        reply_markup=InlineKeyboardMarkup(btn)
+                    )
+                    return
             if STREAM_MODE == True:
                 button = [[
                     InlineKeyboardButton('Sᴜᴘᴘᴏʀᴛ Gʀᴏᴜᴘ', url=f'https://t.me/{SUPPORT_CHAT}'),
