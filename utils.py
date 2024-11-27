@@ -69,15 +69,25 @@ AUTH_CHANNELS = os.getenv("AUTH_CHANNELS", "").split(",")  # Get the list of cha
 
 async def is_subscribed(bot, query):
     missing_channels = []
-    
-    if REQUEST_TO_JOIN_MODE == True and join_db().isActive():
+    global DUMMY_CHANNEL_ID  # Include the dummy channel if it is set
+
+    if REQUEST_TO_JOIN_MODE and join_db().isActive():
         try:
             user = await join_db().get_user(query.from_user.id)
             if user and user["user_id"] == query.from_user.id:
                 return True
             else:
-                for channel_id in AUTH_CHANNELS:
+                for channel_id in AUTH_CHANNELS + ([DUMMY_CHANNEL_ID] if DUMMY_CHANNEL_ID else []):
                     try:
+                        if channel_id == DUMMY_CHANNEL_ID:
+                            # For the dummy channel, just show the link and skip enforcement
+                            channel = await bot.get_chat(int(channel_id))
+                            missing_channels.append(
+                                InlineKeyboardButton(f"Dummy Channel: {channel.title}", url=channel.invite_link)
+                            )
+                            continue
+
+                        # Check membership for mandatory channels
                         user_data = await bot.get_chat_member(int(channel_id), query.from_user.id)
                     except UserNotParticipant:
                         channel = await bot.get_chat(int(channel_id))
@@ -90,17 +100,16 @@ async def is_subscribed(bot, query):
                 # Send missing channels if needed
                 if missing_channels:
                     reply_markup = InlineKeyboardMarkup([missing_channels])
-                    
-                    # Adjust based on object type
+
                     if isinstance(query, CallbackQuery):
                         await query.answer(
                             text="Please join all required channels & Unmute Them to use the bot.\nTap on Files Again",
                             show_alert=True
                         )
-                        await query.message.reply("Join the channels using the buttons below.\nTap on Join Then Unmute\nTap On Files Again To Get Files", reply_markup=reply_markup)
+                        await query.message.reply("Join the channels using the buttons below. Dummy Channel is optional.", reply_markup=reply_markup)
                     else:
                         await query.reply(
-                            "You need to join all the required channels & Unmute Them to get the files.",
+                            "You need to join all the required channels & Unmute Them to get the files. Dummy Channel is optional.",
                             reply_markup=reply_markup
                         )
                     return False
@@ -110,8 +119,12 @@ async def is_subscribed(bot, query):
         except Exception as e:
             return False
     else:
-        for channel_id in AUTH_CHANNELS:
+        for channel_id in AUTH_CHANNELS + ([DUMMY_CHANNEL_ID] if DUMMY_CHANNEL_ID else []):
             try:
+                if channel_id == DUMMY_CHANNEL_ID:
+                    # Skip enforcement for the dummy channel
+                    continue
+
                 user = await bot.get_chat_member(int(channel_id), query.from_user.id)
                 if user.status == enums.ChatMemberStatus.BANNED:
                     return False
@@ -128,22 +141,20 @@ async def is_subscribed(bot, query):
                 )
             reply_markup = InlineKeyboardMarkup([join_buttons])
 
-            # Adjust based on object type
             if isinstance(query, CallbackQuery):
                 await query.answer(
                     text="Please join all required channels & Unmute Them to use the bot.\nTap on Files Again",
                     show_alert=True
                 )
-                await query.message.reply("Join the channels using the buttons below.\nTap on Join Then Unmute\nTap On Files Again To Get Files", reply_markup=reply_markup)
+                await query.message.reply("Join the channels using the buttons below. Dummy Channel is optional.", reply_markup=reply_markup)
             else:
                 await query.reply(
-                    "You need to join all the required channels & Unmute Them to get the files.",
+                    "You need to join all the required channels & Unmute Them to get the files. Dummy Channel is optional.",
                     reply_markup=reply_markup
                 )
             return False
 
-    return True
-                
+    return True                
 
 async def get_poster(query, bulk=False, id=False, file=None):
     if not id:
