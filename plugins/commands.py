@@ -364,7 +364,7 @@ async def start(client, message):
             await asyncio.sleep(1) 
         return await sts.delete()
 
-    elif if VERIFY == True:
+    elif VERIFY == True:
         data.split("-", 1)[0] == "verify":
         userid = data.split("-", 2)[1]
         token = data.split("-", 3)[2]
