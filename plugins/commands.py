@@ -113,8 +113,7 @@ async def start(client, message):
                     invite_links.append(dummy_invite)
                 except ChatAdminRequired:
                     await message.reply_text("Make sure Bot is admin in the dummy channel.")
-                    return
-
+                    return    
         # Generate buttons
         btn = []
         for invite in invite_links:
