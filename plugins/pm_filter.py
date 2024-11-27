@@ -1836,8 +1836,10 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 InlineKeyboardButton("⚠️ Uɴᴀᴠᴀɪʟᴀʙʟᴇ ⚠️", callback_data=f"unalert#{from_user}")
               ]]
         btn2 = [[
-                 InlineKeyboardButton('Jᴏɪɴ Cʜᴀɴɴᴇʟ', url=CHNL_LNK),
+                 InlineKeyboardButton("Join Our Offer Zone 🤑", url=f'https://t.me/+4dWp2gDjwC43YmJl'),
                  InlineKeyboardButton("Vɪᴇᴡ Sᴛᴀᴛᴜs", url=f"{query.message.link}")
+              ],[
+                 InlineKeyboardButton("Rᴇᴏ̨ᴜᴇsᴛ Gʀᴏᴜᴘ Lɪɴᴋ", url="https://t.me/iAmRashmibot")
                ]]
         if query.from_user.id in ADMINS:
             user = await client.get_users(from_user)
@@ -1859,7 +1861,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 InlineKeyboardButton("✅ Uᴘʟᴏᴀᴅᴇᴅ ✅", callback_data=f"upalert#{from_user}")
               ]]
         btn2 = [[
-                 InlineKeyboardButton('Jᴏɪɴ Cʜᴀɴɴᴇʟ', url=CHNL_LNK),
+                 InlineKeyboardButton("Join Our Offer Zone 🤑", url=f'https://t.me/+4dWp2gDjwC43YmJl'),
                  InlineKeyboardButton("Vɪᴇᴡ Sᴛᴀᴛᴜs", url=f"{query.message.link}")
                ],[
                  InlineKeyboardButton("Rᴇᴏ̨ᴜᴇsᴛ Gʀᴏᴜᴘ Lɪɴᴋ", url="https://t.me/iAmRashmibot")
@@ -1884,8 +1886,8 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 InlineKeyboardButton("🟢 Aʟʀᴇᴀᴅʏ Aᴠᴀɪʟᴀʙʟᴇ 🟢", callback_data=f"alalert#{from_user}")
               ]]
         btn2 = [[
-                 InlineKeyboardButton('Jᴏɪɴ Cʜᴀɴɴᴇʟ', url=CHNL_LNK),
-                 InlineKeyboardButton("Vɪᴇᴡ Sᴛᴀᴛᴜs", url=f"{query.message.link}")
+                 InlineKeyboardButton("Join Our Offer Zone 🤑", url=f'https://t.me/+4dWp2gDjwC43YmJl'),
+                 
                ],[
                  InlineKeyboardButton("Rᴇᴏ̨ᴜᴇsᴛ Gʀᴏᴜᴘ Lɪɴᴋ", url="https://t.me/iAmRashmibot")
                ]]
@@ -1907,7 +1909,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
         ident, from_user = query.data.split("#")
         if int(query.from_user.id) == int(from_user):
             user = await client.get_users(from_user)
-            await query.answer(f"Hᴇʏ {user.first_name}, Yᴏᴜʀ Rᴇᴏ̨ᴜᴇsᴛ ɪs Aʟʀᴇᴀᴅʏ Aᴠᴀɪʟᴀʙʟᴇ !", show_alert=True)
+            await query.answer(f"Hᴇʏ {user.first_name}, Yᴏᴜʀ Rᴇᴏ̨ᴜᴇsᴛ ɪs Aʟʀᴇᴀᴅʏ Aᴠᴀɪʟᴀʙʟᴇ !\nCheck Spelling and search again", show_alert=True)
         else:
             await query.answer("Yᴏᴜ ᴅᴏɴ'ᴛ ʜᴀᴠᴇ sᴜғғɪᴄɪᴀɴᴛ ʀɪɢᴛs ᴛᴏ ᴅᴏ ᴛʜɪs !", show_alert=True)
 
@@ -1923,7 +1925,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
         ident, from_user = query.data.split("#")
         if int(query.from_user.id) == int(from_user):
             user = await client.get_users(from_user)
-            await query.answer(f"Hᴇʏ {user.first_name}, Yᴏᴜʀ Rᴇᴏ̨ᴜᴇsᴛ ɪs Uɴᴀᴠᴀɪʟᴀʙʟᴇ !", show_alert=True)
+            await query.answer(f"Hᴇʏ {user.first_name}, Yᴏᴜʀ Rᴇᴏ̨ᴜᴇsᴛ ɪs Uɴᴀᴠᴀɪʟᴀʙʟᴇ !\May be spelling is wrong Or Not Available On Internet.", show_alert=True)
         else:
             await query.answer("Yᴏᴜ ᴅᴏɴ'ᴛ ʜᴀᴠᴇ sᴜғғɪᴄɪᴀɴᴛ ʀɪɢᴛs ᴛᴏ ᴅᴏ ᴛʜɪs !", show_alert=True)
 
@@ -1949,14 +1951,14 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 text=f"•• ʟɪɴᴋ ɢᴇɴᴇʀᴀᴛᴇᴅ ꜰᴏʀ ɪᴅ #{user_id} \n•• ᴜꜱᴇʀɴᴀᴍᴇ : {username} \n\n•• ᖴᎥᒪᗴ Nᗩᗰᗴ : {fileName}",
                 quote=True,
                 disable_web_page_preview=True,
-                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🚀 Fast Download 🚀", url=download),  # we download Link
-                                                    InlineKeyboardButton('🖥️ Watch online 🖥️', url=stream)]])  # web stream Link
+                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('💳 Dᴏɴᴀᴛᴇ', callback_data='donation'),  # we download Link
+                                                    InlineKeyboardButton("Join Our Offer Zone 🤑", url=f'https://t.me/+4dWp2gDjwC43YmJl')]])  # web stream Link
             )
             button = [[
-                InlineKeyboardButton("🚀 Fast Download 🚀", url=download),
-                InlineKeyboardButton('🖥️ Watch online 🖥️', url=stream)
+                InlineKeyboardButton("Join Our Offer Zone 🤑", url=f'https://t.me/+4dWp2gDjwC43YmJl')
+                
             ],[
-                InlineKeyboardButton("• ᴡᴀᴛᴄʜ ɪɴ ᴡᴇʙ ᴀᴘᴘ •", web_app=WebAppInfo(url=stream))
+                InlineKeyboardButton('💳 Dᴏɴᴀᴛᴇ', callback_data='donation')
             ]]
             await query.message.reply_text(
                 text="•• ʟɪɴᴋ ɢᴇɴᴇʀᴀᴛᴇᴅ ☠︎⚔",
@@ -1982,7 +1984,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
     elif query.data == "start":
         if PREMIUM_AND_REFERAL_MODE == True:
             buttons = [[
-                InlineKeyboardButton('⤬ Aᴅᴅ Mᴇ Tᴏ Yᴏᴜʀ Gʀᴏᴜᴘ ⤬', url=f'http://t.me/{temp.U_NAME}?startgroup=true')
+                InlineKeyboardButton('Share Us 💕🫶🏻', url=f'https://t.me/share/url?url=https://t.me/Rashmika_mandanana_bot?start=share&text=🎥%20Discover%20the%20Ultimate%20Telegram%20Media%20Bot!%0A%0ALooking%20for%20movies,%20web%20series,%20and%20much%20more?%20%F0%9F%93%9A%20With%20the%20biggest%20media%20database%20on%20Telegram,%20we%27ve%20been%20serving%20users%20since%202021%20and%20promise%20to%20stay%20completely%20free%20in%20the%20future!%0A%0A💻%20Try%20it%20now!%0A👉%20[Click%20here%20to%20explore%20endless%20entertainment](https://t.me/Rashmika_mandanana_bot?start=share)%0A%0A🔗%20Share%20this%20bot%20with%20your%20friends%20and%20let%20them%20enjoy%20unlimited%20access%20to%20premium%20content!')
             ],[
                 InlineKeyboardButton('⌬ Mᴏᴠɪᴇ Gʀᴏᴜᴘ', url=GRP_LNK)
             ],[
@@ -1993,7 +1995,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             ]]
         else:
             buttons = [[
-                InlineKeyboardButton('⤬ Aᴅᴅ Mᴇ Tᴏ Yᴏᴜʀ Gʀᴏᴜᴘ ⤬', url=f'http://t.me/{temp.U_NAME}?startgroup=true')
+                InlineKeyboardButton('Share Us 💕🫶🏻', url=f'https://t.me/share/url?url=https://t.me/Rashmika_mandanana_bot?start=share&text=🎥%20Discover%20the%20Ultimate%20Telegram%20Media%20Bot!%0A%0ALooking%20for%20movies,%20web%20series,%20and%20much%20more?%20%F0%9F%93%9A%20With%20the%20biggest%20media%20database%20on%20Telegram,%20we%27ve%20been%20serving%20users%20since%202021%20and%20promise%20to%20stay%20completely%20free%20in%20the%20future!%0A%0A💻%20Try%20it%20now!%0A👉%20[Click%20here%20to%20explore%20endless%20entertainment](https://t.me/Rashmika_mandanana_bot?start=share)%0A%0A🔗%20Share%20this%20bot%20with%20your%20friends%20and%20let%20them%20enjoy%20unlimited%20access%20to%20premium%20content!')
             ],[
                 InlineKeyboardButton('⌬ Mᴏᴠɪᴇ Gʀᴏᴜᴘ', url=GRP_LNK)
             ],[
