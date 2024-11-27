@@ -77,75 +77,84 @@ async def start(client, message):
         return
 
     if AUTH_CHANNEL and not await is_subscribed(client, message):
-       try:
-        if REQUEST_TO_JOIN_MODE:
-            invite_links = []
-            for channel_id in AUTH_CHANNELS:
-                try:
-                    invite_link = await client.create_chat_invite_link(chat_id=int(channel_id), creates_join_request=True)
-                    invite_links.append(invite_link)
-                except ChatAdminRequired:
-                    await message.reply_text(f"Make sure Bot is admin in channel ID: {channel_id}")
-                    return
-            
-            # Handle dummy channel
-            if DUMMY_CHANNEL_ID:
-                try:
-                    dummy_invite = await client.create_chat_invite_link(chat_id=DUMMY_CHANNEL_ID)
-                    invite_links.append(dummy_invite)
-                except ChatAdminRequired:
-                    await message.reply_text("Make sure Bot is admin in the dummy channel.")
-                    return
-        else:
-            invite_links = []
-            for channel_id in AUTH_CHANNELS:
-                try:
-                    invite_link = await client.create_chat_invite_link(chat_id=int(channel_id))
-                    invite_links.append(invite_link)
-                except ChatAdminRequired:
-                    await message.reply_text(f"Make sure Bot is admin in channel ID: {channel_id}")
-                    return
-
-            # Handle dummy channel
-            if DUMMY_CHANNEL_ID:
-                try:
-                    dummy_invite = await client.create_chat_invite_link(chat_id=DUMMY_CHANNEL_ID)
-                    invite_links.append(dummy_invite)
-                except ChatAdminRequired:
-                    await message.reply_text("Make sure Bot is admin in the dummy channel.")
-                    return    
-        # Generate buttons
-        btn = []
-        for invite in invite_links:
-            btn.append([InlineKeyboardButton(f"Join {invite.name}", url=invite.invite_link)])
+    try:
+        invite_links = []
+        # Handle channels that require mandatory joining
+        for channel_id in AUTH_CHANNELS:
+            try:
+                if REQUEST_TO_JOIN_MODE:
+                    invite_link = await client.create_chat_invite_link(
+                        chat_id=int(channel_id),
+                        creates_join_request=True
+                    )
+                else:
+                    invite_link = await client.create_chat_invite_link(
+                        chat_id=int(channel_id)
+                    )
+                invite_links.append(invite_link)
+            except ChatAdminRequired:
+                await message.reply_text(
+                    f"Make sure Bot is admin in channel ID: {channel_id}"
+                )
+                return
         
+        # Handle optional dummy channel
+        if DUMMY_CHANNEL_ID:
+            try:
+                dummy_invite = await client.create_chat_invite_link(chat_id=DUMMY_CHANNEL_ID)
+                invite_links.append(dummy_invite)
+            except ChatAdminRequired:
+                await message.reply_text("Make sure Bot is admin in the dummy channel.")
+                return
+
+        # Generate buttons for joining channels
+        btn = [
+            [InlineKeyboardButton(f"Join {invite.name}", url=invite.invite_link)]
+            for invite in invite_links
+        ]
+
+        # Add a Try Again button if needed
         if message.command[1] != "subscribe":
             if REQUEST_TO_JOIN_MODE:
                 if TRY_AGAIN_BTN:
                     try:
                         kk, file_id = message.command[1].split("_", 1)
-                        btn.append([InlineKeyboardButton("↻ Tʀʏ Aɢᴀɪɴ", callback_data=f"checksub#{kk}#{file_id}")])
+                        btn.append(
+                            [InlineKeyboardButton("↻ Tʀʏ Aɢᴀɪɴ", callback_data=f"checksub#{kk}#{file_id}")]
+                        )
                     except (IndexError, ValueError):
-                        btn.append([InlineKeyboardButton("↻ Tʀʏ Aɢᴀɪɴ", url=f"https://t.me/{temp.U_NAME}?start={message.command[1]}")])
+                        btn.append(
+                            [InlineKeyboardButton("↻ Tʀʏ Aɢᴀɪɴ", url=f"https://t.me/{temp.U_NAME}?start={message.command[1]}")]
+                        )
             else:
                 try:
                     kk, file_id = message.command[1].split("_", 1)
-                    btn.append([InlineKeyboardButton("↻ Tʀʏ Aɢᴀɪɴ", callback_data=f"checksub#{kk}#{file_id}")])
+                    btn.append(
+                        [InlineKeyboardButton("↻ Tʀʏ Aɢᴀɪɴ", callback_data=f"checksub#{kk}#{file_id}")]
+                    )
                 except (IndexError, ValueError):
-                    btn.append([InlineKeyboardButton("↻ Tʀʏ Aɢᴀɪɴ", url=f"https://t.me/{temp.U_NAME}?start={message.command[1]}")])
-        
-        # Generate text with dummy channel info
+                    btn.append(
+                        [InlineKeyboardButton("↻ Tʀʏ Aɢᴀɪɴ", url=f"https://t.me/{temp.U_NAME}?start={message.command[1]}")]
+                    )
+
+        # Generate text for the response
         if REQUEST_TO_JOIN_MODE:
             if TRY_AGAIN_BTN:
-                text = "**🕵️ Join the Update Channel to Get Movie Files.**\n\n" \
-                       "**Optional:** The dummy channel (if listed below) does not need to be joined to access files."
+                text = (
+                    "**🕵️ Join the Update Channel to Get Movie Files.**\n\n"
+                    "**Optional:** The dummy channel (if listed below) does not need to be joined to access files."
+                )
             else:
                 await db.set_msg_command(message.from_user.id, com=message.command[1])
-                text = "**🕵️ Join the Update Channel to Get Movie Files.**\n\n" \
-                       "**Optional:** The dummy channel (if listed below) does not need to be joined to access files."
+                text = (
+                    "**🕵️ Join the Update Channel to Get Movie Files.**\n\n"
+                    "**Optional:** The dummy channel (if listed below) does not need to be joined to access files."
+                )
         else:
-            text = "**🕵️ Join the Update Channel to Get Movie Files.**\n\n" \
-                   "**Optional:** The dummy channel (if listed below) does not need to be joined to access files."
+            text = (
+                "**🕵️ Join the Update Channel to Get Movie Files.**\n\n"
+                "**Optional:** The dummy channel (if listed below) does not need to be joined to access files."
+            )
 
         # Send message with buttons
         await client.send_message(
@@ -155,9 +164,9 @@ async def start(client, message):
             parse_mode=enums.ParseMode.MARKDOWN
         )
         return
+
     except Exception as e:
         await message.reply_text(f"Something went wrong with force subscribe: {e}")
-
     
 
     if len(message.command) == 2 and message.command[1] in ["subscribe", "error", "okay", "help"]:
