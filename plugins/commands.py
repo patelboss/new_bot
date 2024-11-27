@@ -22,7 +22,7 @@ async def start(client, message):
     if message.chat.type in [enums.ChatType.GROUP, enums.ChatType.SUPERGROUP]:
         # Inline Keyboard Buttons for Private Chat
         buttons = [[
-                InlineKeyboardButton('⤬ Aᴅᴅ Mᴇ Tᴏ Yᴏᴜʀ Gʀᴏᴜᴘ ⤬', url=f'http://t.me/{temp.U_NAME}?startgroup=true')
+                InlineKeyboardButton('Share Us 💕🫶🏻', url=f'https://t.me/share/url?url=https://t.me/Rashmika_mandanana_bot?start=share&text=**🎥%20Discover%20the%20Ultimate%20Telegram%20Media%20Bot!**%0A%0A**Looking%20for%20movies,%20web%20series,%20and%20much%20more?**%20%F0%9F%93%9A%20With%20the%20**biggest%20media%20database%20on%20Telegram**,%20we%27ve%20been%20serving%20users%20since%20**2021**%20and%20promise%20to%20stay%20**completely%20free**%20in%20the%20future!%0A%0A**💻%20Try%20it%20now!**%0A👉%20[Click%20here%20to%20explore%20endless%20entertainment](https://t.me/Rashmika_mandanana_bot?start=share)%0A%0A🔗%20**Share%20this%20bot%20with%20your%20friends**%20and%20let%20them%20enjoy%20unlimited%20access%20to%20premium%20content!')
             ],[
                 InlineKeyboardButton('⌬ Mᴏᴠɪᴇ Gʀᴏᴜᴘ', url=GRP_LNK)
             ],[
@@ -48,7 +48,7 @@ async def start(client, message):
     if len(message.command) != 2:
         if PREMIUM_AND_REFERAL_MODE == True:
             buttons = [[
-                InlineKeyboardButton('⤬ Aᴅᴅ Mᴇ Tᴏ Yᴏᴜʀ Gʀᴏᴜᴘ ⤬', url=f'http://t.me/{temp.U_NAME}?startgroup=true')
+                InlineKeyboardButton('Share Us 💕🫶🏻', url=f'https://t.me/share/url?url=https://t.me/Rashmika_mandanana_bot?start=share&text=🎥%20Discover%20the%20Ultimate%20Telegram%20Media%20Bot!%0A%0ALooking%20for%20movies,%20web%20series,%20and%20much%20more?%20%F0%9F%93%9A%20With%20the%20biggest%20media%20database%20on%20Telegram,%20we%27ve%20been%20serving%20users%20since%202021%20and%20promise%20to%20stay%20completely%20free%20in%20the%20future!%0A%0A💻%20Try%20it%20now!%0A👉%20[Click%20here%20to%20explore%20endless%20entertainment](https://t.me/Rashmika_mandanana_bot?start=share)%0A%0A🔗%20Share%20this%20bot%20with%20your%20friends%20and%20let%20them%20enjoy%20unlimited%20access%20to%20premium%20content!')
             ],[
                 InlineKeyboardButton('⌬ Mᴏᴠɪᴇ Gʀᴏᴜᴘ', url=GRP_LNK)
             ],[
@@ -60,7 +60,7 @@ async def start(client, message):
             ]]
         else:
             buttons = [[
-                InlineKeyboardButton('⤬ Aᴅᴅ Mᴇ Tᴏ Yᴏᴜʀ Gʀᴏᴜᴘ ⤬', url=f'http://t.me/{temp.U_NAME}?startgroup=true')
+                InlineKeyboardButton('Share Us 💕🫶🏻', url=f'https://t.me/share/url?url=https://t.me/Rashmika_mandanana_bot?start=share&text=🎥%20Discover%20the%20Ultimate%20Telegram%20Media%20Bot!%0A%0ALooking%20for%20movies,%20web%20series,%20and%20much%20more?%20%F0%9F%93%9A%20With%20the%20biggest%20media%20database%20on%20Telegram,%20we%27ve%20been%20serving%20users%20since%202021%20and%20promise%20to%20stay%20completely%20free%20in%20the%20future!%0A%0A💻%20Try%20it%20now!%0A👉%20[Click%20here%20to%20explore%20endless%20entertainment](https://t.me/Rashmika_mandanana_bot?start=share)%0A%0A🔗%20Share%20this%20bot%20with%20your%20friends%20and%20let%20them%20enjoy%20unlimited%20access%20to%20premium%20content!')
             ],[
                 InlineKeyboardButton('⌬ Mᴏᴠɪᴇ Gʀᴏᴜᴘ', url=GRP_LNK)
             ],[
@@ -131,7 +131,7 @@ async def start(client, message):
     if len(message.command) == 2 and message.command[1] in ["subscribe", "error", "okay", "help"]:
         if PREMIUM_AND_REFERAL_MODE == True:
             buttons = [[
-                InlineKeyboardButton('⤬ Aᴅᴅ Mᴇ Tᴏ Yᴏᴜʀ Gʀᴏᴜᴘ ⤬', url=f'http://t.me/{temp.U_NAME}?startgroup=true')
+                InlineKeyboardButton('Share Us 💕🫶🏻', url=f'https://t.me/share/url?url=https://t.me/Rashmika_mandanana_bot?start=share&text=🎥%20Discover%20the%20Ultimate%20Telegram%20Media%20Bot!%0A%0ALooking%20for%20movies,%20web%20series,%20and%20much%20more?%20%F0%9F%93%9A%20With%20the%20biggest%20media%20database%20on%20Telegram,%20we%27ve%20been%20serving%20users%20since%202021%20and%20promise%20to%20stay%20completely%20free%20in%20the%20future!%0A%0A💻%20Try%20it%20now!%0A👉%20[Click%20here%20to%20explore%20endless%20entertainment](https://t.me/Rashmika_mandanana_bot?start=share)%0A%0A🔗%20Share%20this%20bot%20with%20your%20friends%20and%20let%20them%20enjoy%20unlimited%20access%20to%20premium%20content!')
             ],[
                 InlineKeyboardButton('⌬ Mᴏᴠɪᴇ Gʀᴏᴜᴘ', url=GRP_LNK)
             ],[
@@ -143,7 +143,7 @@ async def start(client, message):
             ]]
         else:
             buttons = [[
-                InlineKeyboardButton('⤬ Aᴅᴅ Mᴇ Tᴏ Yᴏᴜʀ Gʀᴏᴜᴘ ⤬', url=f'http://t.me/{temp.U_NAME}?startgroup=true')
+                InlineKeyboardButton('Share Us 💕🫶🏻', url=f'https://t.me/share/url?url=https://t.me/Rashmika_mandanana_bot?start=share&text=🎥%20Discover%20the%20Ultimate%20Telegram%20Media%20Bot!%0A%0ALooking%20for%20movies,%20web%20series,%20and%20much%20more?%20%F0%9F%93%9A%20With%20the%20biggest%20media%20database%20on%20Telegram,%20we%27ve%20been%20serving%20users%20since%202021%20and%20promise%20to%20stay%20completely%20free%20in%20the%20future!%0A%0A💻%20Try%20it%20now!%0A👉%20[Click%20here%20to%20explore%20endless%20entertainment](https://t.me/Rashmika_mandanana_bot?start=share)%0A%0A🔗%20Share%20this%20bot%20with%20your%20friends%20and%20let%20them%20enjoy%20unlimited%20access%20to%20premium%20content!')
             ],[
                 InlineKeyboardButton('⌬ Mᴏᴠɪᴇ Gʀᴏᴜᴘ', url=GRP_LNK)
             ],[
@@ -184,7 +184,7 @@ async def start(client, message):
         else:
             if PREMIUM_AND_REFERAL_MODE == True:
                 buttons = [[
-                InlineKeyboardButton('⤬ Aᴅᴅ Mᴇ Tᴏ Yᴏᴜʀ Gʀᴏᴜᴘ ⤬', url=f'http://t.me/{temp.U_NAME}?startgroup=true')
+                InlineKeyboardButton('Share Us 💕🫶🏻', url=f'https://t.me/share/url?url=https://t.me/Rashmika_mandanana_bot?start=share&text=🎥%20Discover%20the%20Ultimate%20Telegram%20Media%20Bot!%0A%0ALooking%20for%20movies,%20web%20series,%20and%20much%20more?%20%F0%9F%93%9A%20With%20the%20biggest%20media%20database%20on%20Telegram,%20we%27ve%20been%20serving%20users%20since%202021%20and%20promise%20to%20stay%20completely%20free%20in%20the%20future!%0A%0A💻%20Try%20it%20now!%0A👉%20[Click%20here%20to%20explore%20endless%20entertainment](https://t.me/Rashmika_mandanana_bot?start=share)%0A%0A🔗%20Share%20this%20bot%20with%20your%20friends%20and%20let%20them%20enjoy%20unlimited%20access%20to%20premium%20content!')
             ],[
                 InlineKeyboardButton('⌬ Mᴏᴠɪᴇ Gʀᴏᴜᴘ', url=GRP_LNK)
             ],[
@@ -196,7 +196,7 @@ async def start(client, message):
             ]]
             else:
                 buttons = [[
-                InlineKeyboardButton('⤬ Aᴅᴅ Mᴇ Tᴏ Yᴏᴜʀ Gʀᴏᴜᴘ ⤬', url=f'http://t.me/{temp.U_NAME}?startgroup=true')
+                InlineKeyboardButton('Share Us 💕🫶🏻', url=f'https://t.me/share/url?url=https://t.me/Rashmika_mandanana_bot?start=share&text=🎥%20Discover%20the%20Ultimate%20Telegram%20Media%20Bot!%0A%0ALooking%20for%20movies,%20web%20series,%20and%20much%20more?%20%F0%9F%93%9A%20With%20the%20biggest%20media%20database%20on%20Telegram,%20we%27ve%20been%20serving%20users%20since%202021%20and%20promise%20to%20stay%20completely%20free%20in%20the%20future!%0A%0A💻%20Try%20it%20now!%0A👉%20[Click%20here%20to%20explore%20endless%20entertainment](https://t.me/Rashmika_mandanana_bot?start=share)%0A%0A🔗%20Share%20this%20bot%20with%20your%20friends%20and%20let%20them%20enjoy%20unlimited%20access%20to%20premium%20content!')
             ],[
                 InlineKeyboardButton('⌬ Mᴏᴠɪᴇ Gʀᴏᴜᴘ', url=GRP_LNK)
             ],[
@@ -270,18 +270,17 @@ async def start(client, message):
                         text=f"•• ʟɪɴᴋ ɢᴇɴᴇʀᴀᴛᴇᴅ ꜰᴏʀ ɪᴅ #{user_id} \n•• ᴜꜱᴇʀɴᴀᴍᴇ : {username} \n\n•• ᖴᎥᒪᗴ Nᗩᗰᗴ : {fileName}",
                         quote=True,
                         disable_web_page_preview=True,
-                        reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🚀 Fast Download 🚀", url=download),  # we download Link
-                                                            InlineKeyboardButton('🖥️ Watch online 🖥️', url=stream)]])  # web stream Link
+                        reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Join Our Offer Zone 🤑", url=f'https://t.me/+4dWp2gDjwC43YmJl'),  # we download Link
+                                                            InlineKeyboardButton('💳 Dᴏɴᴀᴛᴇ', callback_data='donation')]])  # web stream Link
                     )
                 if STREAM_MODE == True:
                     button = [[
                         InlineKeyboardButton('Sᴜᴘᴘᴏʀᴛ Gʀᴏᴜᴘ', url=f'https://t.me/{SUPPORT_CHAT}'),
                         InlineKeyboardButton('Uᴘᴅᴀᴛᴇs Cʜᴀɴɴᴇʟ', url=CHNL_LNK)
                     ],[
-                        InlineKeyboardButton("🚀 Fast Download 🚀", url=download),  # we download Link
-                        InlineKeyboardButton('🖥️ Watch online 🖥️', url=stream)
+                        InlineKeyboardButton("Join Our Offer Zone 🤑", url=f'https://t.me/+4dWp2gDjwC43YmJl')
                     ],[
-                        InlineKeyboardButton("• ᴡᴀᴛᴄʜ ɪɴ ᴡᴇʙ ᴀᴘᴘ •", web_app=WebAppInfo(url=stream))
+                        InlineKeyboardButton('💳 Dᴏɴᴀᴛᴇ', callback_data='donation')
                     ]]
                 else:
                     button = [[
@@ -400,9 +399,9 @@ async def start(client, message):
         k = await client.send_message(chat_id=message.from_user.id,text=f"<b>Get All Files in a Single Click!!!\n\n📂 ʟɪɴᴋ ➠ : {g}\n\n<i>Note: This message is deleted in 5 mins to avoid copyrights. Save the link to Somewhere else</i></b>", reply_markup=InlineKeyboardMarkup(
                 [
                     [
-                        InlineKeyboardButton('📂 Dᴏᴡɴʟᴏᴀᴅ Nᴏᴡ 📂', url=g)
+                        InlineKeyboardButton("Join Our Offer Zone 🤑", url=f'https://t.me/+4dWp2gDjwC43YmJl')
                     ], [
-                        InlineKeyboardButton('⁉️ Hᴏᴡ Tᴏ Dᴏᴡɴʟᴏᴀᴅ ⁉️', url=await get_tutorial(chat_id))
+                        InlineKeyboardButton('💳 Dᴏɴᴀᴛᴇ', callback_data='donation')
                     ]
                 ]
             )
@@ -422,9 +421,9 @@ async def start(client, message):
         k = await client.send_message(chat_id=user,text=f'<b>📕Nᴀᴍᴇ ➠ : <code>{files["file_name"]}</code> \n\n🔗Sɪᴢᴇ ➠ : {get_size(files["file_size"])}\n\n📂Fɪʟᴇ ʟɪɴᴋ ➠ : {g}\n\n<i>Note: This message is deleted in 20 mins to avoid copyrights. Save the link to Somewhere else</i></b>', reply_markup=InlineKeyboardMarkup(
                 [
                     [
-                        InlineKeyboardButton('📂 Dᴏᴡɴʟᴏᴀᴅ Nᴏᴡ 📂', url=g)
+                        InlineKeyboardButton("Join Our Offer Zone 🤑", url=f'https://t.me/+4dWp2gDjwC43YmJl')
                     ], [
-                        InlineKeyboardButton('⁉️ Hᴏᴡ Tᴏ Dᴏᴡɴʟᴏᴀᴅ ⁉️', url=await get_tutorial(chat_id))
+                        InlineKeyboardButton('💳 Dᴏɴᴀᴛᴇ', callback_data='donation')
                     ]
                 ]
             )
@@ -471,7 +470,9 @@ async def start(client, message):
                     InlineKeyboardButton('Sᴜᴘᴘᴏʀᴛ Gʀᴏᴜᴘ', url=f'https://t.me/{SUPPORT_CHAT}'),
                     InlineKeyboardButton('Uᴘᴅᴀᴛᴇs Cʜᴀɴɴᴇʟ', url=CHNL_LNK)
                 ],[
-                    InlineKeyboardButton('🚀 Fast Download / Watch Online🖥️', callback_data=f'generate_stream_link:{file_id}') #Don't change anything without contacting me @KingVJ01
+                    InlineKeyboardButton("Join Our Offer Zone 🤑", url=f'https://t.me/+4dWp2gDjwC43YmJl'),
+                ],[
+                    InlineKeyboardButton('💳 Dᴏɴᴀᴛᴇ', callback_data='donation') #Don't change anything without contacting me @KingVJ01
                 ]]
             else:
                 button = [[
@@ -506,12 +507,12 @@ async def start(client, message):
             g = await get_shortlink(chat_id, f"https://telegram.me/{temp.U_NAME}?start=file_{file_id}")
             k = await client.send_message(chat_id=message.from_user.id,text=f'<b>📕Nᴀᴍᴇ ➠ : <code>{files["file_name"]}</code> \n\n🔗Sɪᴢᴇ ➠ : {get_size(files["file_size"])}\n\n📂Fɪʟᴇ ʟɪɴᴋ ➠ : {g}\n\n<i>Note: This message is deleted in 20 mins to avoid copyrights. Save the link to Somewhere else</i></b>', reply_markup=InlineKeyboardMarkup(
                     [
-                        [
-                            InlineKeyboardButton('📂 Dᴏᴡɴʟᴏᴀᴅ Nᴏᴡ 📂', url=g)
-                        ], [
-                            InlineKeyboardButton('⁉️ Hᴏᴡ Tᴏ Dᴏᴡɴʟᴏᴀᴅ ⁉️', url=await get_tutorial(chat_id))
-                        ]
+                    [
+                        InlineKeyboardButton("Join Our Offer Zone 🤑", url=f'https://t.me/+4dWp2gDjwC43YmJl')
+                    ], [
+                        InlineKeyboardButton('💳 Dᴏɴᴀᴛᴇ', callback_data='donation')
                     ]
+                ]
                 )
             )
             await asyncio.sleep(1200)
@@ -540,7 +541,9 @@ async def start(client, message):
                     InlineKeyboardButton('Sᴜᴘᴘᴏʀᴛ Gʀᴏᴜᴘ', url=f'https://t.me/{SUPPORT_CHAT}'),
                     InlineKeyboardButton('Uᴘᴅᴀᴛᴇs Cʜᴀɴɴᴇʟ', url=CHNL_LNK)
                 ],[
-                    InlineKeyboardButton('🚀 Fast Download / Watch Online🖥️', callback_data=f'generate_stream_link:{file_id}') #Don't change anything without contacting me @KingVJ01
+                    InlineKeyboardButton("Join Our Offer Zone 🤑", url=f'https://t.me/+4dWp2gDjwC43YmJl'),
+                ],[
+                    InlineKeyboardButton('💳 Dᴏɴᴀᴛᴇ', callback_data='donation') #Don't change anything without contacting me @KingVJ01
                 ]]
             else:
                 button = [[
@@ -1147,8 +1150,8 @@ async def requests(bot, message):
     if success:
         link = await bot.create_chat_invite_link(int(REQST_CHANNEL))
         btn = [[
-                InlineKeyboardButton('Join Channel', url=link.invite_link),
-                InlineKeyboardButton('View Request', url=f"{reported_post.link}")
+                InlineKeyboardButton("Join Our Offer Zone 🤑", url=f'https://t.me/+4dWp2gDjwC43YmJl'),
+                InlineKeyboardButton('Search Group', url=GRP_LNK)
               ]]
         await message.reply_text("<b>Your request has been sent to our admin! Please wait for some time.\n\nJoin This Channel For Great Deals On Amazon Flipkart etc.</b>", reply_markup=InlineKeyboardMarkup(btn))
     
