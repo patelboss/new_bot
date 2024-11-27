@@ -79,6 +79,7 @@ async def start(client, message):
     if AUTH_CHANNEL and not await is_subscribed(client, message):
     try:
         invite_links = []
+        
         # Handle channels that require mandatory joining
         for channel_id in AUTH_CHANNELS:
             try:
@@ -167,7 +168,6 @@ async def start(client, message):
 
     except Exception as e:
         await message.reply_text(f"Something went wrong with force subscribe: {e}")
-    
 
     if len(message.command) == 2 and message.command[1] in ["subscribe", "error", "okay", "help"]:
         if PREMIUM_AND_REFERAL_MODE == True:
