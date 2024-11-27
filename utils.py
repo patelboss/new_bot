@@ -67,19 +67,28 @@ from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 # Fetch the channel IDs from environment variables
 AUTH_CHANNELS = os.getenv("AUTH_CHANNELS", "").split(",")  # Get the list of channel IDs
 
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
 async def is_subscribed(bot, query):
+    logging.info("Checking subscription status for user: %s", query.from_user.id)
     missing_channels = []
     global DUMMY_CHANNEL_ID  # Include the dummy channel if it is set
 
     if REQUEST_TO_JOIN_MODE and join_db().isActive():
+        logging.info("Request to join mode is active")
         try:
             user = await join_db().get_user(query.from_user.id)
             if user and user["user_id"] == query.from_user.id:
+                logging.info("User is already active in the database")
                 return True
             else:
                 for channel_id in AUTH_CHANNELS + ([DUMMY_CHANNEL_ID] if DUMMY_CHANNEL_ID else []):
                     try:
                         if channel_id == DUMMY_CHANNEL_ID:
+                            logging.info("Dummy channel detected: %s", channel_id)
                             # For the dummy channel, just show the link and skip enforcement
                             channel = await bot.get_chat(int(channel_id))
                             missing_channels.append(
@@ -89,50 +98,62 @@ async def is_subscribed(bot, query):
 
                         # Check membership for mandatory channels
                         user_data = await bot.get_chat_member(int(channel_id), query.from_user.id)
+                        logging.info("Checked membership for channel: %s", channel_id)
                     except UserNotParticipant:
+                        logging.warning("User is not a participant in channel: %s", channel_id)
                         channel = await bot.get_chat(int(channel_id))
                         missing_channels.append(
                             InlineKeyboardButton(f"Join {channel.title}", url=channel.invite_link)
                         )
                     except Exception as e:
+                        logging.error("Error checking channel %s: %s", channel_id, e)
                         return False  # Return False if there's an error
 
                 # Send missing channels if needed
                 if missing_channels:
+                    logging.info("Missing channels detected: %s", missing_channels)
                     reply_markup = InlineKeyboardMarkup([missing_channels])
 
                     if isinstance(query, CallbackQuery):
+                        logging.info("Sending missing channel buttons to user via CallbackQuery")
                         await query.answer(
                             text="Please join all required channels & Unmute Them to use the bot.\nTap on Files Again",
                             show_alert=True
                         )
                         await query.message.reply("Join the channels using the buttons below. Dummy Channel is optional.", reply_markup=reply_markup)
                     else:
+                        logging.info("Sending missing channel buttons to user via regular query")
                         await query.reply(
                             "You need to join all the required channels & Unmute Them to get the files. Dummy Channel is optional.",
                             reply_markup=reply_markup
                         )
                     return False
 
+                logging.info("User has joined all required channels")
                 return True
 
         except Exception as e:
+            logging.error("Error in subscription check: %s", e)
             return False
     else:
+        logging.info("Request to join mode is not active or database is inactive")
         for channel_id in AUTH_CHANNELS + ([DUMMY_CHANNEL_ID] if DUMMY_CHANNEL_ID else []):
             try:
                 if channel_id == DUMMY_CHANNEL_ID:
-                    # Skip enforcement for the dummy channel
+                    logging.info("Skipping enforcement for dummy channel: %s", channel_id)
                     continue
 
                 user = await bot.get_chat_member(int(channel_id), query.from_user.id)
                 if user.status == enums.ChatMemberStatus.BANNED:
+                    logging.warning("User is banned in channel: %s", channel_id)
                     return False
             except UserNotParticipant:
+                logging.warning("User is not a participant in channel: %s", channel_id)
                 missing_channels.append(channel_id)
                 continue
 
         if missing_channels:
+            logging.info("User is missing membership in channels: %s", missing_channels)
             join_buttons = []
             for channel_id in missing_channels:
                 channel = await bot.get_chat(int(channel_id))
@@ -142,20 +163,22 @@ async def is_subscribed(bot, query):
             reply_markup = InlineKeyboardMarkup([join_buttons])
 
             if isinstance(query, CallbackQuery):
+                logging.info("Sending missing channel buttons to user via CallbackQuery")
                 await query.answer(
                     text="Please join all required channels & Unmute Them to use the bot.\nTap on Files Again",
                     show_alert=True
                 )
                 await query.message.reply("Join the channels using the buttons below. Dummy Channel is optional.", reply_markup=reply_markup)
             else:
+                logging.info("Sending missing channel buttons to user via regular query")
                 await query.reply(
                     "You need to join all the required channels & Unmute Them to get the files. Dummy Channel is optional.",
                     reply_markup=reply_markup
                 )
             return False
 
-    return True                
-
+    logging.info("User has joined all required channels")
+    return True
 async def get_poster(query, bulk=False, id=False, file=None):
     if not id:
         query = (query.strip()).lower()
