@@ -57,13 +57,14 @@ async def start(client, message):
                             chat_id=int(channel_id)
                         )
                     invite_links.append(invite_link)
-                except ChatAdminRequired:
+        except ChatAdminRequired:
                     await message.reply_text(
                         f"Make sure Bot is admin in channel ID: {channel_id}"
                     )
                     return
 
         # Handle optional dummy channel
+        
             if DUMMY_CHANNEL_ID:
                 try:
                     dummy_invite = await client.create_chat_invite_link(chat_id=DUMMY_CHANNEL_ID)
@@ -73,7 +74,8 @@ async def start(client, message):
                     return
 
         # Generate buttons for joining channels
-            btn = [
+        try
+                btn = [
                 [InlineKeyboardButton(f"Join {invite.name}", url=invite.invite_link)]
                 for invite in invite_links
             ]
