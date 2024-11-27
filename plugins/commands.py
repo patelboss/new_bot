@@ -1532,3 +1532,19 @@ async def purge_requests(client, message):
             parse_mode=enums.ParseMode.MARKDOWN,
             disable_web_page_preview=True
         )
+
+@Client.on_message(filters.command("setdummy") & filters.user(ADMINS))
+async def set_dummy_channel(client, message):
+    global DUMMY_CHANNEL_ID
+    try:
+        args = message.text.split()
+        if len(args) < 2:
+            await message.reply("Usage: /setdummy <channel_id>")
+            return
+        # Validate and set the dummy channel ID
+        DUMMY_CHANNEL_ID = int(args[1])
+        await message.reply(f"Dummy channel has been set to: `{DUMMY_CHANNEL_ID}`")
+    except ValueError:
+        await message.reply("Invalid channel ID. Please provide a valid integer.")
+    except Exception as e:
+        await message.reply(f"An error occurred: {e}")
