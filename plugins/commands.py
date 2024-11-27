@@ -75,51 +75,92 @@ async def start(client, message):
             parse_mode=enums.ParseMode.HTML
         )
         return
+
     if AUTH_CHANNEL and not await is_subscribed(client, message):
-        try:
-            if REQUEST_TO_JOIN_MODE == True:
-                invite_link = await client.create_chat_invite_link(chat_id=(int(AUTH_CHANNELS)), creates_join_request=True)
-            else:
-                invite_link = await client.create_chat_invite_link(int(AUTH_CHANNELS))
-        except ChatAdminRequired:
-            await message.reply_text("Make sure Bot is admin in Forcesub channel")
-            return
-        try:
-            btn = [[
-                InlineKeyboardButton("❆ Jᴏɪɴ Uᴘᴅᴀᴛᴇ Cʜᴀɴɴᴇʟ ❆", url=invite_link.invite_link)
-            ]]
-            if message.command[1] != "subscribe":
-                if REQUEST_TO_JOIN_MODE == True:
-                    if TRY_AGAIN_BTN == True:
-                        try:
-                            kk, file_id = message.command[1].split("_", 1)
-                            btn.append([InlineKeyboardButton("↻ Tʀʏ Aɢᴀɪɴ", callback_data=f"checksub#{kk}#{file_id}")])
-                        except (IndexError, ValueError):
-                            btn.append([InlineKeyboardButton("↻ Tʀʏ Aɢᴀɪɴ", url=f"https://t.me/{temp.U_NAME}?start={message.command[1]}")])
-                else:
+    try:
+        if REQUEST_TO_JOIN_MODE:
+            invite_links = []
+            for channel_id in AUTH_CHANNELS:
+                try:
+                    invite_link = await client.create_chat_invite_link(chat_id=int(channel_id), creates_join_request=True)
+                    invite_links.append(invite_link)
+                except ChatAdminRequired:
+                    await message.reply_text(f"Make sure Bot is admin in channel ID: {channel_id}")
+                    return
+            
+            # Handle dummy channel
+            if DUMMY_CHANNEL_ID:
+                try:
+                    dummy_invite = await client.create_chat_invite_link(chat_id=DUMMY_CHANNEL_ID)
+                    invite_links.append(dummy_invite)
+                except ChatAdminRequired:
+                    await message.reply_text("Make sure Bot is admin in the dummy channel.")
+                    return
+        else:
+            invite_links = []
+            for channel_id in AUTH_CHANNELS:
+                try:
+                    invite_link = await client.create_chat_invite_link(chat_id=int(channel_id))
+                    invite_links.append(invite_link)
+                except ChatAdminRequired:
+                    await message.reply_text(f"Make sure Bot is admin in channel ID: {channel_id}")
+                    return
+
+            # Handle dummy channel
+            if DUMMY_CHANNEL_ID:
+                try:
+                    dummy_invite = await client.create_chat_invite_link(chat_id=DUMMY_CHANNEL_ID)
+                    invite_links.append(dummy_invite)
+                except ChatAdminRequired:
+                    await message.reply_text("Make sure Bot is admin in the dummy channel.")
+                    return
+
+        # Generate buttons
+        btn = []
+        for invite in invite_links:
+            btn.append([InlineKeyboardButton(f"Join {invite.name}", url=invite.invite_link)])
+        
+        if message.command[1] != "subscribe":
+            if REQUEST_TO_JOIN_MODE:
+                if TRY_AGAIN_BTN:
                     try:
                         kk, file_id = message.command[1].split("_", 1)
                         btn.append([InlineKeyboardButton("↻ Tʀʏ Aɢᴀɪɴ", callback_data=f"checksub#{kk}#{file_id}")])
                     except (IndexError, ValueError):
                         btn.append([InlineKeyboardButton("↻ Tʀʏ Aɢᴀɪɴ", url=f"https://t.me/{temp.U_NAME}?start={message.command[1]}")])
-            if REQUEST_TO_JOIN_MODE == True:
-                if TRY_AGAIN_BTN == True:
-                    text = "**🕵️ Jᴏɪɴ Tʜᴇ Uᴘᴅᴀᴛᴇ Cʜᴀɴɴᴇʟ Tᴏ Gᴇᴛ Mᴏᴠɪᴇ Fɪʟᴇ\n\n👨‍💻 Fɪʀsᴛ Cʟɪᴄᴋ Oɴ Jᴏɪɴ Uᴘᴅᴀᴛᴇ Cʜᴀɴɴᴇʟ Bᴜᴛᴛᴏɴ, Tʜᴇɴ Cʟɪᴄᴋ Oɴ Rᴇǫᴜᴇsᴛ Tᴏ Jᴏɪɴ Bᴜᴛᴛᴏɴ Aғᴛᴇʀ Cʟɪᴄᴋ Oɴ Tʀʏ Aɢᴀɪɴ Bᴜᴛᴛᴏɴ.**"
-                else:
-                    await db.set_msg_command(message.from_user.id, com=message.command[1])
-                    text = "**🕵️ Jᴏɪɴ Tʜᴇ Uᴘᴅᴀᴛᴇ Cʜᴀɴɴᴇʟ Tᴏ Gᴇᴛ Mᴏᴠɪᴇ Fɪʟᴇ\n\n👨‍💻 Fɪʀsᴛ Cʟɪᴄᴋ Oɴ Jᴏɪɴ Uᴘᴅᴀᴛᴇ Cʜᴀɴɴᴇʟ Bᴜᴛᴛᴏɴ, Tʜᴇɴ Cʟɪᴄᴋ Oɴ Rᴇǫᴜᴇsᴛ Tᴏ Jᴏɪɴ Bᴜᴛᴛᴏɴ.**"
             else:
-                text = "**🕵️ Jᴏɪɴ Tʜᴇ Uᴘᴅᴀᴛᴇ Cʜᴀɴɴᴇʟ Tᴏ Gᴇᴛ Mᴏᴠɪᴇ Fɪʟᴇ\n\n👨‍💻 Fɪʀsᴛ  Cʟɪᴄᴋ Oɴ Jᴏɪɴ Uᴘᴅᴀᴛᴇ Cʜᴀɴɴᴇʟ Bᴜᴛᴛᴏɴ, Tʜᴇɴ Jᴏɪɴ Cʜᴀɴɴᴇʟ Aғᴛᴇʀ Cʟɪᴄᴋ Oɴ Tʀʏ Aɢᴀɪɴ Bᴜᴛᴛᴏɴ**"
-            await client.send_message(
-                chat_id=message.from_user.id,
-                text=text,
-                reply_markup=InlineKeyboardMarkup(btn),
-                parse_mode=enums.ParseMode.MARKDOWN
-                )
-            return
-        except:
-            await message.reply_text("something wrong with force subscribe.")
-            
+                try:
+                    kk, file_id = message.command[1].split("_", 1)
+                    btn.append([InlineKeyboardButton("↻ Tʀʏ Aɢᴀɪɴ", callback_data=f"checksub#{kk}#{file_id}")])
+                except (IndexError, ValueError):
+                    btn.append([InlineKeyboardButton("↻ Tʀʏ Aɢᴀɪɴ", url=f"https://t.me/{temp.U_NAME}?start={message.command[1]}")])
+        
+        # Generate text with dummy channel info
+        if REQUEST_TO_JOIN_MODE:
+            if TRY_AGAIN_BTN:
+                text = "**🕵️ Join the Update Channel to Get Movie Files.**\n\n" \
+                       "**Optional:** The dummy channel (if listed below) does not need to be joined to access files."
+            else:
+                await db.set_msg_command(message.from_user.id, com=message.command[1])
+                text = "**🕵️ Join the Update Channel to Get Movie Files.**\n\n" \
+                       "**Optional:** The dummy channel (if listed below) does not need to be joined to access files."
+        else:
+            text = "**🕵️ Join the Update Channel to Get Movie Files.**\n\n" \
+                   "**Optional:** The dummy channel (if listed below) does not need to be joined to access files."
+
+        # Send message with buttons
+        await client.send_message(
+            chat_id=message.from_user.id,
+            text=text,
+            reply_markup=InlineKeyboardMarkup(btn),
+            parse_mode=enums.ParseMode.MARKDOWN
+        )
+        return
+    except Exception as e:
+        await message.reply_text(f"Something went wrong with force subscribe: {e}")
+
+
+
     if len(message.command) == 2 and message.command[1] in ["subscribe", "error", "okay", "help"]:
         if PREMIUM_AND_REFERAL_MODE == True:
             buttons = [[
@@ -1016,7 +1057,7 @@ async def settings(client, message):
 
 
 
-@Client.on_message(filters.command('set_template'))
+@Client.on_message(filters.command('set_template') & filters.user(ADMINS))
 async def save_template(client, message):
     sts = await message.reply("Checking template")
     userid = message.from_user.id if message.from_user else None
@@ -1193,7 +1234,7 @@ async def deletemultiplefiles(bot, message):
         parse_mode=enums.ParseMode.HTML
     )
 
-@Client.on_message(filters.command("shortlink"))
+@Client.on_message(filters.command("shortlink") & filters.user(ADMINS))
 async def shortlink(bot, message):
     if SHORTLINK_MODE == False:
         return 
@@ -1227,7 +1268,7 @@ async def shortlink(bot, message):
     await save_group_settings(grpid, 'is_shortlink', True)
     await reply.edit_text(f"<b>Successfully added shortlink API for {title}.\n\nCurrent Shortlink Website: <code>{shortlink_url}</code>\nCurrent API: <code>{api}</code></b>")
     
-@Client.on_message(filters.command("setshortlinkoff"))
+@Client.on_message(filters.command("setshortlinkoff") & filters.user(ADMINS))
 async def offshortlink(bot, message):
     if SHORTLINK_MODE == False:
         return 
@@ -1243,7 +1284,7 @@ async def offshortlink(bot, message):
     # ENABLE_SHORTLINK = False
     return await message.reply_text("Successfully disabled shortlink")
     
-@Client.on_message(filters.command("setshortlinkon"))
+@Client.on_message(filters.command("setshortlinkon") & filters.user(ADMINS))
 async def onshortlink(bot, message):
     if SHORTLINK_MODE == False:
         return 
@@ -1259,7 +1300,7 @@ async def onshortlink(bot, message):
     # ENABLE_SHORTLINK = True
     return await message.reply_text("Successfully enabled shortlink")
 
-@Client.on_message(filters.command("shortlink_info"))
+@Client.on_message(filters.command("shortlink_info") & filters.user(ADMINS))
 async def showshortlink(bot, message):
     if SHORTLINK_MODE == False:
         return 
@@ -1297,7 +1338,7 @@ async def showshortlink(bot, message):
             return await message.reply_text("Shortener url and Tutorial Link Not Connected. Check this commands, /shortlink and /set_tutorial")
         
 
-@Client.on_message(filters.command("set_tutorial"))
+@Client.on_message(filters.command("set_tutorial") & filters.user(ADMINS))
 async def settutorial(bot, message):
     if SHORTLINK_MODE == False:
         return 
@@ -1329,7 +1370,7 @@ async def settutorial(bot, message):
     else:
         return await message.reply("<b>You entered Incorrect Format\n\nFormat: /set_tutorial your tutorial link</b>")
 
-@Client.on_message(filters.command("remove_tutorial"))
+@Client.on_message(filters.command("remove_tutorial") & filters.user(ADMINS))
 async def removetutorial(bot, message):
     if SHORTLINK_MODE == False:
         return 
@@ -1361,7 +1402,7 @@ async def stop_button(bot, message):
     await msg.edit("**✅️ 𝙱𝙾𝚃 𝙸𝚂 𝚁𝙴𝚂𝚃𝙰𝚁𝚃𝙴𝙳. 𝙽𝙾𝚆 𝚈𝙾𝚄 𝙲𝙰𝙽 𝚄𝚂𝙴 𝙼𝙴**")
     os.execl(sys.executable, sys.executable, *sys.argv)
 
-@Client.on_message(filters.command("nofsub"))
+@Client.on_message(filters.command("nofsub") & filters.user(ADMINS))
 async def nofsub(client, message):
     userid = message.from_user.id if message.from_user else None
     if not userid:
@@ -1383,7 +1424,7 @@ async def nofsub(client, message):
     await save_group_settings(grpid, 'fsub', None)
     await message.reply_text(f"<b>Successfully removed force subscribe from {title}.</b>")
 
-@Client.on_message(filters.command('fsub'))
+@Client.on_message(filters.command('fsub') & filters.user(ADMINS))
 async def fsub(client, message):
     userid = message.from_user.id if message.from_user else None
     if not userid:
@@ -1530,3 +1571,21 @@ async def purge_requests(client, message):
             parse_mode=enums.ParseMode.MARKDOWN,
             disable_web_page_preview=True
         )
+# Global variable for the dummy channel (use a database for persistence in production)
+DUMMY_CHANNEL_ID = None  # Initialize with no dummy channel
+
+@Client.on_message(filters.command("setdummy") & filters.user(ADMINS))
+async def set_dummy_channel(client, message):
+    global DUMMY_CHANNEL_ID
+    try:
+        args = message.text.split()
+        if len(args) < 2:
+            await message.reply("Usage: /setdummy <channel_id>")
+            return
+        # Validate and set the dummy channel ID
+        DUMMY_CHANNEL_ID = int(args[1])
+        await message.reply(f"Dummy channel has been set to: `{DUMMY_CHANNEL_ID}`")
+    except ValueError:
+        await message.reply("Invalid channel ID. Please provide a valid integer.")
+    except Exception as e:
+        await message.reply(f"An error occurred: {e}")
