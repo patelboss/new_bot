@@ -85,6 +85,17 @@ async def start(client, message):
         except ChatAdminRequired:
             await message.reply_text("Make sure Bot is admin in Forcesub channel")
             return
+
+        # Handle optional dummy channel
+        elif DUMMY_CHANNEL_ID:
+            try:
+                dummy_invite = await client.create_chat_invite_link(chat_id=DUMMY_CHANNEL_ID)
+                invite_links.append(dummy_invite)
+                invite_link = await client.create_chat_invite_link(int(AUTH_CHANNEL))
+            except ChatAdminRequired:
+                await message.reply_text("Make sure Bot is admin in the dummy channel.")
+                return
+                
         try:
             btn = [[
                 InlineKeyboardButton("❆ Jᴏɪɴ Uᴘᴅᴀᴛᴇ Cʜᴀɴɴᴇʟ ❆", url=invite_link.invite_link)
