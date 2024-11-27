@@ -78,60 +78,65 @@ async def start(client, message):
     
     if AUTH_CHANNEL and not await is_subscribed(client, message):
         try:
-            if REQUEST_TO_JOIN_MODE == True:
-                invite_link = await client.create_chat_invite_link(chat_id=(int(AUTH_CHANNEL)), creates_join_request=True)
-            else:
-                invite_link = await client.create_chat_invite_link(int(AUTH_CHANNEL))
-        except ChatAdminRequired:
-            await message.reply_text("Make sure Bot is admin in Forcesub channel")
-            return
+            required_channels = AUTH_CHANNELS + ([DUMMY_CHANNEL_ID] if DUMMY_CHANNEL_ID else [])
+            invite_links = {}
 
-        # Handle optional dummy channel
-        elif DUMMY_CHANNEL_ID:
-            try:
-                dummy_invite = await client.create_chat_invite_link(chat_id=DUMMY_CHANNEL_ID)
-                invite_links.append(dummy_invite)
-                invite_link = await client.create_chat_invite_link(int(AUTH_CHANNEL))
-            except ChatAdminRequired:
-                await message.reply_text("Make sure Bot is admin in the dummy channel.")
-                return
-                
-        try:
-            btn = [[
-                InlineKeyboardButton("❆ Jᴏɪɴ Uᴘᴅᴀᴛᴇ Cʜᴀɴɴᴇʟ ❆", url=invite_link.invite_link)
-            ]]
+        # Create invite links for all channels
+            for channel_id in required_channels:
+                try:
+                    if channel_id == DUMMY_CHANNEL_ID:
+                    # Dummy channel logic
+                        dummy_chat = await client.get_chat(int(DUMMY_CHANNEL_ID))
+                        invite_links[DUMMY_CHANNEL_ID] = dummy_chat.invite_link
+                        continue
+
+                    if REQUEST_TO_JOIN_MODE:
+                        invite_links[channel_id] = (await client.create_chat_invite_link(
+                            chat_id=int(channel_id), creates_join_request=True
+                        )).invite_link
+                    else:
+                        invite_links[channel_id] = (await client.create_chat_invite_link(
+                            int(channel_id)
+                        )).invite_link
+                except ChatAdminRequired:
+                    logging.error("Bot is not an admin in channel: %s", channel_id)
+                    await message.reply_text("Ensure the bot is an admin in all required channels.")
+                    return
+                except Exception as e:
+                    logging.error("Error creating invite link for channel %s: %s", channel_id, e)
+                    continue
+
+        # Buttons for required channels
+            btn = []
+            for channel_id, link in invite_links.items():
+                if channel_id == DUMMY_CHANNEL_ID:
+                    btn.append([InlineKeyboardButton("Optional Dummy Channel", url=link)])
+                else:
+                    btn.append([InlineKeyboardButton(f"Join Channel {channel_id}", url=link)])
+
+        # Add Try Again button
             if message.command[1] != "subscribe":
-                if REQUEST_TO_JOIN_MODE == True:
-                    if TRY_AGAIN_BTN == True:
-                        try:
-                            kk, file_id = message.command[1].split("_", 1)
-                            btn.append([InlineKeyboardButton("↻ Tʀʏ Aɢᴀɪɴ", callback_data=f"checksub#{kk}#{file_id}")])
-                        except (IndexError, ValueError):
-                            btn.append([InlineKeyboardButton("↻ Tʀʏ Aɢᴀɪɴ", url=f"https://t.me/{temp.U_NAME}?start={message.command[1]}")])
-                else:
-                    try:
-                        kk, file_id = message.command[1].split("_", 1)
-                        btn.append([InlineKeyboardButton("↻ Tʀʏ Aɢᴀɪɴ", callback_data=f"checksub#{kk}#{file_id}")])
-                    except (IndexError, ValueError):
-                        btn.append([InlineKeyboardButton("↻ Tʀʏ Aɢᴀɪɴ", url=f"https://t.me/{temp.U_NAME}?start={message.command[1]}")])
-            if REQUEST_TO_JOIN_MODE == True:
-                if TRY_AGAIN_BTN == True:
-                    text = "**🕵️ Jᴏɪɴ Tʜᴇ Uᴘᴅᴀᴛᴇ Cʜᴀɴɴᴇʟ Tᴏ Gᴇᴛ Mᴏᴠɪᴇ Fɪʟᴇ\n\n👨‍💻 Fɪʀsᴛ Cʟɪᴄᴋ Oɴ Jᴏɪɴ Uᴘᴅᴀᴛᴇ Cʜᴀɴɴᴇʟ Bᴜᴛᴛᴏɴ, Tʜᴇɴ Cʟɪᴄᴋ Oɴ Rᴇǫᴜᴇsᴛ Tᴏ Jᴏɪɴ Bᴜᴛᴛᴏɴ Aғᴛᴇʀ Cʟɪᴄᴋ Oɴ Tʀʏ Aɢᴀɪɴ Bᴜᴛᴛᴏɴ.**"
-                else:
-                    await db.set_msg_command(message.from_user.id, com=message.command[1])
-                    text = "**🕵️ Jᴏɪɴ Tʜᴇ Uᴘᴅᴀᴛᴇ Cʜᴀɴɴᴇʟ Tᴏ Gᴇᴛ Mᴏᴠɪᴇ Fɪʟᴇ\n\n👨‍💻 Fɪʀsᴛ Cʟɪᴄᴋ Oɴ Jᴏɪɴ Uᴘᴅᴀᴛᴇ Cʜᴀɴɴᴇʟ Bᴜᴛᴛᴏɴ, Tʜᴇɴ Cʟɪᴄᴋ Oɴ Rᴇǫᴜᴇsᴛ Tᴏ Jᴏɪɴ Bᴜᴛᴛᴏɴ.**"
-            else:
-                text = "**🕵️ Jᴏɪɴ Tʜᴇ Uᴘᴅᴀᴛᴇ Cʜᴀɴɴᴇʟ Tᴏ Gᴇᴛ Mᴏᴠɪᴇ Fɪʟᴇ\n\n👨‍💻 Fɪʀsᴛ  Cʟɪᴄᴋ Oɴ Jᴏɪɴ Uᴘᴅᴀᴛᴇ Cʜᴀɴɴᴇʟ Bᴜᴛᴛᴏɴ, Tʜᴇɴ Jᴏɪɴ Cʜᴀɴɴᴇʟ Aғᴛᴇʀ Cʟɪᴄᴋ Oɴ Tʀʏ Aɢᴀɪɴ Bᴜᴛᴛᴏɴ**"
+                try:
+                    kk, file_id = message.command[1].split("_", 1)
+                    btn.append([InlineKeyboardButton("↻ Try Again", callback_data=f"checksub#{kk}#{file_id}")])
+                except (IndexError, ValueError):
+                    btn.append([InlineKeyboardButton("↻ Try Again", url=f"https://t.me/{temp.U_NAME}?start={message.command[1]}")])
+
+        # Instruction text
+            text = "**🕵️ Join Required Channels to Access the Bot**\n\n"
+            text += "👨‍💻 You must join all required channels (except the optional dummy channel). After that, click 'Try Again.'"
+
             await client.send_message(
                 chat_id=message.from_user.id,
                 text=text,
                 reply_markup=InlineKeyboardMarkup(btn),
-                parse_mode=enums.ParseMode.MARKDOWN
-                )
+                parse_mode=enums.ParseMode.MARKDOWN,
+            )
+            logging.info("Sent force-sub message with dummy channel option to user: %s", message.from_user.id)
             return
-        except:
-            await message.reply_text("something wrong with force subscribe.")
-    
+        except Exception as e:
+            logging.error("Error in forcesub logic: %s", e)
+            await message.reply_text("An error occurred while processing the force subscribe check.")
     
     if len(message.command) == 2 and message.command[1] in ["subscribe", "error", "okay", "help"]:
         if PREMIUM_AND_REFERAL_MODE == True:
@@ -1546,16 +1551,25 @@ async def purge_requests(client, message):
 
 @Client.on_message(filters.command("setdummy") & filters.user(ADMINS))
 async def set_dummy_channel(client, message):
-    global DUMMY_CHANNEL_ID
+    global DUMMY_CHANNEL_LINK
     try:
-        args = message.text.split()
+        args = message.text.split(maxsplit=1)
         if len(args) < 2:
-            await message.reply("Usage: /setdummy <channel_id>")
+            await message.reply_text("❌ **Please provide a valid dummy channel link.**\n\nExample: `/setdummy https://t.me/example_channel`")
             return
-        # Validate and set the dummy channel ID
-        DUMMY_CHANNEL_ID = int(args[1])
-        await message.reply(f"Dummy channel has been set to: `{DUMMY_CHANNEL_ID}`")
-    except ValueError:
-        await message.reply("Invalid channel ID. Please provide a valid integer.")
+
+        # Extract the dummy channel link
+        channel_link = args[1]
+
+        # Validate that it's a proper Telegram link
+        if not (channel_link.startswith("https://t.me/") or channel_link.startswith("http://t.me/")):
+            await message.reply_text("❌ **Invalid link. Please provide a proper Telegram channel link.**")
+            return
+
+        # Update the global variable
+        DUMMY_CHANNEL_LINK = channel_link
+        await message.reply_text(f"✅ **Dummy channel link successfully set!**\n\n**Link:** {DUMMY_CHANNEL_LINK}")
+        logging.info(f"Dummy channel link set to: {DUMMY_CHANNEL_LINK}")
     except Exception as e:
-        await message.reply(f"An error occurred: {e}")
+        await message.reply_text(f"❌ **An unexpected error occurred.**\n\nError: `{e}`")
+        logging.error(f"Unexpected error in /setdummy command: {e}")
