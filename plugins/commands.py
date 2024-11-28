@@ -29,7 +29,8 @@ async def start(client, message):
                 InlineKeyboardButton('〄 Hᴇʟᴘ', callback_data='help'),
                 InlineKeyboardButton('⍟ Aʙᴏᴜᴛ', callback_data='about')
             ],[
-                InlineKeyboardButton('✇ Jᴏɪɴ Uᴘᴅᴀᴛᴇs Cʜᴀɴɴᴇʟ ✇', url=CHNL_LNK)
+                InlineKeyboardButton('✇ Jᴏɪɴ Uᴘᴅᴀᴛᴇs Cʜᴀɴɴᴇʟ ✇', url=CHNL_LNK),
+                InlineKeyboardButton('💳 Discount & Offer 🤑', url=OFR_CNL)
             
             ]]
         
@@ -54,7 +55,8 @@ async def start(client, message):
                 InlineKeyboardButton('〄 Hᴇʟᴘ', callback_data='help'),
                 InlineKeyboardButton('⍟ Aʙᴏᴜᴛ', callback_data='about')
             ],[
-                InlineKeyboardButton('✇ Jᴏɪɴ Uᴘᴅᴀᴛᴇs Cʜᴀɴɴᴇʟ ✇', url=CHNL_LNK)
+                InlineKeyboardButton('✇ Jᴏɪɴ Uᴘᴅᴀᴛᴇs Cʜᴀɴɴᴇʟ ✇', url=CHNL_LNK),
+                InlineKeyboardButton('💳 Discount & Offer 🤑', url=OFR_CNL)
             ]]
         else:
             buttons = [[
@@ -65,7 +67,8 @@ async def start(client, message):
                 InlineKeyboardButton('〄 Hᴇʟᴘ', callback_data='help'),
                 InlineKeyboardButton('⍟ Aʙᴏᴜᴛ', callback_data='about')
             ],[
-                InlineKeyboardButton('✇ Jᴏɪɴ Uᴘᴅᴀᴛᴇs Cʜᴀɴɴᴇʟ ✇', url=CHNL_LNK)
+                InlineKeyboardButton('✇ Jᴏɪɴ Uᴘᴅᴀᴛᴇs Cʜᴀɴɴᴇʟ ✇', url=CHNL_LNK),
+                InlineKeyboardButton('💳 Discount & Offer 🤑', url=OFR_CNL)
             ]]
         if CLONE_MODE == True:
             buttons.append([InlineKeyboardButton('🤖 Cʀᴇᴀᴛᴇ Yᴏᴜʀ Oᴡɴ Cʟᴏɴᴇ Bᴏᴛ 🤖', callback_data='clone')])
@@ -83,9 +86,9 @@ async def start(client, message):
     if AUTH_CHANNEL and not await is_subscribed(client, message):
         try:
             if REQUEST_TO_JOIN_MODE == True:
-                invite_link = await client.create_chat_invite_link(chat_id=(int(AUTH_CHANNEL)), creates_join_request=True)
+                invite_link = await client.create_chat_invite_link(chat_id=(int(AUTH_CHANNELS)), creates_join_request=True)
             else:
-                invite_link = await client.create_chat_invite_link(int(AUTH_CHANNEL))
+                invite_link = await client.create_chat_invite_link(int(AUTH_CHANNELS))
         except ChatAdminRequired:
             await message.reply_text("Make sure Bot is admin in Forcesub channel")
             return
@@ -135,7 +138,8 @@ async def start(client, message):
                 InlineKeyboardButton('〄 Hᴇʟᴘ', callback_data='help'),
                 InlineKeyboardButton('⍟ Aʙᴏᴜᴛ', callback_data='about')
             ],[
-                InlineKeyboardButton('✇ Jᴏɪɴ Uᴘᴅᴀᴛᴇs Cʜᴀɴɴᴇʟ ✇', url=CHNL_LNK)
+                InlineKeyboardButton('✇ Jᴏɪɴ Uᴘᴅᴀᴛᴇs Cʜᴀɴɴᴇʟ ✇', url=CHNL_LNK),
+                InlineKeyboardButton('💳 Discount & Offer 🤑', url=OFR_CNL)
             ]]
         else:
             buttons = [[
@@ -146,7 +150,8 @@ async def start(client, message):
                 InlineKeyboardButton('〄 Hᴇʟᴘ', callback_data='help'),
                 InlineKeyboardButton('⍟ Aʙᴏᴜᴛ', callback_data='about')
             ],[
-                InlineKeyboardButton('✇ Jᴏɪɴ Uᴘᴅᴀᴛᴇs Cʜᴀɴɴᴇʟ ✇', url=CHNL_LNK)
+                InlineKeyboardButton('✇ Jᴏɪɴ Uᴘᴅᴀᴛᴇs Cʜᴀɴɴᴇʟ ✇', url=CHNL_LNK),
+                InlineKeyboardButton('💳 Discount & Offer 🤑', url=OFR_CNL)
             ]]
         if CLONE_MODE == True:
             buttons.append([InlineKeyboardButton('🤖 Cʀᴇᴀᴛᴇ Yᴏᴜʀ Oᴡɴ Cʟᴏɴᴇ Bᴏᴛ 🤖', callback_data='clone')])
@@ -186,7 +191,8 @@ async def start(client, message):
                 InlineKeyboardButton('〄 Hᴇʟᴘ', callback_data='help'),
                 InlineKeyboardButton('⍟ Aʙᴏᴜᴛ', callback_data='about')
             ],[
-                InlineKeyboardButton('✇ Jᴏɪɴ Uᴘᴅᴀᴛᴇs Cʜᴀɴɴᴇʟ ✇', url=CHNL_LNK)
+                InlineKeyboardButton('✇ Jᴏɪɴ Uᴘᴅᴀᴛᴇs Cʜᴀɴɴᴇʟ ✇', url=CHNL_LNK),
+                InlineKeyboardButton('💳 Discount & Offer 🤑', url=OFR_CNL)
             ]]
             else:
                 buttons = [[
@@ -197,7 +203,8 @@ async def start(client, message):
                 InlineKeyboardButton('〄 Hᴇʟᴘ', callback_data='help'),
                 InlineKeyboardButton('⍟ Aʙᴏᴜᴛ', callback_data='about')
             ],[
-                InlineKeyboardButton('✇ Jᴏɪɴ Uᴘᴅᴀᴛᴇs Cʜᴀɴɴᴇʟ ✇', url=CHNL_LNK)
+                InlineKeyboardButton('✇ Jᴏɪɴ Uᴘᴅᴀᴛᴇs Cʜᴀɴɴᴇʟ ✇', url=CHNL_LNK),
+                InlineKeyboardButton('💳 Discount & Offer 🤑', url=OFR_CNL)
             ]]
             if CLONE_MODE == True:
                 buttons.append([InlineKeyboardButton('🤖 Cʀᴇᴀᴛᴇ Yᴏᴜʀ Oᴡɴ Cʟᴏɴᴇ Bᴏᴛ 🤖', callback_data='clone')])
@@ -268,17 +275,15 @@ async def start(client, message):
                     )
                 if STREAM_MODE == True:
                     button = [[
-                        InlineKeyboardButton('Sᴜᴘᴘᴏʀᴛ Gʀᴏᴜᴘ', url=f'https://t.me/{SUPPORT_CHAT}'),
-                        InlineKeyboardButton('Uᴘᴅᴀᴛᴇs Cʜᴀɴɴᴇʟ', url=CHNL_LNK)
-                    ],[
-                        InlineKeyboardButton("Join Our Offer Zone 🤑", url=f'https://t.me/+4dWp2gDjwC43YmJl')
+                        InlineKeyboardButton("Join Our Offer Zone 🤑", url=OFR_CNL)
                     ],[
                         InlineKeyboardButton('💳 Dᴏɴᴀᴛᴇ', callback_data='donation')
                     ]]
                 else:
                     button = [[
-                        InlineKeyboardButton('Sᴜᴘᴘᴏʀᴛ Gʀᴏᴜᴘ', url=f'https://t.me/{SUPPORT_CHAT}'),
-                        InlineKeyboardButton('Uᴘᴅᴀᴛᴇs Cʜᴀɴɴᴇʟ', url=CHNL_LNK)
+                        InlineKeyboardButton("Join Our Offer Zone 🤑", url=OFR_CNL)
+                    ],[
+                        InlineKeyboardButton('💳 Dᴏɴᴀᴛᴇ', callback_data='donation')
                     ]]
                 msg = await client.send_cached_media(
                     chat_id=message.from_user.id,
@@ -392,7 +397,7 @@ async def start(client, message):
         k = await client.send_message(chat_id=message.from_user.id,text=f"<b>Get All Files in a Single Click!!!\n\n📂 ʟɪɴᴋ ➠ : {g}\n\n<i>Note: This message is deleted in 5 mins to avoid copyrights. Save the link to Somewhere else</i></b>", reply_markup=InlineKeyboardMarkup(
                 [
                     [
-                        InlineKeyboardButton("Join Our Offer Zone 🤑", url=f'https://t.me/+4dWp2gDjwC43YmJl')
+                        InlineKeyboardButton("Join Our Offer Zone 🤑", url=OFR_CNL)
                     ], [
                         InlineKeyboardButton('💳 Dᴏɴᴀᴛᴇ', callback_data='donation')
                     ]
@@ -414,7 +419,7 @@ async def start(client, message):
         k = await client.send_message(chat_id=user,text=f'<b>📕Nᴀᴍᴇ ➠ : <code>{files["file_name"]}</code> \n\n🔗Sɪᴢᴇ ➠ : {get_size(files["file_size"])}\n\n📂Fɪʟᴇ ʟɪɴᴋ ➠ : {g}\n\n<i>Note: This message is deleted in 20 mins to avoid copyrights. Save the link to Somewhere else</i></b>', reply_markup=InlineKeyboardMarkup(
                 [
                     [
-                        InlineKeyboardButton("Join Our Offer Zone 🤑", url=f'https://t.me/+4dWp2gDjwC43YmJl')
+                        InlineKeyboardButton("Join Our Offer Zone 🤑", url=OFR_CNL)
                     ], [
                         InlineKeyboardButton('💳 Dᴏɴᴀᴛᴇ', callback_data='donation')
                     ]
@@ -460,18 +465,16 @@ async def start(client, message):
                     return
             if STREAM_MODE == True:
                 button = [[
-                    InlineKeyboardButton('Sᴜᴘᴘᴏʀᴛ Gʀᴏᴜᴘ', url=f'https://t.me/{SUPPORT_CHAT}'),
-                    InlineKeyboardButton('Uᴘᴅᴀᴛᴇs Cʜᴀɴɴᴇʟ', url=CHNL_LNK)
-                ],[
-                    InlineKeyboardButton("Join Our Offer Zone 🤑", url=f'https://t.me/+4dWp2gDjwC43YmJl'),
-                ],[
-                    InlineKeyboardButton('💳 Dᴏɴᴀᴛᴇ', callback_data='donation') #Don't change anything without contacting me @KingVJ01
-                ]]
+                        InlineKeyboardButton("Join Our Offer Zone 🤑", url=OFR_CNL)
+                    ],[
+                        InlineKeyboardButton('💳 Dᴏɴᴀᴛᴇ', callback_data='donation')
+                    ]]
             else:
                 button = [[
-                    InlineKeyboardButton('Sᴜᴘᴘᴏʀᴛ Gʀᴏᴜᴘ', url=f'https://t.me/{SUPPORT_CHAT}'),
-                    InlineKeyboardButton('Uᴘᴅᴀᴛᴇs Cʜᴀɴɴᴇʟ', url=CHNL_LNK)
-                ]]
+                        InlineKeyboardButton("Join Our Offer Zone 🤑", url=OFR_CNL)
+                    ],[
+                        InlineKeyboardButton('💳 Dᴏɴᴀᴛᴇ', callback_data='donation')
+                    ]]
             msg = await client.send_cached_media(
                 chat_id=message.from_user.id,
                 file_id=file_id,
@@ -498,10 +501,10 @@ async def start(client, message):
             files_ = await get_file_details(file_id)
             files = files_
             g = await get_shortlink(chat_id, f"https://telegram.me/{temp.U_NAME}?start=file_{file_id}")
-            k = await client.send_message(chat_id=message.from_user.id,text=f'<b>📕Nᴀᴍᴇ ➠ : <code>{files["file_name"]}</code> \n\n🔗Sɪᴢᴇ ➠ : {get_size(files["file_size"])}\n\n📂Fɪʟᴇ ʟɪɴᴋ ➠ : {g}\n\n<i>Note: This message is deleted in 24 hours to avoid copyrights. Save the link to Somewhere else</i></b>', reply_markup=InlineKeyboardMarkup(
+            k = await client.send_message(chat_id=message.from_user.id,text=f'<b>📕Nᴀᴍᴇ ➠ :@Filmykeedha <code>{files["file_name"]}</code> \n\n🔗Sɪᴢᴇ ➠ : {get_size(files["file_size"])}\n\n📂Fɪʟᴇ ʟɪɴᴋ ➠ : {g}\n\n<i>Note: This message is deleted in 24 hours to avoid copyrights. Save the link to Somewhere else</i></b>', reply_markup=InlineKeyboardMarkup(
                     [
                     [
-                        InlineKeyboardButton("Join Our Offer Zone 🤑", url=f'https://t.me/+4dWp2gDjwC43YmJl')
+                        InlineKeyboardButton("Join Our Offer Zone 🤑", url=OFR_CNL)
                     ], [
                         InlineKeyboardButton('💳 Dᴏɴᴀᴛᴇ', callback_data='donation')
                     ]
@@ -531,13 +534,10 @@ async def start(client, message):
                     return
             if STREAM_MODE == True:
                 button = [[
-                    InlineKeyboardButton('Sᴜᴘᴘᴏʀᴛ Gʀᴏᴜᴘ', url=f'https://t.me/{SUPPORT_CHAT}'),
-                    InlineKeyboardButton('Uᴘᴅᴀᴛᴇs Cʜᴀɴɴᴇʟ', url=CHNL_LNK)
-                ],[
-                    InlineKeyboardButton("Join Our Offer Zone 🤑", url=f'https://t.me/+4dWp2gDjwC43YmJl'),
-                ],[
-                    InlineKeyboardButton('💳 Dᴏɴᴀᴛᴇ', callback_data='donation') #Don't change anything without contacting me @KingVJ01
-                ]]
+                        InlineKeyboardButton("Join Our Offer Zone 🤑", url=OFR_CNL)
+                    ],[
+                        InlineKeyboardButton('💳 Dᴏɴᴀᴛᴇ', callback_data='donation')
+                    ]]
             else:
                 button = [[
                     InlineKeyboardButton('Sᴜᴘᴘᴏʀᴛ Gʀᴏᴜᴘ', url=f'https://t.me/{SUPPORT_CHAT}'),
@@ -601,18 +601,16 @@ async def start(client, message):
             return
     if STREAM_MODE == True:
         button = [[
-            InlineKeyboardButton('Sᴜᴘᴘᴏʀᴛ Gʀᴏᴜᴘ', url=f'https://t.me/{SUPPORT_CHAT}'),
-            InlineKeyboardButton('Uᴘᴅᴀᴛᴇs Cʜᴀɴɴᴇʟ', url=CHNL_LNK)
-        ],[
-                    InlineKeyboardButton("Join Our Offer Zone 🤑", url=f'https://t.me/+4dWp2gDjwC43YmJl'),
-                ],[
-                    InlineKeyboardButton('💳 Dᴏɴᴀᴛᴇ', callback_data='donation') #Don't change anything without contacting me @KingVJ01
-                ]]
+                        InlineKeyboardButton("Join Our Offer Zone 🤑", url=OFR_CNL)
+                    ],[
+                        InlineKeyboardButton('💳 Dᴏɴᴀᴛᴇ', callback_data='donation')
+                    ]]
     else:
         button = [[
-            InlineKeyboardButton('Sᴜᴘᴘᴏʀᴛ Gʀᴏᴜᴘ', url=f'https://t.me/{SUPPORT_CHAT}'),
-            InlineKeyboardButton('Uᴘᴅᴀᴛᴇs Cʜᴀɴɴᴇʟ', url=CHNL_LNK)
-        ]]
+                        InlineKeyboardButton("Join Our Offer Zone 🤑", url=OFR_CNL)
+                    ],[
+                        InlineKeyboardButton('💳 Dᴏɴᴀᴛᴇ', callback_data='donation')
+                    ]]
     msg = await client.send_cached_media(
         chat_id=message.from_user.id,
         file_id=file_id,
@@ -1145,7 +1143,7 @@ async def requests(bot, message):
     if success:
         link = await bot.create_chat_invite_link(int(REQST_CHANNEL))
         btn = [[
-                InlineKeyboardButton("Join Our Offer Zone 🤑", url=f'https://t.me/+4dWp2gDjwC43YmJl'),
+                InlineKeyboardButton("Join Our Offer Zone 🤑", url=OFR_CNL),
                 InlineKeyboardButton('Search Group', url=GRP_LNK)
               ]]
         await message.reply_text("<b>Your request has been sent to our admin! Please wait for some time.\n\nJoin This Channel For Great Deals On Amazon Flipkart etc.</b>", reply_markup=InlineKeyboardMarkup(btn))
@@ -1487,8 +1485,6 @@ async def remove_premium_cmd_handler(client, message):
         
 @Client.on_message(filters.command("donate"))
 async def plans_cmd_handler(client, message): 
-    if PREMIUM_AND_REFERAL_MODE == False:
-        return 
     btn = [            
         [InlineKeyboardButton("ꜱᴇɴᴅ ᴘᴀʏᴍᴇɴᴛ ʀᴇᴄᴇɪᴘᴛ 🧾", url=f"https://t.me/{OWNER_USERNAME}")],
         [InlineKeyboardButton("⚠️ ᴄʟᴏsᴇ / ᴅᴇʟᴇᴛᴇ ⚠️", callback_data="close_data")]
