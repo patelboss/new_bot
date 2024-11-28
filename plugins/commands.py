@@ -364,8 +364,7 @@ async def start(client, message):
             await asyncio.sleep(1) 
         return await sts.delete()
 
-    elif VERIFY == True:
-        data.split("-", 1)[0] == "verify":
+    elif data.split("-", 1)[0] == "verify":
         userid = data.split("-", 2)[1]
         token = data.split("-", 3)[2]
         if str(message.from_user.id) != str(userid):
@@ -447,7 +446,7 @@ async def start(client, message):
             if f_caption is None:
                 f_caption = f"{' '.join(filter(lambda x: not x.startswith('[') and not x.startswith('@'), files1['file_name'].split()))}"
             if not await db.has_premium_access(message.from_user.id):
-                if not await check_verification(client, message.from_user.id) and if VERIFY == True::
+                if not await check_verification(client, message.from_user.id) and VERIFY == True:
                     btn = [[
                         InlineKeyboardButton("Verify", url=await get_token(client, message.from_user.id, f"https://telegram.me/{temp.U_NAME}?start="))
                     ],[
