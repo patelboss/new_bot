@@ -69,74 +69,84 @@ AUTH_CHANNELS = os.getenv("AUTH_CHANNELS", "").split(",")  # Get the list of cha
 
 import logging
 
-# Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 async def is_subscribed(bot, query):
-    logging.info("Checking subscription status for user: %s", query.from_user.id)
     missing_channels = []
-    required_channels = AUTH_CHANNELS
-
-    if REQUEST_TO_JOIN_MODE and join_db().isActive():
-        logging.info("Request to join mode is active")
+    
+    if REQUEST_TO_JOIN_MODE == True and join_db().isActive():
         try:
             user = await join_db().get_user(query.from_user.id)
             if user and user["user_id"] == query.from_user.id:
-                logging.info("User is already active in the database")
                 return True
             else:
-                for channel_id in required_channels:
+                for channel_id in AUTH_CHANNELS:
                     try:
                         user_data = await bot.get_chat_member(int(channel_id), query.from_user.id)
-                        logging.info("Checked membership for channel: %s", channel_id)
                     except UserNotParticipant:
-                        logging.warning("User is not a participant in channel: %s", channel_id)
                         channel = await bot.get_chat(int(channel_id))
                         missing_channels.append(
                             InlineKeyboardButton(f"Join {channel.title}", url=channel.invite_link)
                         )
                     except Exception as e:
-                        logging.error("Error checking channel %s: %s", channel_id, e)
-                        return False
-
-                # Add Dummy Channel Button (Optional)
-                if DUMMY_CHANNEL_ID:
-                    try:
-                        dummy_chat = await bot.get_chat(int(DUMMY_CHANNEL_ID))
-                        missing_channels.append(
-                            InlineKeyboardButton(f"Optional Dummy Channel", url=dummy_chat.invite_link)
-                        )
-                    except Exception as e:
-                        logging.error("Error fetching dummy channel invite link: %s", e)
+                        return False  # Return False if there's an error
 
                 # Send missing channels if needed
                 if missing_channels:
-                    logging.info("Missing channels detected: %s", missing_channels)
                     reply_markup = InlineKeyboardMarkup([missing_channels])
-
+                    
+                    # Adjust based on object type
                     if isinstance(query, CallbackQuery):
-                        logging.info("Sending missing channel buttons to user via CallbackQuery")
                         await query.answer(
-                            text="Please join all required channels (dummy channel is optional) & unmute them to use the bot.\nTap on Files Again.",
-                            show_alert=True,
+                            text="Please join all required channels & Unmute Them to use the bot.\nTap on Files Again",
+                            show_alert=True
                         )
-                        await query.message.reply(
-                            "Join the channels using the buttons below. Dummy Channel is optional.",
-                            reply_markup=reply_markup,
-                        )
+                        await query.message.reply("Join the channels using the buttons below.\nTap on Join Then Unmute\nTap On Files Again To Get Files", reply_markup=reply_markup)
                     else:
-                        logging.info("Sending missing channel buttons to user via regular query")
                         await query.reply(
-                            "You need to join all required channels (dummy channel is optional) & unmute them to use the bot.",
-                            reply_markup=reply_markup,
+                            "You need to join all the required channels & Unmute Them to get the files.",
+                            reply_markup=reply_markup
                         )
                     return False
 
-                logging.info("User has joined all required channels")
                 return True
 
         except Exception as e:
-            logging.error("Error in subscription check: %s", e)
             return False
+    else:
+        for channel_id in AUTH_CHANNELS:
+            try:
+                user = await bot.get_chat_member(int(channel_id), query.from_user.id)
+                if user.status == enums.ChatMemberStatus.BANNED:
+                    return False
+            except UserNotParticipant:
+                missing_channels.append(channel_id)
+                continue
+
+        if missing_channels:
+            join_buttons = []
+            for channel_id in missing_channels:
+                channel = await bot.get_chat(int(channel_id))
+                join_buttons.append(
+                    InlineKeyboardButton(f"Join {channel.title}", url=channel.invite_link)
+                )
+            reply_markup = InlineKeyboardMarkup([join_buttons])
+
+            # Adjust based on object type
+            if isinstance(query, CallbackQuery):
+                await query.answer(
+                    text="Please join all required channels & Unmute Them to use the bot.\nTap on Files Again",
+                    show_alert=True
+                )
+                await query.message.reply("Join the channels using the buttons below.\nTap on Join Then Unmute\nTap On Files Again To Get Files", reply_markup=reply_markup)
+            else:
+                await query.reply(
+                    "You need to join all the required channels & Unmute Them to get the files.",
+                    reply_markup=reply_markup
+                )
+            return False
+
+    return True
+
+
 
 async def get_poster(query, bulk=False, id=False, file=None):
     if not id:
