@@ -80,9 +80,9 @@ CLONE_DATABASE_URI = environ.get('CLONE_DATABASE_URI', "") # Necessary If clone 
 PUBLIC_FILE_CHANNEL = environ.get('PUBLIC_FILE_CHANNEL', '') # Public Channel Username Without @ or without https://t.me/ and Bot Is Admin With Full Right.
 
 # Links
-GRP_LNK = environ.get('GRP_LNK', 'https://t.me/Rashmika_mandanana_bot?profile')
-CHNL_LNK = environ.get('CHNL_LNK', 'https://t.me/Rashmika_mandanana_bot?profile')
-TUTORIAL = environ.get('TUTORIAL', 'https://t.me/Rashmika_mandanana_bot?profile')
+GRP_LNK = environ.get('GRP_LNK', 'https://bit.ly/3OOoNpP')
+CHNL_LNK = environ.get('CHNL_LNK', 'https://bit.ly/3OOoNpP')
+TUTORIAL = environ.get('TUTORIAL', 'https://bit.ly/3OOoNpP')
 SUPPORT_CHAT = environ.get('SUPPORT_CHAT', 'iAmRashmibot') # Support Chat Link Without https:// or @
 
 # True Or False
@@ -105,7 +105,7 @@ NO_RESULTS_MSG = bool(environ.get("NO_RESULTS_MSG", True))
 USE_CAPTION_FILTER = bool(environ.get('USE_CAPTION_FILTER', True))
 
 # Token Verification Info :
-VERIFY = bool(environ.get('VERIFY', False))
+VERIFY = False
 VERIFY_SECOND_SHORTNER = bool(environ.get('VERIFY_SECOND_SHORTNER', False))
 VERIFY_SHORTLINK_URL = environ.get('VERIFY_SHORTLINK_URL', '')
 VERIFY_SHORTLINK_API = environ.get('VERIFY_SHORTLINK_API', '')
