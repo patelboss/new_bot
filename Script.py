@@ -61,21 +61,20 @@ If you'd like to support this bot's future operations:
    • "Donate" बटन पर क्लिक करें या /donate कमांड का उपयोग करके आर्थिक मदद करें।
 </pre>
 """
-    ABOUT_TXT = """<b><blockquote>⍟───[ MY ᴅᴇᴛᴀɪʟꜱ ]───⍟</blockquote>
-    
-‣ ᴍʏ ɴᴀᴍᴇ : <a href=https://t.me/{}>{}</a>
+    ABOUT_TXT ="""
+<b>    
+    <blockquote>⍟───[ MY ᴅᴇᴛᴀɪʟꜱ ]───⍟</blockquote>    
 ✯ 𝙼𝚈 𝙽𝙰𝙼𝙴: <a href=https://t.me/{}>ᏒᏗᏕᏂᎷᎥ</a>
-✯ 𝙈𝘼𝙄𝙉 𝘾𝙃𝘼𝙉𝙉𝙀𝙇: 𝐅𝐢𝐥𝐦𝐲𝐤𝐞𝐞𝐝𝐡𝐚
+✯ 𝙈𝘼𝙄𝙉 𝘾𝙃𝘼𝙉𝙉𝙀𝙇: <a href=https://t.me/filmykeedha>𝐅𝐢𝐥𝐦𝐲𝐤𝐞𝐞𝐝𝐡𝐚</a>
 ✯ 𝘾𝙍𝙀𝘼𝙏𝙀𝙍: <a href='https://t.me/Pankaj_jii'>Ꭾᥲᥒⲕᥲ၂👮🏻‍♂️❤️🚔</a>
 ✯ 𝗠𝗼𝘃𝗶𝗲 𝗟𝗮𝗻𝗴𝘂𝗮𝗴𝗲:𝐇𝐢𝐧𝐝𝐢, 𝐄𝐧𝐠𝐥𝐢𝐬𝐡, 𝐓𝐚𝐦𝐢𝐥 𝐀𝐧𝐝 𝐌𝐚𝐧𝐲 𝐌𝐨𝐫𝐞 𝐌𝐨𝐯𝐢𝐞 𝐋𝐚𝐧𝐠𝐮𝐚𝐠𝐞
-✯ 𝗕𝗼𝘁 𝗟𝗮𝗻𝗴𝘂𝗮𝗴𝗲: 𝐇𝐢𝐧𝐝𝐢 𝐚𝐧𝐝 𝐄𝐧𝐠𝐥𝐢𝐬𝐡
+✯ 𝗕𝗼𝘁 𝗟𝗮𝗻𝗴𝘂𝗮𝗴𝗲: 𝐄𝐧𝐠𝐥𝐢𝐬𝐡
 ✯ 𝙱𝚄𝙸𝙻𝙳 𝚂𝚃𝙰𝚃𝚄𝚂: V2.0.1 [ 𝙱𝙴𝚃𝙰 ] 
  </b>"""
     CLONE_ABOUT_TXT = """<b><blockquote>⍟───[ ᴍʏ ᴀʙᴏᴜᴛ ]───⍟</blockquote>
     
-‣ ᴍʏ ɴᴀᴍᴇ : <a href=https://t.me/{}>{}</a>
 ✯ 𝙼𝚈 𝙽𝙰𝙼𝙴: <a href=https://t.me/{}>ᏒᏗᏕᏂᎷᎥ</a>
-✯ 𝙈𝘼𝙄𝙉 𝘾𝙃𝘼𝙉𝙉𝙀𝙇: 𝐅𝐢𝐥𝐦𝐲𝐤𝐞𝐞𝐝𝐡𝐚
+✯ 𝙈𝘼𝙄𝙉 𝘾𝙃𝘼𝙉𝙉𝙀𝙇: <a href=https://t.me/filmykeedha>𝐅𝐢𝐥𝐦𝐲𝐤𝐞𝐞𝐝𝐡𝐚</a>
 ✯ 𝘾𝙍𝙀𝘼𝙏𝙀𝙍: <a href='https://t.me/Pankaj_jii'>Ꭾᥲᥒⲕᥲ၂👮🏻‍♂️❤️🚔</a>
 ✯ 𝗠𝗼𝘃𝗶𝗲 𝗟𝗮𝗻𝗴𝘂𝗮𝗴𝗲:𝐇𝐢𝐧𝐝𝐢, 𝐄𝐧𝐠𝐥𝐢𝐬𝐡, 𝐓𝐚𝐦𝐢𝐥 𝐀𝐧𝐝 𝐌𝐚𝐧𝐲 𝐌𝐨𝐫𝐞 𝐌𝐨𝐯𝐢𝐞 𝐋𝐚𝐧𝐠𝐮𝐚𝐠𝐞
 ✯ 𝗕𝗼𝘁 𝗟𝗮𝗻𝗴𝘂𝗮𝗴𝗲: 𝐇𝐢𝐧𝐝𝐢 𝐚𝐧𝐝 𝐄𝐧𝐠𝐥𝐢𝐬𝐡
