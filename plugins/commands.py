@@ -49,6 +49,7 @@ async def start(client, message):
         if PREMIUM_AND_REFERAL_MODE == True:
             buttons = [[
                 InlineKeyboardButton('Share Us 💕🫶🏻', url=Share_msg)
+            ],[    
                 InlineKeyboardButton('⌬ Mᴏᴠɪᴇ Gʀᴏᴜᴘ', url=GRP_LNK)
             ],[
                 InlineKeyboardButton('〄 Hᴇʟᴘ', callback_data='help'),
