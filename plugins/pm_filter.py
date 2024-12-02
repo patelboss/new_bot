@@ -1901,7 +1901,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
                     text=(
                         f"<b>{user.mention}, Sᴏʀʀʏ, ʏᴏᴜʀ ʀᴇϙᴜᴇsᴛᴇᴅ ᴄᴏɴᴛᴇɴᴛ:\n\n"
                         f"➡️ <code>{content}</code>\n\n"
-                        f"is ᴜɴᴀᴠᴀɪʟᴀʙʟᴇ, ᴀɴᴅ ᴛʜɪs ᴍᴇssᴀɢᴇ ɪs sᴇɴᴛ ʙᴇᴄᴀᴜsᴇ ʏᴏᴜ'ᴠᴇ ʙʟᴏᴄᴋᴇᴅ ᴛʜᴇ ʙᴏᴛ.</b>"
+                        f"is ᴜɴᴀᴠᴀɪʟᴀʙʟᴇ, ᴀɴᴅ ᴛʜɪs ᴍᴇssᴀɢᴇ ɪs sᴇɴᴛ ʜᴇʀᴇ ʙᴇᴄᴀᴜsᴇ ʏᴏᴜ'ᴠᴇ ʙʟᴏᴄᴋᴇᴅ ᴛʜᴇ ʙᴏᴛ.</b>"
                     ),
                     reply_markup=InlineKeyboardMarkup(btn2)
                 )
@@ -1940,7 +1940,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
                     text=(
                         f"<b>{user.mention}, Yᴏᴜʀ ʀᴇϙᴜᴇsᴛᴇᴅ ᴄᴏɴᴛᴇɴᴛ:\n\n"
                         f"➡️ <code>{content}</code>\n\n"
-                        f"ʜᴀs ʙᴇᴇɴ ᴜᴘʟᴏᴀᴅᴇᴅ, ʙᴜᴛ ʏᴏᴜ'ᴠᴇ ʙʟᴏᴄᴋᴇᴅ ᴛʜᴇ ʙᴏᴛ.</b>"
+                        f"ʜᴀs ʙᴇᴇɴ ᴜᴘʟᴏᴀᴅᴇᴅ, ᴀɴᴅ ᴛʜɪs ᴍᴇssᴀɢᴇ ɪs sᴇɴᴛ ʜᴇʀᴇ ʙᴇᴄᴀᴜsᴇ ʏᴏᴜ'ᴠᴇ ʙʟᴏᴄᴋᴇᴅ ᴛʜᴇ ʙᴏᴛ.</b>"
                     ),
                     reply_markup=InlineKeyboardMarkup(btn2)
                 )
@@ -1981,7 +1981,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 text=(
                     f"<b>{user.mention}, Yᴏᴜʀ ʀᴇϙᴜᴇsᴛᴇᴅ ᴄᴏɴᴛᴇɴᴛ:\n\n"
                     f"➡️ <code>{content}</code>\n\n"
-                    f"Yᴏᴜʀ Rᴇᴏ̨ᴜᴇsᴛ ɪs Aʟʀᴇᴀᴅʏ Aᴠᴀɪʟᴀʙʟᴇ !\nCheck Spelling and search again, ʙᴜᴛ ʏᴏᴜ'ᴠᴇ ʙʟᴏᴄᴋᴇᴅ ᴛʜᴇ ʙᴏᴛ.</b>"
+                    f"Yᴏᴜʀ Rᴇᴏ̨ᴜᴇsᴛ ɪs Aʟʀᴇᴀᴅʏ Aᴠᴀɪʟᴀʙʟᴇ !\nCheck Spelling and search again, ᴀɴᴅ ᴛʜɪs ᴍᴇssᴀɢᴇ ɪs sᴇɴᴛ ʜᴇʀᴇ ʙᴇᴄᴀᴜsᴇ ʏᴏᴜ'ᴠᴇ ʙʟᴏᴄᴋᴇᴅ ᴛʜᴇ ʙᴏᴛ.</b>"
                 ),
                 reply_markup=InlineKeyboardMarkup(btn2)
             )
