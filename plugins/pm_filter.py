@@ -1988,63 +1988,59 @@ async def cb_handler(client: Client, query: CallbackQuery):
             )
         else:
             await query.answer("Yᴏᴜ ᴅᴏɴ'ᴛ ʜᴀᴠᴇ sᴜғғɪᴄɪᴀɴᴛ ʀɪɢᴛs ᴛᴏ ᴅᴏ ᴛʜɪs !", show_alert=True)
-
-
-    elif query.data.startswith("CheckF"):
-    # Split callback data
-        ident, from_user = query.data.split("#")
     
-    # Sanitize and encode user query for Google search
-        content = query.message.text.strip()  # Remove extra whitespace
-        encoded_query = quote_plus(content) if content else "default"  # Fallback for empty content
+    elif query.data.startswith("CheckF"):
+        ident, from_user = query.data.split("#")
+        content = query.message.text.strip()  # Use 'content' directly if it already holds the user message
+        search_query = content.replace(' ', '+')  # For Google search, replace spaces with '+'
 
-    # Define buttons
-        btn = [
-            [InlineKeyboardButton("Spelling Mistake", callback_data=f"smalert#{from_user}")]
-        ]
+    # Inline button setup for spelling correction
+        btn = [[
+            InlineKeyboardButton("Spelling Mistake", callback_data=f"smalert#{from_user}")
+        ]]
 
-        btn2 = [
-            [InlineKeyboardButton("Join Our Offer Zone 🤑", url=OFR_CNL)],
-            [InlineKeyboardButton("Search Gʀᴏᴜᴘ Lɪɴᴋ", url=GRP_LNK)],
-            [InlineKeyboardButton("🔎 Google It", url=f"https://www.google.com/search?q={encoded_query}")]
-        ]
+    # Additional buttons like "Google it"
+        btn2 = [[
+            InlineKeyboardButton("Join Our Offer Zone 🤑", url=OFR_CNL),
+        ], [
+            InlineKeyboardButton("Search Gʀᴏᴜᴘ Lɪɴᴋ", url=GRP_LNK)
+        ], [
+            InlineKeyboardButton("🔎 Google It", url=f"https://www.google.com/search?q={search_query}")
+        ]]
 
-        if query.from_user.id in ADMINS:  # Check if user is an admin
-        # Get user details
+        if query.from_user.id in ADMINS:
             user = await client.get_users(from_user)
-            reply_markup = InlineKeyboardMarkup(btn)
-        
-        # Update the message with the edited content and buttons
             await query.message.edit_text(f"<b><strike>{content}</strike></b>")
-            await query.message.edit_reply_markup(reply_markup)
+            await query.message.edit_reply_markup(InlineKeyboardMarkup(btn))
             await query.answer("Spelling error")
-
+        
             try:
-            # Send notification to the user about the spelling mistake
+            # Send a direct message to the user
                 await client.send_message(
                     chat_id=int(from_user),
                     text=(
                         f"<b>{user.mention}, Yᴏᴜʀ ʀᴇϙᴜᴇsᴛᴇᴅ ᴄᴏɴᴛᴇɴᴛ:\n\n"
                         f"➡️ <code>{content}</code>\n\n"
-                        f"ʏᴏᴜʀ ꜱᴘᴇʟʟɪɴɢ ɪꜱ ɴᴏᴛ ᴄᴏʀʀᴇᴄᴛ. "
-                        f"ᴘʟᴇᴀꜱᴇ ᴄʜᴇᴄᴋ ᴀɴᴅ ᴜꜱᴇ ᴛʜᴇ ɢᴏᴏɢʟᴇ ɪᴛ ʙᴜᴛᴛᴏɴ ꜰᴏʀ ꜱᴇᴀʀᴄʜ 🤗.</b>"
+                        f"ʏᴏᴜʀ ꜱᴘᴇʟʟɪɴɢ ɪꜱ ɴᴏᴛ ᴄᴏʀʀᴇᴄᴛ. ᴘʟᴇᴀꜱᴇ ᴄʜᴇᴄᴋ ᴀɴᴅ ᴜꜱᴇ ᴛʜᴇ ɢᴏᴏɢʟᴇ ɪᴛ ʙᴜᴛᴛᴏɴ ꜰᴏʀ ꜱᴇᴀʀᴄʜ 🤗.</b>"
                     ),
                     reply_markup=InlineKeyboardMarkup(btn2)
                 )
             except UserIsBlocked:
-            # If the user blocked the bot, notify the support channel
                 await client.send_message(
                     chat_id=int(SUPPORT_CHAT_ID),
                     text=(
                         f"<b>{user.mention}, Yᴏᴜʀ ʀᴇϙᴜᴇsᴛᴇᴅ ᴄᴏɴᴛᴇɴᴛ:\n\n"
                         f"➡️ <code>{content}</code>\n\n"
-                        f"Check Spelling and search again in the search group. "
-                        f"ᴛʜɪꜱ ᴍᴇꜱꜱᴀɢᴇ ɪꜱ ꜱᴇɴᴛ ʜᴇʀᴇ ʙᴇᴄᴀᴜꜱᴇ ʏᴏᴜ'ᴠᴇ ʙʟᴏᴄᴋᴇᴅ ᴛʜᴇ ʙᴏᴛ.</b>"
+                        f"Check Spelling and search again in search group, ᴀɴᴅ ᴛʜɪs ᴍᴇssᴀɢᴇ ɪs sᴇɴᴛ ʜᴇʀᴇ ʙᴇᴄᴀᴜsᴇ ʏᴏᴜ'ᴠᴇ ʙʟᴏᴄᴋᴇᴅ ᴛʜᴇ ʙᴏᴛ.</b>"
                     ),
                     reply_markup=InlineKeyboardMarkup(btn2)
                 )
         else:
-            await query.answer("Yᴏᴜ ᴅᴏɴ'ᴛ ʜᴀᴠᴇ sᴜғғɪᴄɪᴀɴᴛ ʀɪɢʜᴛs ᴛᴏ ᴅᴏ ᴛʜɪꜱ!", show_alert=True)
+            await query.answer("Yᴏᴜ ᴅᴏɴ'ᴛ ʜᴀᴠᴇ sᴜғғɪᴄɪᴀɴᴛ ʀɪɢʜᴛs ᴛᴏ ᴅᴏ ᴛʜɪs!", show_alert=True)
+    
+    
+    
+    
     elif query.data.startswith("alalert"):
         ident, from_user = query.data.split("#")
         if int(query.from_user.id) == int(from_user):
