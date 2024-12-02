@@ -30,44 +30,81 @@ SPELL_CHECK = {}
 
 @Client.on_message(filters.group & filters.text & filters.incoming)
 async def give_filter(client, message):
-    if message.chat.id != SUPPORT_CHAT_ID:
-        settings = await get_settings(message.chat.id)
-        chatid = message.chat.id 
-        user_id = message.from_user.id if message.from_user else 0
-        if settings['fsub'] != None:
+    chat_id = message.chat.id
+    user_id = message.from_user.id if message.from_user else 0
+
+    # If the message is not from the support chat
+    if chat_id != SUPPORT_CHAT_ID:
+        settings = await get_settings(chat_id)
+
+        # Check if forced subscription is enabled
+        if settings.get("fsub"):
             try:
-                btn = await pub_is_subscribed(client, message, settings['fsub'])
+                btn = await pub_is_subscribed(client, message, settings["fsub"])
                 if btn:
-                    btn.append([InlineKeyboardButton("Unmute Me 🔕", callback_data=f"unmuteme#{int(user_id)}")])
-                    await client.restrict_chat_member(chatid, message.from_user.id, ChatPermissions(can_send_messages=False))
-                    await message.reply_photo(photo=random.choice(PICS), caption=f"👋 Hello {message.from_user.mention},\n\nPlease join the channel then click on unmute me button. 😇", reply_markup=InlineKeyboardMarkup(btn), parse_mode=enums.ParseMode.HTML)
+                    btn.append([InlineKeyboardButton("Unmute Me 🔕", callback_data=f"unmuteme#{user_id}")])
+                    await client.restrict_chat_member(chat_id, user_id, ChatPermissions(can_send_messages=False))
+                    await message.reply_photo(
+                        photo=random.choice(PICS),
+                        caption=f"👋 Hello {message.from_user.mention},\n\nPlease join the channel and then click the 'Unmute Me' button. 😇",
+                        reply_markup=InlineKeyboardMarkup(btn),
+                        parse_mode=enums.ParseMode.HTML,
+                    )
                     return
             except Exception as e:
                 print(e)
-            
+
+        # Handle manual filters
         manual = await manual_filters(client, message)
-        if manual == False:
-            settings = await get_settings(message.chat.id)
-            try:
-                if settings['auto_ffilter']:
+        if not manual:
+            # Check for auto-filter settings
+            if settings.get("auto_ffilter", False):
+                ai_search = True
+                reply_msg = await message.reply_text(f"<b><i>Searching for {message.text} 🔍</i></b>")
+                await auto_filter(client, message.text, message, reply_msg, ai_search)
+            else:
+                grpid = await active_connection(str(user_id))
+                await save_group_settings(grpid, "auto_ffilter", True)
+                settings = await get_settings(chat_id)
+                if settings.get("auto_ffilter"):
                     ai_search = True
-                    reply_msg = await message.reply_text(f"<b><i>Searching For {message.text} 🔍</i></b>")
+                    reply_msg = await message.reply_text(f"<b><i>Searching for {message.text} 🔍</i></b>")
                     await auto_filter(client, message.text, message, reply_msg, ai_search)
-            except KeyError:
-                grpid = await active_connection(str(message.from_user.id))
-                await save_group_settings(grpid, 'auto_ffilter', True)
-                settings = await get_settings(message.chat.id)
-                if settings['auto_ffilter']:
-                    ai_search = True
-                    reply_msg = await message.reply_text(f"<b><i>Searching For {message.text} 🔍</i></b>")
-                    await auto_filter(client, message.text, message, reply_msg, ai_search)
-    else: #a better logic to avoid repeated lines of code in auto_filter function
+
+    # If the message is from the support chat
+    else:
         search = message.text
-        temp_files, temp_offset, total_results = await get_search_results(chat_id=message.chat.id, query=search.lower(), offset=0, filter=True)
-        if total_results == 0:
-            return
+        temp_files, temp_offset, total_results = await get_search_results(
+            chat_id=chat_id, query=search.lower(), offset=0, filter=True
+        )
+        if total_results > 0:
+            # If files are found, reply with the group link
+            await message.reply_text(
+                f"<b>Hey {message.from_user.mention}, {total_results} results found in my database for your query '{search}'.\n\n"
+                "This is a support group, so you can't get files here.\n\n"
+                "Search Group Link: https://linktr.ee/filmykeedha</b>"
+            )
         else:
-            return await message.reply_text(f"<b>Hᴇʏ {message.from_user.mention}, {str(total_results)} ʀᴇsᴜʟᴛs ᴀʀᴇ ғᴏᴜɴᴅ ɪɴ ᴍʏ ᴅᴀᴛᴀʙᴀsᴇ ғᴏʀ ʏᴏᴜʀ ᴏ̨ᴜᴇʀʏ {search}. \n\nTʜɪs ɪs ᴀ sᴜᴘᴘᴏʀᴛ ɢʀᴏᴜᴘ sᴏ ᴛʜᴀᴛ ʏᴏᴜ ᴄᴀɴ'ᴛ ɢᴇᴛ ғɪʟᴇs ғʀᴏᴍ ʜᴇʀᴇ...\n\nSearch Group Link- https://linktr.ee/filmykeedha</b>")
+            # If no files are found, create a request
+            try:
+                reporter = str(message.from_user.id)
+                mention = message.from_user.mention
+                content = search
+
+                if REQST_CHANNEL:
+                    btn = [[
+                        InlineKeyboardButton('View Request', url=f"{message.link}"),
+                        InlineKeyboardButton('Show Options', callback_data=f'show_option#{reporter}')
+                    ]]
+                    await client.send_message(
+                        chat_id=REQST_CHANNEL,
+                        text=f"<b>𝖱𝖾𝗉𝗈𝗋𝗍𝖾𝗋 : {mention} ({reporter})\n\n𝖬𝖾𝗌𝗌𝖺𝗀𝖾 : {content}</b>",
+                        reply_markup=InlineKeyboardMarkup(btn)
+                    )
+                else:
+                    await message.reply_text("<b>Request channel is not configured. Please contact the admin.</b>")
+            except Exception as e:
+                await message.reply_text(f"<b>Error while requesting: {e}</b>")
 
 @Client.on_message(filters.private & filters.text & filters.incoming)
 async def pm_text(bot, message):
