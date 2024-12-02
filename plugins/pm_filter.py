@@ -1854,7 +1854,8 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 InlineKeyboardButton("Uɴᴀᴠᴀɪʟᴀʙʟᴇ", callback_data=f"unavailable#{from_user}"),
                 InlineKeyboardButton("Uᴘʟᴏᴀᴅᴇᴅ", callback_data=f"uploaded#{from_user}")
              ],[
-                InlineKeyboardButton("Aʟʀᴇᴀᴅʏ Aᴠᴀɪʟᴀʙʟᴇ", callback_data=f"already_available#{from_user}")
+                InlineKeyboardButton("Aʟʀᴇᴀᴅʏ Aᴠᴀɪʟᴀʙʟᴇ", callback_data=f"already_available#{from_user}"),
+                InlineKeyboardButton("Spelling Error", callback_data=f"CheckF#{from_user}")
               ]]
         btn2 = [[
                  InlineKeyboardButton("Vɪᴇᴡ Sᴛᴀᴛᴜs", url=f"{query.message.link}")
@@ -1988,6 +1989,47 @@ async def cb_handler(client: Client, query: CallbackQuery):
         else:
             await query.answer("Yᴏᴜ ᴅᴏɴ'ᴛ ʜᴀᴠᴇ sᴜғғɪᴄɪᴀɴᴛ ʀɪɢᴛs ᴛᴏ ᴅᴏ ᴛʜɪs !", show_alert=True)
 
+    elif query.data.startswith("CheckF"):
+        ident, from_user = query.data.split("#")
+        btn = [[
+                InlineKeyboardButton("Spelling Mistake", callback_data=f"smalert#{from_user}")
+              ]]
+        btn2 = [[
+                 InlineKeyboardButton("Join Our Offer Zone 🤑", url=OFR_CNL),
+                 
+              ],[
+                 InlineKeyboardButton("Search Gʀᴏᴜᴘ Lɪɴᴋ", url=GRP_LNK)
+               ]]
+        if query.from_user.id in ADMINS:
+            user = await client.get_users(from_user)
+            reply_markup = InlineKeyboardMarkup(btn)
+            content = query.message.text
+            await query.message.edit_text(f"<b><strike>{content}</strike></b>")
+            await query.message.edit_reply_markup(reply_markup)
+            await query.answer("Sᴇᴛ ᴛᴏ Aʟʀᴇᴀᴅʏ Aᴠᴀɪʟᴀʙʟᴇ !")
+            try:
+                await client.send_message(
+                chat_id=int(from_user), 
+                text=(
+                    f"<b>{user.mention}, Yᴏᴜʀ ʀᴇϙᴜᴇsᴛᴇᴅ ᴄᴏɴᴛᴇɴᴛ:\n\n"
+                    f"➡️ <code>{content}</code>\n\n"
+                    f"Cutiye spelling check kr le 😄. Kɪɴᴅʟʏ sᴇᴀʀᴄʜ ɪɴ ᴏᴜʀ Gʀᴏᴜᴘ.</b>"
+                ),
+                reply_markup=InlineKeyboardMarkup(btn2)
+            )
+            except UserIsBlocked:
+                await client.send_message(
+                chat_id=int(SUPPORT_CHAT_ID),
+                text=(
+                    f"<b>{user.mention}, Yᴏᴜʀ ʀᴇϙᴜᴇsᴛᴇᴅ ᴄᴏɴᴛᴇɴᴛ:\n\n"
+                    f"➡️ <code>{content}</code>\n\n"
+                    f"Check Spelling and search again, ᴀɴᴅ ᴛʜɪs ᴍᴇssᴀɢᴇ ɪs sᴇɴᴛ ʜᴇʀᴇ ʙᴇᴄᴀᴜsᴇ ʏᴏᴜ'ᴠᴇ ʙʟᴏᴄᴋᴇᴅ ᴛʜᴇ ʙᴏᴛ.</b>"
+                ),
+                reply_markup=InlineKeyboardMarkup(btn2)
+            )
+        else:
+            await query.answer("Yᴏᴜ ᴅᴏɴ'ᴛ ʜᴀᴠᴇ sᴜғғɪᴄɪᴀɴᴛ ʀɪɢᴛs ᴛᴏ ᴅᴏ ᴛʜɪs !", show_alert=True)
+    
     elif query.data.startswith("alalert"):
         ident, from_user = query.data.split("#")
         if int(query.from_user.id) == int(from_user):
@@ -2012,6 +2054,14 @@ async def cb_handler(client: Client, query: CallbackQuery):
         else:
             await query.answer("Yᴏᴜ ᴅᴏɴ'ᴛ ʜᴀᴠᴇ sᴜғғɪᴄɪᴀɴᴛ ʀɪɢᴛs ᴛᴏ ᴅᴏ ᴛʜɪs !", show_alert=True)
 
+    elif query.data.startswith("smalert"):
+        ident, from_user = query.data.split("#")
+        if int(query.from_user.id) == int(from_user):
+            user = await client.get_users(from_user)
+            await query.answer(f"Hᴇʏ {user.first_name}, spelling mistake!\nCheck Spelling and search again", show_alert=True)
+        else:
+            await query.answer("Yᴏᴜ ᴅᴏɴ'ᴛ ʜᴀᴠᴇ sᴜғғɪᴄɪᴀɴᴛ ʀɪɢᴛs ᴛᴏ ᴅᴏ ᴛʜɪs !", show_alert=True)
+            
     elif query.data.startswith("generate_stream_link"):
         _, file_id = query.data.split(":")
         try:
