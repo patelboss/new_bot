@@ -1989,46 +1989,47 @@ async def cb_handler(client: Client, query: CallbackQuery):
         else:
             await query.answer("Yᴏᴜ ᴅᴏɴ'ᴛ ʜᴀᴠᴇ sᴜғғɪᴄɪᴀɴᴛ ʀɪɢᴛs ᴛᴏ ᴅᴏ ᴛʜɪs !", show_alert=True)
 
-    elif query.data.startswith("CheckF"):
+        elif query.data.startswith("CheckF"):
         ident, from_user = query.data.split("#")
         btn = [[
-                InlineKeyboardButton("Spelling Mistake", callback_data=f"smalert#{from_user}")
-              ]]
+            InlineKeyboardButton("Spelling Mistake", callback_data=f"smalert#{from_user}")
+        ]]
         btn2 = [[
-                 InlineKeyboardButton("Join Our Offer Zone 🤑", url=OFR_CNL),
-                 
-              ],[
-                 InlineKeyboardButton("Search Gʀᴏᴜᴘ Lɪɴᴋ", url=GRP_LNK)
-               ]]
+            InlineKeyboardButton("Join Our Offer Zone 🤑", url=OFR_CNL),
+        ], [
+            InlineKeyboardButton("Search Gʀᴏᴜᴘ Lɪɴᴋ", url=GRP_LNK)
+        ], [
+            InlineKeyboardButton("🔎 Google It", url=f"https://www.google.com/search?q={query.message.text.replace(' ', '+')}")
+        ]]
         if query.from_user.id in ADMINS:
             user = await client.get_users(from_user)
             reply_markup = InlineKeyboardMarkup(btn)
             content = query.message.text
             await query.message.edit_text(f"<b><strike>{content}</strike></b>")
             await query.message.edit_reply_markup(reply_markup)
-            await query.answer("Sᴇᴛ ᴛᴏ Aʟʀᴇᴀᴅʏ Aᴠᴀɪʟᴀʙʟᴇ !")
+            await query.answer("Spelling error")
             try:
                 await client.send_message(
-                chat_id=int(from_user), 
-                text=(
-                    f"<b>{user.mention}, Yᴏᴜʀ ʀᴇϙᴜᴇsᴛᴇᴅ ᴄᴏɴᴛᴇɴᴛ:\n\n"
-                    f"➡️ <code>{content}</code>\n\n"
-                    f"Cutiye spelling check kr le 😄. Kɪɴᴅʟʏ sᴇᴀʀᴄʜ ɪɴ ᴏᴜʀ Gʀᴏᴜᴘ.</b>"
-                ),
-                reply_markup=InlineKeyboardMarkup(btn2)
-            )
+                    chat_id=int(from_user),
+                    text=(
+                        f"<b>{user.mention}, Yᴏᴜʀ ʀᴇϙᴜᴇsᴛᴇᴅ ᴄᴏɴᴛᴇɴᴛ:\n\n"
+                        f"➡️ <code>{content}</code>\n\n"
+                        f"ʏᴏᴜʀ ꜱᴘᴇʟʟɪɴɢ ɪꜱ ɴᴏᴛ ᴄᴏʀʀᴇᴄᴛ. ʙʜᴀɪ ᴀɢᴀʀ ꜱᴘᴇʟʟɪɴɢ ᴋᴇ ᴇʀʀᴏʀ ᴋᴏ ꜱᴀʜɪ ᴋʀɴᴇ ʙᴇᴛʜᴀ ᴛᴏ ᴏʀ ᴋᴜᴄʜ ɴᴀʜɪ ᴋᴀʀ  ᴘᴀᴜɴɢᴀ ɪꜱʟɪʏᴇ ɴᴇxᴛ ᴛɪᴍᴇ ꜱᴘᴇʟʟɪɴɢ ꜱᴀʜɪ ᴅᴀʟɴᴀ. ᴀʙʜɪ ꜱᴀʜɪ ꜱᴘᴇʟʟɪɴɢ ᴄʜᴇᴄᴋ ᴋʀɴᴇ ᴋᴇ  ɴɪᴄʜᴇ ɢᴏᴏɢʟᴇ ɪᴛ ᴋᴀ ʙᴜᴛᴛᴏɴ ᴅɪʏᴀ ʜ ᴜꜱᴘᴇ ᴄʟɪᴄᴋ ᴋᴀʀ. ᴏʀ ꜰɪʀ ꜱᴇᴀʀᴄʜ ɢʀᴏᴜᴘ ᴍᴇ ꜱᴇᴀʀᴄʜ ᴋᴀʀ.</b>"
+                    ),
+                    reply_markup=InlineKeyboardMarkup(btn2)
+                )
             except UserIsBlocked:
                 await client.send_message(
-                chat_id=int(SUPPORT_CHAT_ID),
-                text=(
-                    f"<b>{user.mention}, Yᴏᴜʀ ʀᴇϙᴜᴇsᴛᴇᴅ ᴄᴏɴᴛᴇɴᴛ:\n\n"
-                    f"➡️ <code>{content}</code>\n\n"
-                    f"Check Spelling and search again, ᴀɴᴅ ᴛʜɪs ᴍᴇssᴀɢᴇ ɪs sᴇɴᴛ ʜᴇʀᴇ ʙᴇᴄᴀᴜsᴇ ʏᴏᴜ'ᴠᴇ ʙʟᴏᴄᴋᴇᴅ ᴛʜᴇ ʙᴏᴛ.</b>"
-                ),
-                reply_markup=InlineKeyboardMarkup(btn2)
-            )
+                    chat_id=int(SUPPORT_CHAT_ID),
+                    text=(
+                        f"<b>{user.mention}, Yᴏᴜʀ ʀᴇϙᴜᴇsᴛᴇᴅ ᴄᴏɴᴛᴇɴᴛ:\n\n"
+                        f"➡️ <code>{content}</code>\n\n"
+                        f"Check Spelling and search again in search group, ᴀɴᴅ ᴛʜɪs ᴍᴇssᴀɢᴇ ɪs sᴇɴᴛ ʜᴇʀᴇ ʙᴇᴄᴀᴜsᴇ ʏᴏᴜ'ᴠᴇ ʙʟᴏᴄᴋᴇᴅ ᴛʜᴇ ʙᴏᴛ.</b>"
+                    ),
+                    reply_markup=InlineKeyboardMarkup(btn2)
+                )
         else:
-            await query.answer("Yᴏᴜ ᴅᴏɴ'ᴛ ʜᴀᴠᴇ sᴜғғɪᴄɪᴀɴᴛ ʀɪɢᴛs ᴛᴏ ᴅᴏ ᴛʜɪs !", show_alert=True)
+            await query.answer("Yᴏᴜ ᴅᴏɴ'ᴛ ʜᴀᴠᴇ sᴜғғɪᴄɪᴀɴᴛ ʀɪɢʜᴛs ᴛᴏ ᴅᴏ ᴛʜɪs!", show_alert=True)
     
     elif query.data.startswith("alalert"):
         ident, from_user = query.data.split("#")
