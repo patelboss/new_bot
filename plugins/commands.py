@@ -1070,7 +1070,7 @@ async def save_template(client, message):
 
 
 @Client.on_message((filters.command(["request", "Request"]) | filters.regex("#request") | filters.regex("#Request")) & filters.group)
-async def requests(bot, message):
+async def requests(client, message):
     if REQST_CHANNEL is None or SUPPORT_CHAT_ID is None: return # Must add REQST_CHANNEL and SUPPORT_CHAT_ID to use this feature
     if message.reply_to_message and SUPPORT_CHAT_ID == message.chat.id:
         chat_id = message.chat.id
@@ -1084,7 +1084,7 @@ async def requests(bot, message):
                         InlineKeyboardButton('View Request', url=f"{message.reply_to_message.link}"),
                         InlineKeyboardButton('Show Options', callback_data=f'show_option#{reporter}')
                       ]]
-                reported_post = await bot.send_message(chat_id=REQST_CHANNEL, text=f"<b>𝖱𝖾𝗉𝗈𝗋𝗍𝖾𝗋 : {mention} ({reporter})\n\n𝖬𝖾𝗌𝗌𝖺𝗀𝖾 : {content}</b>", reply_markup=InlineKeyboardMarkup(btn))
+                reported_post = await client.send_message(chat_id=REQST_CHANNEL, text=f"<b>𝖱𝖾𝗉𝗈𝗋𝗍𝖾𝗋 : {mention} ({reporter})\n\n𝖬𝖾𝗌𝗌𝖺𝗀𝖾 : {content}</b>", reply_markup=InlineKeyboardMarkup(btn))
                 success = True
             elif len(content) >= 3:
                 for admin in ADMINS:
@@ -1092,7 +1092,7 @@ async def requests(bot, message):
                         InlineKeyboardButton('View Request', url=f"{message.reply_to_message.link}"),
                         InlineKeyboardButton('Show Options', callback_data=f'show_option#{reporter}')
                       ]]
-                    reported_post = await bot.send_message(chat_id=admin, text=f"<b>𝖱𝖾𝗉𝗈𝗋𝗍𝖾𝗋 : {mention} ({reporter})\n\n𝖬𝖾𝗌𝗌𝖺𝗀𝖾 : {content}</b>", reply_markup=InlineKeyboardMarkup(btn))
+                    reported_post = await client.send_message(chat_id=admin, text=f"<b>𝖱𝖾𝗉𝗈𝗋𝗍𝖾𝗋 : {mention} ({reporter})\n\n𝖬𝖾𝗌𝗌𝖺𝗀𝖾 : {content}</b>", reply_markup=InlineKeyboardMarkup(btn))
                     success = True
             else:
                 if len(content) < 3:
@@ -1119,7 +1119,7 @@ async def requests(bot, message):
                         InlineKeyboardButton('View Request', url=f"{message.link}"),
                         InlineKeyboardButton('Show Options', callback_data=f'show_option#{reporter}')
                       ]]
-                reported_post = await bot.send_message(chat_id=REQST_CHANNEL, text=f"<b>𝖱𝖾𝗉𝗈𝗋𝗍𝖾𝗋 : {mention} ({reporter})\n\n𝖬𝖾𝗌𝗌𝖺𝗀𝖾 : {content}</b>", reply_markup=InlineKeyboardMarkup(btn))
+                reported_post = await client.send_message(chat_id=REQST_CHANNEL, text=f"<b>𝖱𝖾𝗉𝗈𝗋𝗍𝖾𝗋 : {mention} ({reporter})\n\n𝖬𝖾𝗌𝗌𝖺𝗀𝖾 : {content}</b>", reply_markup=InlineKeyboardMarkup(btn))
                 success = True
             elif len(content) >= 3:
                 for admin in ADMINS:
@@ -1127,7 +1127,7 @@ async def requests(bot, message):
                         InlineKeyboardButton('View Request', url=f"{message.link}"),
                         InlineKeyboardButton('Show Options', callback_data=f'show_option#{reporter}')
                       ]]
-                    reported_post = await bot.send_message(chat_id=admin, text=f"<b>𝖱𝖾𝗉𝗈𝗋𝗍𝖾𝗋 : {mention} ({reporter})\n\n𝖬𝖾𝗌𝗌𝖺𝗀𝖾 : {content}</b>", reply_markup=InlineKeyboardMarkup(btn))
+                    reported_post = await client.send_message(chat_id=admin, text=f"<b>𝖱𝖾𝗉𝗈𝗋𝗍𝖾𝗋 : {mention} ({reporter})\n\n𝖬𝖾𝗌𝗌𝖺𝗀𝖾 : {content}</b>", reply_markup=InlineKeyboardMarkup(btn))
                     success = True
             else:
                 if len(content) < 3:
@@ -1142,13 +1142,14 @@ async def requests(bot, message):
         success = False
     
     if success:
-        link = await bot.create_chat_invite_link(int(REQST_CHANNEL))
+        link = await client.create_chat_invite_link(int(REQST_CHANNEL))
         btn = [[
                 InlineKeyboardButton("Join Our Offer Zone 🤑", url=OFR_CNL),
                 InlineKeyboardButton('Search Group', url=GRP_LNK)
               ]]
         await message.reply_text("<b>Your request has been sent to our admin! Please wait for some time.\n\nJoin This Channel For Great Deals On Amazon Flipkart etc.</b>", reply_markup=InlineKeyboardMarkup(btn))
-    
+
+
 @Client.on_message(filters.command("send") & filters.user(ADMINS))
 async def send_msg(bot, message):
     if message.reply_to_message:
