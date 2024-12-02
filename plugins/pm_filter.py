@@ -1892,7 +1892,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
                     text=(
                         f"<b>Hᴇʏ {user.mention}, Sᴏʀʀʏ, ʏᴏᴜʀ ʀᴇϙᴜᴇsᴛᴇᴅ ᴄᴏɴᴛᴇɴᴛ:\n\n"
                         f"➡️ <code>{content}</code>\n\n"
-                        f"is ᴜɴᴀᴠᴀɪʟᴀʙʟᴇ. ᴘʟᴇᴀsᴇ ᴄʜᴇᴄᴋ sᴘᴇʟʟɪɴɢs ᴏʀ ᴛʀʏ ᴀɢᴀɪɴ.</b>"
+                        f"ᴀʀᴇ ʏᴀᴀʀ, ʏᴇ ᴛᴏ ᴍᴜᴊʜᴇ ᴍɪʟ ʜɪ ɴᴀʜɪ ʀᴀʜɪ ʜᴀɪ ᴋᴀʜɪ ʙʜɪ.ᴀɢᴀʀ ꜱᴘᴇʟʟɪɴɢ ꜱᴀʜɪ ʜᴀɪ ᴛᴏ ꜰɪʀ ʏᴇ ʀᴇʟᴇᴀꜱᴇ ɴᴀʜɪ ʜᴜɪ ʜᴏɢɪ ʏᴀ ꜰɪʀ ᴏɴʟɪɴᴇ ᴀᴠᴀɪʟᴀʙʟᴇ ʜɪ ɴᴀʜɪ ʜᴏɢɪ. ᴅᴜꜱʀɪ ᴅᴇᴋʜ ʟᴇ ɴᴀ ʙᴀʙᴜ 😊 #whattowatch@filmykeedha </b>"
                     ),
                     reply_markup=InlineKeyboardMarkup(btn2)
                 )
@@ -1931,7 +1931,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
                     text=(
                         f"<b>Hᴇʏ {user.mention}, Yᴏᴜʀ ʀᴇϙᴜᴇsᴛᴇᴅ ᴄᴏɴᴛᴇɴᴛ:\n\n"
                         f"➡️ <code>{content}</code>\n\n"
-                        f"ʜᴀs ʙᴇᴇɴ ᴜᴘʟᴏᴀᴅᴇᴅ! Cʜᴇᴄᴋ ɪᴛ ᴏᴜᴛ!</b>"
+                        f"ᴍᴇʀᴇ ʙᴀʙᴜ ɴᴇ ʀᴇQᴜᴇꜱᴛ ᴋᴀʀɪ ᴏʀ ᴠᴏ ᴜᴘʟᴏᴀᴅ ɴᴀ ᴋᴀʀᴜ ᴍᴇ 😌. ᴀʙ ꜱᴇᴀʀᴄʜ ᴋᴀʀ ʟᴏ ɢʀᴏᴜᴘ ᴍᴇ 😚.</b>"
                     ),
                     reply_markup=InlineKeyboardMarkup(btn2)
                 )
@@ -1972,7 +1972,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 text=(
                     f"<b>{user.mention}, Yᴏᴜʀ ʀᴇϙᴜᴇsᴛᴇᴅ ᴄᴏɴᴛᴇɴᴛ:\n\n"
                     f"➡️ <code>{content}</code>\n\n"
-                    f"Yᴏᴜʀ ʀᴇᴏ̨ᴜᴇsᴛ ɪs ᴀʟʀᴇᴀᴅʏ ᴀᴠᴀɪʟᴀʙʟᴇ ᴏɴ ᴏᴜʀ ʙᴏᴛ's ᴅᴀᴛᴀʙᴀsᴇ. Kɪɴᴅʟʏ sᴇᴀʀᴄʜ ɪɴ ᴏᴜʀ Gʀᴏᴜᴘ.</b>"
+                    f"ᴀʟʀᴇᴀᴅʏ ᴀᴠᴀɪʟᴀʙʟᴇ. ꜱᴇᴀʀᴄʜ ɢʀᴏᴜᴘ ᴍᴇ ꜱᴇᴀʀᴄʜ ᴋᴀʀɴᴀ ʜᴏᴛᴀ ʜᴀɪ. ʀᴇQᴜᴇꜱᴛ ɢʀᴏᴜᴘ ᴍᴇ ꜱᴇᴀʀᴄʜ ᴍᴀᴛ ᴋᴀʀɴᴀ ᴀᴀɢᴇ ꜱᴇ. ʙᴀʙᴜ ᴛᴜ ᴛᴏ ꜱᴀᴍᴀᴊʜᴅᴀʀ ʜᴀɪ ɴᴀ 😉.</b>"
                 ),
                 reply_markup=InlineKeyboardMarkup(btn2)
             )
@@ -2014,7 +2014,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
                     text=(
                         f"<b>{user.mention}, Yᴏᴜʀ ʀᴇϙᴜᴇsᴛᴇᴅ ᴄᴏɴᴛᴇɴᴛ:\n\n"
                         f"➡️ <code>{content}</code>\n\n"
-                        f"ʏᴏᴜʀ ꜱᴘᴇʟʟɪɴɢ ɪꜱ ɴᴏᴛ ᴄᴏʀʀᴇᴄᴛ. ʙʜᴀɪ ᴀɢᴀʀ ꜱᴘᴇʟʟɪɴɢ ᴋᴇ ᴇʀʀᴏʀ ᴋᴏ ꜱᴀʜɪ ᴋʀɴᴇ ʙᴇᴛʜᴀ ᴛᴏ ᴏʀ ᴋᴜᴄʜ ɴᴀʜɪ ᴋᴀʀ  ᴘᴀᴜɴɢᴀ ɪꜱʟɪʏᴇ ɴᴇxᴛ ᴛɪᴍᴇ ꜱᴘᴇʟʟɪɴɢ ꜱᴀʜɪ ᴅᴀʟɴᴀ. ᴀʙʜɪ ꜱᴀʜɪ ꜱᴘᴇʟʟɪɴɢ ᴄʜᴇᴄᴋ ᴋʀɴᴇ ᴋᴇ  ɴɪᴄʜᴇ ɢᴏᴏɢʟᴇ ɪᴛ ᴋᴀ ʙᴜᴛᴛᴏɴ ᴅɪʏᴀ ʜ ᴜꜱᴘᴇ ᴄʟɪᴄᴋ ᴋᴀʀ. ᴏʀ ꜰɪʀ ꜱᴇᴀʀᴄʜ ɢʀᴏᴜᴘ ᴍᴇ ꜱᴇᴀʀᴄʜ ᴋᴀʀ.</b>"
+                        f"ʏᴏᴜʀ ꜱᴘᴇʟʟɪɴɢ ɪꜱ ɴᴏᴛ ᴄᴏʀʀᴇᴄᴛ. ʙᴀʙᴜ ᴀɢᴀʀ ꜱᴘᴇʟʟɪɴɢ ᴋᴇ ᴇʀʀᴏʀ ᴋᴏ ꜱᴀʜɪ ᴋʀɴᴇ ʙᴇᴛʜɪ ᴛᴏ ᴏʀ ᴋᴜᴄʜ ɴᴀʜɪ ᴋᴀʀ ᴘᴀᴜɴɢɪ ɪꜱʟɪʏᴇ ɴᴇxᴛ ᴛɪᴍᴇ ꜱᴘᴇʟʟɪɴɢ ꜱᴀʜɪ ᴅᴀʟɴᴀ ɴᴀ ʙᴀʙᴜ 🤗. ᴀʙʜɪ ꜱᴀʜɪ ꜱᴘᴇʟʟɪɴɢ ᴄʜᴇᴄᴋ ᴋʀɴᴇ ᴋᴇ ʟɪʏᴇ ɴɪᴄʜᴇ ɢᴏᴏɢʟᴇ ɪᴛ ᴋᴀ ʙᴜᴛᴛᴏɴ ᴅɪʏᴀ ʜᴀɪ ᴜꜱᴘᴇ ᴄʟɪᴄᴋ ᴋᴀʀᴏ. ᴏʀ ꜰɪʀ ꜱᴇᴀʀᴄʜ ɢʀᴏᴜᴘ ᴍᴇ ꜱᴇᴀʀᴄʜ ᴋᴀʀᴏ 😉.</b>"
                     ),
                     reply_markup=InlineKeyboardMarkup(btn2)
                 )
