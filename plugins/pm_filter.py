@@ -1991,20 +1991,17 @@ async def cb_handler(client: Client, query: CallbackQuery):
 
     elif query.data.startswith("CheckF"):
         ident, from_user = query.data.split("#")
-        content = query.message.text.strip()
+        searcx = query.message.text.replace(' ', '+')
         btn = [[
             InlineKeyboardButton("Spelling Mistake", callback_data=f"smalert#{from_user}")
         ]]
-        if content:  # Ensure content is not empty
-             Goofle = f"https://www.google.com/search?q={content.replace(' ', '+')}"
-        else:
-             Goofle = "https://www.google.com"  # Fallback URL if content is invalid
+        
         btn2 = [[
             InlineKeyboardButton("Join Our Offer Zone 🤑", url=OFR_CNL),
         ], [
             InlineKeyboardButton("Search Gʀᴏᴜᴘ Lɪɴᴋ", url=GRP_LNK)
         ], [
-            InlineKeyboardButton("🔎 Google It", url=Goofle)
+            InlineKeyboardButton("🔎 Google It", url= f"https://www.google.com/search?q={searcx}")
         ]]
         if query.from_user.id in ADMINS:
             user = await client.get_users(from_user)
