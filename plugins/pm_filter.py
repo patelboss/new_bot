@@ -1991,7 +1991,8 @@ async def cb_handler(client: Client, query: CallbackQuery):
 
     elif query.data.startswith("CheckF"):
         ident, from_user = query.data.split("#")
-        searcx = query.message.text.replace(' ', '+')
+        content = query.message.text.strip() if query.message.text else ""  # Sanitize input
+        searcx = content.replace(' ', '+') if content else ""  # Prepare Google query
         btn = [[
             InlineKeyboardButton("Spelling Mistake", callback_data=f"smalert#{from_user}")
         ]]
