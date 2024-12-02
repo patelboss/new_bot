@@ -1950,6 +1950,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
     
     elif query.data.startswith("already_available"):
         ident, from_user = query.data.split("#")
+        content = query.message.text.strip()
         btn = [[
                 InlineKeyboardButton("🟢 Aʟʀᴇᴀᴅʏ Aᴠᴀɪʟᴀʙʟᴇ 🟢", callback_data=f"alalert#{from_user}")
               ]]
@@ -1991,7 +1992,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
     
     elif query.data.startswith("CheckF"):
         ident, from_user = query.data.split("#")
-      #  content = query.message.text.strip()  # Use 'content' directly if it already holds the user message
+        content = query.message.text.strip()  # Use 'content' directly if it already holds the user message
       #  search_query = content.replace(' ', '+')  # For Google search, replace spaces with '+'
 
     # Inline button setup for spelling correction
