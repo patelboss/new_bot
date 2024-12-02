@@ -1989,7 +1989,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
         else:
             await query.answer("Yᴏᴜ ᴅᴏɴ'ᴛ ʜᴀᴠᴇ sᴜғғɪᴄɪᴀɴᴛ ʀɪɢᴛs ᴛᴏ ᴅᴏ ᴛʜɪs !", show_alert=True)
 
-        elif query.data.startswith("CheckF"):
+    elif query.data.startswith("CheckF"):
         ident, from_user = query.data.split("#")
         btn = [[
             InlineKeyboardButton("Spelling Mistake", callback_data=f"smalert#{from_user}")
