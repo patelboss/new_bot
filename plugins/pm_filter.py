@@ -85,27 +85,21 @@ async def give_filter(client, message):
                 "Search Group Link: https://t.me/Filmykeedha/306</b>"
             )
         else:
-            # If no files are found, create a request
+            # If no files are found, trigger the request function
             try:
                 reporter = str(message.from_user.id)
                 mention = message.from_user.mention
                 content = search
 
-                if REQST_CHANNEL:
-                    btn = [[
-                        InlineKeyboardButton('View Request', url=f"{message.link}"),
-                        InlineKeyboardButton('Show Options', callback_data=f'show_option#{reporter}')
-                    ]]
-                    await client.send_message(
-                        chat_id=REQST_CHANNEL,
-                        text=f"<b>𝖱𝖾𝗉𝗈𝗋𝗍𝖾𝗋 : {mention} ({reporter})\n\n𝖬𝖾𝗌𝗌𝖺𝗀𝖾 : {content}</b>",
-                        reply_markup=InlineKeyboardMarkup(btn)
-                    )
-                else:
-                    await message.reply_text("<b>Request channel is not configured. Please contact the admin.</b>")
+                # Call the 'requests' function to handle the request
+                success = await requests(client, message)  # Call the requests function here
+
+                if not success:
+                    await message.reply_text("<b>Something went wrong while sending the request. Please try again later.</b>")
+                
             except Exception as e:
                 await message.reply_text(f"<b>Error while requesting: {e}</b>")
-
+                
 @Client.on_message(filters.private & filters.text & filters.incoming)
 async def pm_text(bot, message):
     content = message.text
