@@ -1991,8 +1991,8 @@ async def cb_handler(client: Client, query: CallbackQuery):
     
     elif query.data.startswith("CheckF"):
         ident, from_user = query.data.split("#")
-        content = query.message.text.strip()  # Use 'content' directly if it already holds the user message
-        search_query = content.replace(' ', '+')  # For Google search, replace spaces with '+'
+      #  content = query.message.text.strip()  # Use 'content' directly if it already holds the user message
+      #  search_query = content.replace(' ', '+')  # For Google search, replace spaces with '+'
 
     # Inline button setup for spelling correction
         btn = [[
@@ -2004,9 +2004,10 @@ async def cb_handler(client: Client, query: CallbackQuery):
             InlineKeyboardButton("Join Our Offer Zone 🤑", url=OFR_CNL),
         ], [
             InlineKeyboardButton("Search Gʀᴏᴜᴘ Lɪɴᴋ", url=GRP_LNK)
-        ], [
-            InlineKeyboardButton("🔎 Google It", url=f"https://www.google.com/search?q={search_query}")
         ]]
+                # [
+            #InlineKeyboardButton("🔎 Google It", url=f"https://www.google.com/search?q={search_query}")
+       # ]
 
         if query.from_user.id in ADMINS:
             user = await client.get_users(from_user)
@@ -2021,8 +2022,8 @@ async def cb_handler(client: Client, query: CallbackQuery):
                     text=(
                         f"<b>{user.mention}, Yᴏᴜʀ ʀᴇϙᴜᴇsᴛᴇᴅ ᴄᴏɴᴛᴇɴᴛ:\n\n"
                         f"➡️ <code>{content}</code>\n\n"
-                        f"ʏᴏᴜʀ ꜱᴘᴇʟʟɪɴɢ ɪꜱ ɴᴏᴛ ᴄᴏʀʀᴇᴄᴛ. ʙʜᴀɪ ᴀɢᴀʀ ꜱᴘᴇʟʟɪɴɢ ᴋᴇ ᴇʀʀᴏʀ ᴋᴏ ꜱᴀʜɪ ᴋʀɴᴇ ʙᴇᴛʜᴀ ᴛᴏ ᴏʀ ᴋᴜᴄʜ ɴᴀʜɪ ᴋᴀʀ  ᴘᴀᴜɴɢᴀ ɪꜱʟɪʏᴇ ɴᴇxᴛ ᴛɪᴍᴇ ꜱᴘᴇʟʟɪɴɢ ꜱᴀʜɪ ᴅᴀʟɴᴀ. ᴀʙʜɪ ꜱᴀʜɪ ꜱᴘᴇʟʟɪɴɢ ᴄʜᴇᴄᴋ ᴋʀɴᴇ ᴋᴇ  ɴɪᴄʜᴇ ɢᴏᴏɢʟᴇ ɪᴛ ᴋᴀ ʙᴜᴛᴛᴏɴ ᴅɪʏᴀ ʜ ᴜꜱᴘᴇ ᴄʟɪᴄᴋ ᴋᴀʀ. ᴏʀ ꜰɪʀ ꜱᴇᴀʀᴄʜ ɢʀᴏᴜᴘ ᴍᴇ ꜱᴇᴀʀᴄʜ ᴋᴀʀ.</b>"
-                    ),
+                        f"ʏᴏᴜʀ ꜱᴘᴇʟʟɪɴɢ ɪꜱ ɴᴏᴛ ᴄᴏʀʀᴇᴄᴛ. ʙᴀʙᴜ ᴀɢᴀʀ ꜱᴘᴇʟʟɪɴɢ ᴋᴇ ᴇʀʀᴏʀ ᴋᴏ ꜱᴀʜɪ ᴋʀɴᴇ ʙᴇᴛʜɪ ᴛᴏ ᴏʀ ᴋᴜᴄʜ ɴᴀʜɪ ᴋᴀʀ  ᴘᴀᴜɴɢɪ ɪꜱʟɪʏᴇ ɴᴇxᴛ ᴛɪᴍᴇ ꜱᴘᴇʟʟɪɴɢ ꜱᴀʜɪ ᴅᴀʟɴᴀ. ᴏʀ ꜱᴀʜɪ ꜱᴘᴇʟʟɪɴɢ ɢᴏᴏɢʟᴇ ꜱᴇ ᴄʜᴇᴄᴋ ᴋʀ ʟᴇɴᴀ 😉.</b>"
+                    ), 
                     reply_markup=InlineKeyboardMarkup(btn2)
                 )
             except UserIsBlocked:
