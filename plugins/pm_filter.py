@@ -82,7 +82,7 @@ async def give_filter(client, message):
             await message.reply_text(
                 f"<b>Hey {message.from_user.mention}, {total_results} results found in my database for your query '{search}'.\n\n"
                 "This is a support group, so you can't get files here.\n\n"
-                "Search Group Link: https://linktr.ee/filmykeedha</b>"
+                "Search Group Link: https://t.me/Filmykeedha/306</b>"
             )
         else:
             # If no files are found, create a request
