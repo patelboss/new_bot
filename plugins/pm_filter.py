@@ -19,6 +19,12 @@ from plugins.commands import requests
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.ERROR)
 lock = asyncio.Lock()
+import logging
+
+# Set up basic logging configuration
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 
 BUTTON = {}
 BUTTONS = {}
@@ -33,15 +39,20 @@ async def give_filter(client, message):
     chat_id = message.chat.id
     user_id = message.from_user.id if message.from_user else 0
 
+    logger.info(f"Processing message from user {user_id} in chat {chat_id}")
+
     # If the message is not from the support chat
     if chat_id != SUPPORT_CHAT_ID:
         settings = await get_settings(chat_id)
+        logger.info(f"Settings retrieved for chat {chat_id}: {settings}")
 
         # Check if forced subscription is enabled
         if settings.get("fsub"):
             try:
+                logger.info(f"Checking if user {user_id} is subscribed to the channel.")
                 btn = await pub_is_subscribed(client, message, settings["fsub"])
                 if btn:
+                    logger.info(f"User {user_id} is not subscribed, restricting access and showing unmute button.")
                     btn.append([InlineKeyboardButton("Unmute Me 🔕", callback_data=f"unmuteme#{user_id}")])
                     await client.restrict_chat_member(chat_id, user_id, ChatPermissions(can_send_messages=False))
                     await message.reply_photo(
@@ -52,32 +63,39 @@ async def give_filter(client, message):
                     )
                     return
             except Exception as e:
-                print(e)
+                logger.error(f"Error while checking subscription for user {user_id}: {e}")
 
         # Handle manual filters
+        logger.info(f"Checking for manual filters.")
         manual = await manual_filters(client, message)
         if not manual:
+            logger.info(f"No manual filter applied, checking auto-filter settings.")
             # Check for auto-filter settings
             if settings.get("auto_ffilter", False):
                 ai_search = True
                 reply_msg = await message.reply_text(f"<b><i>Searching for {message.text} 🔍</i></b>")
+                logger.info(f"Auto-filter enabled, searching for {message.text}")
                 await auto_filter(client, message.text, message, reply_msg, ai_search)
             else:
+                logger.info(f"Auto-filter not enabled. Saving group settings.")
                 grpid = await active_connection(str(user_id))
                 await save_group_settings(grpid, "auto_ffilter", True)
                 settings = await get_settings(chat_id)
                 if settings.get("auto_ffilter"):
                     ai_search = True
                     reply_msg = await message.reply_text(f"<b><i>Searching for {message.text} 🔍</i></b>")
+                    logger.info(f"Auto-filter enabled, searching for {message.text}")
                     await auto_filter(client, message.text, message, reply_msg, ai_search)
 
     # If the message is from the support chat
     else:
         search = message.text
+        logger.info(f"Message from support chat. Searching for '{search}' in the database.")
         temp_files, temp_offset, total_results = await get_search_results(
             chat_id=chat_id, query=search.lower(), offset=0, filter=True
         )
         if total_results > 0:
+            logger.info(f"Found {total_results} results for search query '{search}'. Sending group link.")
             # If files are found, reply with the group link
             await message.reply_text(
                 f"<b>Hey {message.from_user.mention}, {total_results} results found in my database for your query '{search}'.\n\n"
@@ -85,6 +103,7 @@ async def give_filter(client, message):
                 "Search Group Link: https://t.me/Filmykeedha/306</b>"
             )
         else:
+            logger.info(f"No results found for query '{search}'. Triggering request function.")
             # If no files are found, trigger the request function
             try:
                 reporter = str(message.from_user.id)
@@ -93,11 +112,14 @@ async def give_filter(client, message):
 
                 # Call the 'requests' function to handle the request
                 success = await requests(client, message)  # Call the requests function here
+                logger.info(f"Request function triggered for {mention}.")
 
                 if not success:
+                    logger.error(f"Failed to send request for user {user_id}.")
                     await message.reply_text("<b>Something went wrong while sending the request. Please try again later.</b>")
                 
             except Exception as e:
+                logger.error(f"Error while requesting for user {user_id}: {e}")
                 await message.reply_text(f"<b>Error while requesting: {e}</b>")
                 
 @Client.on_message(filters.private & filters.text & filters.incoming)
