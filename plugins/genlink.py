@@ -35,7 +35,9 @@ import re
 import base64
 from pyrogram.errors import ChannelInvalid, UsernameInvalid, UsernameNotModified
 from logging import getLogger
-
+import base64
+import json
+import hashlib
 logger = getLogger(__name__)
 
 @Client.on_message(filters.command(['batch', 'pbatch']) & filters.create(allowed))
@@ -141,3 +143,4 @@ async def gen_link_batch(bot, message):
     except Exception as e:
         logger.exception("Failed to generate link for user: %s", message.from_user.id)
         await sts.edit("Failed to generate the link. Please try again.")
+
