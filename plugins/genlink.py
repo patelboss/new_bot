@@ -47,12 +47,17 @@ logging.basicConfig(
     ]
 )
 logger = logging.getLogger(__name__)
+import os
+import json
+import re
+import base64
+from pyrogram.errors import ChannelInvalid, UsernameInvalid, UsernameNotModified
+from logging import getLogger
+
+logger = getLogger(__name__)
 
 @Client.on_message(filters.command(['batch', 'pbatch']) & filters.create(allowed))
 async def gen_link_batch(bot, message):
-    import re, os, json, base64
-    from pyrogram.errors import ChannelInvalid, UsernameInvalid, UsernameNotModified
-
     logger.info("Received batch command from user: %s", message.from_user.id)
 
     # Validate the command format
@@ -116,30 +121,41 @@ async def gen_link_batch(bot, message):
     outlist = []
     links_sent = 0
 
+    # Process each range
     for f_chat_id, f_msg_id, l_msg_id in message_ranges:
-        async for msg in bot.iter_messages(chat_id=f_chat_id, reverse=True, offset_id=f_msg_id, limit=None):
-            if msg.id > l_msg_id:
-                continue
-            if msg.empty or msg.service:
-                continue
-            if not msg.media:
-                continue
+        current_id = f_msg_id - 1  # Start from the offset
+        while True:
+            messages = await bot.get_messages(chat_id=f_chat_id, offset_id=current_id, limit=100)
+            if not messages:  # No more messages
+                break
 
-            try:
-                file_type = msg.media
-                file = getattr(msg, file_type.value, None)
-                caption = getattr(msg, 'caption', '') or ''
-                if file:
-                    outlist.append({
-                        "file_id": file.file_id,
-                        "caption": caption.html if caption else '',
-                        "title": getattr(file, "file_name", ''),
-                        "size": getattr(file, "file_size", 0),
-                        "protect": cmd.lower() == "/pbatch",
-                    })
-                    links_sent += 1
-            except Exception as e:
-                logger.warning("Error processing message %s: %s", msg.id, str(e))
+            for msg in messages:
+                if msg.id > l_msg_id:  # Stop if the message ID exceeds the range
+                    break
+                if msg.empty or msg.service:
+                    continue
+                if not msg.media:
+                    continue
+
+                try:
+                    file_type = msg.media
+                    file = getattr(msg, file_type.value, None)
+                    caption = getattr(msg, 'caption', '') or ''
+                    if file:
+                        outlist.append({
+                            "file_id": file.file_id,
+                            "caption": caption.html if caption else '',
+                            "title": getattr(file, "file_name", ''),
+                            "size": getattr(file, "file_size", 0),
+                            "protect": cmd.lower() == "/pbatch",
+                        })
+                        links_sent += 1
+                except Exception as e:
+                    logger.warning("Error processing message %s: %s", msg.id, str(e))
+
+            current_id = messages[-1].id  # Update the offset for the next batch
+            if current_id >= l_msg_id:  # All messages processed
+                break
 
     # Save Results
     json_file = f"batch_{message.from_user.id}.json"
