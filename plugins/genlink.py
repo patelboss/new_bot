@@ -31,32 +31,6 @@ async def gen_link_s(bot, message):
 
 import os
 import json
-                        links_sent += 1
-                except Exception as e:
-                    logger.warning("Error processing message %s: %s", msg.id, str(e))
-            current_id += 100  # Increment to the next batch
-        except Exception as e:
-            logger.exception("Error iterating messages for user %s: %s", message.from_user.id, str(e))
-            break
-
-    # Save Results
-    json_file = f"batch_{message.from_user.id}.json"
-    with open(json_file, "w") as f:
-        json.dump(outlist, f)
-
-    # Upload to LOG_CHANNEL
-    try:
-        upload = await bot.send_document(
-            LOG_CHANNEL, json_file, file_name="Batch.json", caption="Generated batch file."
-        )
-        logger.info("Batch file uploaded for user: %s. Links Sent: %d", message.from_user.id, links_sent)
-        os.remove(json_file)
-        await sts.edit(f"Link generated! Contains `{links_sent}` files: https://t.me/{temp.U_NAME}?start=BATCH-{upload.document.file_id}")
-    except Exception as e:
-        logger.exception("Failed to upload batch file for user: %s", message.from_user.id)
-        await sts.edit("Failed to upload the batch file. Please try again.")
-import os
-import json
 import re
 import base64
 from pyrogram.errors import ChannelInvalid, UsernameInvalid, UsernameNotModified
