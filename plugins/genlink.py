@@ -129,14 +129,15 @@ async def gen_link_batch(bot, message):
     with open(json_file, "w") as f:
         json.dump(outlist, f)
 
-    # Upload JSON to LOG_CHANNEL
+    # Generate Shortened `start` Parameter
     try:
-        upload = await bot.send_document(
-            LOG_CHANNEL, json_file, file_name="Batch.json", caption="Generated batch file."
-        )
-        logger.info("Batch file uploaded for user: %s. Links Sent: %d", message.from_user.id, links_sent)
-        os.remove(json_file)
-        await sts.edit(f"Link generated! Contains `{links_sent}` files: https://t.me/{temp.U_NAME}?start=BATCH-{upload.document.file_id}")
+        encoded_data = base64.urlsafe_b64encode(json.dumps(outlist).encode()).decode()
+        if len(encoded_data) > 64:  # Truncate to 64 characters if needed
+            encoded_data = encoded_data[:64]
+
+        # Generate Link
+        await sts.edit(f"Link generated! Contains `{links_sent}` files: https://t.me/{temp.U_NAME}?start=BATCH-{encoded_data}")
+        logger.info("Batch link generated for user: %s. Links Sent: %d", message.from_user.id, links_sent)
     except Exception as e:
-        logger.exception("Failed to upload batch file for user: %s", message.from_user.id)
-        await sts.edit("Failed to upload the batch file. Please try again.")
+        logger.exception("Failed to generate link for user: %s", message.from_user.id)
+        await sts.edit("Failed to generate the link. Please try again.")
