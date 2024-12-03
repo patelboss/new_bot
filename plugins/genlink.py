@@ -29,24 +29,7 @@ async def gen_link_s(bot, message):
     outstr = base64.urlsafe_b64encode(string.encode("ascii")).decode().strip("=")
     await message.reply(f"Here is your Link:\nhttps://t.me/{temp.U_NAME}?start={outstr}")    
     
-import logging
-import os
-import json
-import re
-import base64
-from pyrogram.errors import ChannelInvalid, UsernameInvalid, UsernameNotModified
 
-# Configure Logging
-LOG_FILE = "batch_processing.log"
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s",
-    handlers=[
-        logging.FileHandler(LOG_FILE),
-        logging.StreamHandler()
-    ]
-)
-logger = logging.getLogger(__name__)
 import os
 import json
 import re
@@ -68,12 +51,7 @@ async def gen_link_batch(bot, message):
             "Use correct format.\nExample: <code>/batch https://t.me/c/123456789/1 https://t.me/c/123456789/50</code>."
         )
 
-    cmd, *link_list = links
-    if len(link_list) < 2:
-        logger.warning("User provided fewer than two links: %s", message.from_user.id)
-        return await message.reply(
-            "You must provide at least two message links.\nExample: <code>/batch https://t.me/c/123456789/1 https://t.me/c/123456789/50</code>."
-        )
+    cmd, first, last = links[:3]
 
     # Validate links
     def validate_link(link):
@@ -87,23 +65,16 @@ async def gen_link_batch(bot, message):
             chat_id = int("-100" + chat_id)
         return chat_id, msg_id
 
-    # Process all provided links
-    message_ranges = []
-    for i in range(len(link_list) - 1):
-        first = link_list[i]
-        last = link_list[i + 1]
-        f_chat_id, f_msg_id = validate_link(first)
-        l_chat_id, l_msg_id = validate_link(last)
+    f_chat_id, f_msg_id = validate_link(first)
+    l_chat_id, l_msg_id = validate_link(last)
 
-        if not (f_chat_id and l_chat_id):
-            logger.error("Invalid links provided by user: %s", message.from_user.id)
-            return await message.reply("Invalid link(s) provided.")
+    if not (f_chat_id and l_chat_id):
+        logger.error("Invalid links provided by user: %s", message.from_user.id)
+        return await message.reply("Invalid link(s) provided.")
 
-        if f_chat_id != l_chat_id:
-            logger.error("Chat IDs do not match for user: %s", message.from_user.id)
-            return await message.reply("Chat IDs do not match.")
-
-        message_ranges.append((f_chat_id, f_msg_id, l_msg_id))
+    if f_chat_id != l_chat_id:
+        logger.error("Chat IDs do not match for user: %s", message.from_user.id)
+        return await message.reply("Chat IDs do not match.")
 
     # Verify chat
     try:
@@ -121,41 +92,30 @@ async def gen_link_batch(bot, message):
     outlist = []
     links_sent = 0
 
-    # Process each range
-    for f_chat_id, f_msg_id, l_msg_id in message_ranges:
-        current_id = f_msg_id - 1  # Start from the offset
-        while True:
-            messages = await bot.get_messages(chat_id=f_chat_id, offset_id=current_id, limit=100)
-            if not messages:  # No more messages
-                break
+    # Iterate through messages using iter_messages
+    async for msg in bot.iter_messages(chat_id=f_chat_id, reverse=True, offset_id=f_msg_id - 1, limit=0):
+        if msg.id > l_msg_id:  # Stop if the message ID exceeds the range
+            break
+        if msg.empty or msg.service:
+            continue
+        if not msg.media:
+            continue
 
-            for msg in messages:
-                if msg.id > l_msg_id:  # Stop if the message ID exceeds the range
-                    break
-                if msg.empty or msg.service:
-                    continue
-                if not msg.media:
-                    continue
-
-                try:
-                    file_type = msg.media
-                    file = getattr(msg, file_type.value, None)
-                    caption = getattr(msg, 'caption', '') or ''
-                    if file:
-                        outlist.append({
-                            "file_id": file.file_id,
-                            "caption": caption.html if caption else '',
-                            "title": getattr(file, "file_name", ''),
-                            "size": getattr(file, "file_size", 0),
-                            "protect": cmd.lower() == "/pbatch",
-                        })
-                        links_sent += 1
-                except Exception as e:
-                    logger.warning("Error processing message %s: %s", msg.id, str(e))
-
-            current_id = messages[-1].id  # Update the offset for the next batch
-            if current_id >= l_msg_id:  # All messages processed
-                break
+        try:
+            file_type = msg.media
+            file = getattr(msg, file_type.value, None)
+            caption = getattr(msg, 'caption', '') or ''
+            if file:
+                outlist.append({
+                    "file_id": file.file_id,
+                    "caption": caption.html if caption else '',
+                    "title": getattr(file, "file_name", ''),
+                    "size": getattr(file, "file_size", 0),
+                    "protect": cmd.lower() == "/pbatch",
+                })
+                links_sent += 1
+        except Exception as e:
+            logger.warning("Error processing message %s: %s", msg.id, str(e))
 
     # Save Results
     json_file = f"batch_{message.from_user.id}.json"
