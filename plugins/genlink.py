@@ -28,7 +28,6 @@ async def gen_link_s(bot, message):
     string += file_id
     outstr = base64.urlsafe_b64encode(string.encode("ascii")).decode().strip("=")
     await message.reply(f"Here is your Link:\nhttps://t.me/{temp.U_NAME}?start={outstr}")    
-    
 
 import os
 import json
@@ -93,29 +92,35 @@ async def gen_link_batch(bot, message):
     links_sent = 0
 
     # Iterate through messages using iter_messages
-    async for msg in bot.iter_messages(chat_id=f_chat_id, reverse=True, offset_id=f_msg_id - 1, limit=0):
-        if msg.id > l_msg_id:  # Stop if the message ID exceeds the range
-            break
-        if msg.empty or msg.service:
-            continue
-        if not msg.media:
-            continue
-
+    current_id = f_msg_id
+    while current_id <= l_msg_id:
         try:
-            file_type = msg.media
-            file = getattr(msg, file_type.value, None)
-            caption = getattr(msg, 'caption', '') or ''
-            if file:
-                outlist.append({
-                    "file_id": file.file_id,
-                    "caption": caption.html if caption else '',
-                    "title": getattr(file, "file_name", ''),
-                    "size": getattr(file, "file_size", 0),
-                    "protect": cmd.lower() == "/pbatch",
-                })
-                links_sent += 1
+            messages = await bot.get_messages(chat_id=f_chat_id, message_ids=list(range(current_id, min(l_msg_id + 1, current_id + 100))))
+            for msg in messages:
+                if msg.empty or msg.service:
+                    continue
+                if not msg.media:
+                    continue
+
+                try:
+                    file_type = msg.media
+                    file = getattr(msg, file_type.value, None)
+                    caption = getattr(msg, 'caption', '') or ''
+                    if file:
+                        outlist.append({
+                            "file_id": file.file_id,
+                            "caption": caption.html if caption else '',
+                            "title": getattr(file, "file_name", ''),
+                            "size": getattr(file, "file_size", 0),
+                            "protect": cmd.lower() == "/pbatch",
+                        })
+                        links_sent += 1
+                except Exception as e:
+                    logger.warning("Error processing message %s: %s", msg.id, str(e))
+            current_id += 100  # Increment to the next batch
         except Exception as e:
-            logger.warning("Error processing message %s: %s", msg.id, str(e))
+            logger.exception("Error iterating messages for user %s: %s", message.from_user.id, str(e))
+            break
 
     # Save Results
     json_file = f"batch_{message.from_user.id}.json"
