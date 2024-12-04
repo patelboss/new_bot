@@ -21,7 +21,7 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-@Client.on_message(filters.command("start") & filters.incoming) #start
+@Client.on_message(filters.command("nstart") & filters.incoming) #start
 async def start(client, message):
     await message.react(emoji="🤩")
     if message.chat.type in [enums.ChatType.GROUP, enums.ChatType.SUPERGROUP]:
