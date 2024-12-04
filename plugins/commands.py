@@ -15,6 +15,11 @@ logger = logging.getLogger(__name__)
 
 BATCH_FILES = {}
 join_db = JoinReqs
+import logging
+
+# Set up basic logging configuration
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 @Client.on_message(filters.command("start") & filters.incoming) #start
 async def start(client, message):
@@ -1070,111 +1075,127 @@ async def save_template(client, message):
 
 
 @Client.on_message((filters.command(["request", "Request"]) | filters.regex("#request") | filters.regex("#Request")) & filters.group)
-async def requests(bot, message):
-    if REQST_CHANNEL is None or SUPPORT_CHAT_ID is None: return # Must add REQST_CHANNEL and SUPPORT_CHAT_ID to use this feature
+async def requests(client, message):
+    if REQST_CHANNEL is None or SUPPORT_CHAT_ID is None:
+        logger.error("REQST_CHANNEL or SUPPORT_CHAT_ID is not set.")
+        return  # Must add REQST_CHANNEL and SUPPORT_CHAT_ID to use this feature
+
+    # If the message is a reply in the support chat
     if message.reply_to_message and SUPPORT_CHAT_ID == message.chat.id:
         chat_id = message.chat.id
         reporter = str(message.from_user.id)
         mention = message.from_user.mention
-        success = True
         content = message.reply_to_message.text
+        success = True
+
+        logger.info(f"Received request from {mention} ({reporter}) in support chat. Content: {content}")
+
         try:
             if REQST_CHANNEL is not None:
+                logger.info(f"Sending request to REQST_CHANNEL {REQST_CHANNEL}.")
                 btn = [[
                         InlineKeyboardButton('View Request', url=f"{message.reply_to_message.link}"),
                         InlineKeyboardButton('Show Options', callback_data=f'show_option#{reporter}')
                       ]]
-                reported_post = await bot.send_message(chat_id=REQST_CHANNEL, text=f"<b>𝖱𝖾𝗉𝗈𝗋𝗍𝖾𝗋 : {mention} ({reporter})\n\n𝖬𝖾𝗌𝗌𝖺𝗀𝖾 : {content}</b>", reply_markup=InlineKeyboardMarkup(btn))
+                reported_post = await client.send_message(
+                    chat_id=REQST_CHANNEL, 
+                    text=f"<b>𝖱𝖾𝗉𝗈𝗋𝗍𝖾𝗋 : {mention} ({reporter})\n\n𝖬𝖾𝗌𝗌𝖺𝗀𝖾 : {content}</b>", 
+                    reply_markup=InlineKeyboardMarkup(btn)
+                )
+                logger.info(f"Request successfully sent to REQST_CHANNEL.")
                 success = True
             elif len(content) >= 3:
+                logger.info(f"Content is valid (>= 3 characters), sending to admins.")
                 for admin in ADMINS:
                     btn = [[
                         InlineKeyboardButton('View Request', url=f"{message.reply_to_message.link}"),
                         InlineKeyboardButton('Show Options', callback_data=f'show_option#{reporter}')
-                      ]]
-                    reported_post = await bot.send_message(chat_id=admin, text=f"<b>𝖱𝖾𝗉𝗈𝗋𝗍𝖾𝗋 : {mention} ({reporter})\n\n𝖬𝖾𝗌𝗌𝖺𝗀𝖾 : {content}</b>", reply_markup=InlineKeyboardMarkup(btn))
-                    success = True
+                    ]]
+                    reported_post = await client.send_message(
+                        chat_id=admin, 
+                        text=f"<b>𝖱𝖾𝗉𝗈𝗋𝗍𝖾𝗋 : {mention} ({reporter})\n\n𝖬𝖾𝗌𝗌𝖺𝗀𝖾 : {content}</b>", 
+                        reply_markup=InlineKeyboardMarkup(btn)
+                    )
+                    logger.info(f"Request successfully sent to admin {admin}.")
+                success = True
             else:
-                if len(content) < 3:
-                    await message.reply_text("<b>You must type about your request [Minimum 3 Characters]. Requests can't be empty.</b>")
-            if len(content) < 3:
+                logger.warning(f"Content is too short (< 3 characters), replying with warning.")
+                await message.reply_text("<b>You must type about your request [Minimum 3 Characters]. Requests can't be empty.</b>")
                 success = False
         except Exception as e:
+            logger.error(f"Error while processing request from {mention}: {e}")
             await message.reply_text(f"Error: {e}")
-            pass
         
+    # If the message is directly from the support chat (without a reply)
     elif SUPPORT_CHAT_ID == message.chat.id:
         chat_id = message.chat.id
         reporter = str(message.from_user.id)
         mention = message.from_user.mention
-        success = True
         content = message.text
         keywords = ["#request", "/request", "#Request", "/Request"]
         for keyword in keywords:
             if keyword in content:
                 content = content.replace(keyword, "")
+        
+        logger.info(f"Received request from {mention} ({reporter}) with content: {content}")
+
         try:
             if REQST_CHANNEL is not None and len(content) >= 3:
+                logger.info(f"Sending request to REQST_CHANNEL {REQST_CHANNEL}.")
                 btn = [[
                         InlineKeyboardButton('View Request', url=f"{message.link}"),
                         InlineKeyboardButton('Show Options', callback_data=f'show_option#{reporter}')
-                      ]]
-                reported_post = await bot.send_message(chat_id=REQST_CHANNEL, text=f"<b>𝖱𝖾𝗉𝗈𝗋𝗍𝖾𝗋 : {mention} ({reporter})\n\n𝖬𝖾𝗌𝗌𝖺𝗀𝖾 : {content}</b>", reply_markup=InlineKeyboardMarkup(btn))
+                    ]]
+                reported_post = await client.send_message(
+                    chat_id=REQST_CHANNEL, 
+                    text=f"<b>𝖱𝖾𝗉𝗈𝗋𝗍𝖾𝗋 : {mention} ({reporter})\n\n𝖬𝖾𝗌𝗌𝖺𝗀𝖾 : {content}</b>", 
+                    reply_markup=InlineKeyboardMarkup(btn)
+                )
+                logger.info(f"Request successfully sent to REQST_CHANNEL.")
                 success = True
             elif len(content) >= 3:
+                logger.info(f"Content is valid (>= 3 characters), sending to admins.")
                 for admin in ADMINS:
                     btn = [[
                         InlineKeyboardButton('View Request', url=f"{message.link}"),
                         InlineKeyboardButton('Show Options', callback_data=f'show_option#{reporter}')
-                      ]]
-                    reported_post = await bot.send_message(chat_id=admin, text=f"<b>𝖱𝖾𝗉𝗈𝗋𝗍𝖾𝗋 : {mention} ({reporter})\n\n𝖬𝖾𝗌𝗌𝖺𝗀𝖾 : {content}</b>", reply_markup=InlineKeyboardMarkup(btn))
-                    success = True
+                    ]]
+                    reported_post = await client.send_message(
+                        chat_id=admin, 
+                        text=f"<b>𝖱𝖾𝗉𝗈𝗋𝗍𝖾𝗋 : {mention} ({reporter})\n\n𝖬𝖾𝗌𝗌𝖺𝗀𝖾 : {content}</b>", 
+                        reply_markup=InlineKeyboardMarkup(btn)
+                    )
+                    logger.info(f"Request successfully sent to admin {admin}.")
+                success = True
             else:
-                if len(content) < 3:
-                    await message.reply_text("<b>You must type about your request [Minimum 3 Characters]. Requests can't be empty.</b>")
-            if len(content) < 3:
+                logger.warning(f"Content is too short (< 3 characters), replying with warning.")
+                await message.reply_text("<b>You must type about your request [Minimum 3 Characters]. Requests can't be empty.</b>")
                 success = False
         except Exception as e:
+            logger.error(f"Error while processing request from {mention}: {e}")
             await message.reply_text(f"Error: {e}")
-            pass
 
     else:
+        logger.warning("Message is from an invalid chat, request cannot be processed.")
         success = False
     
     if success:
-        link = await bot.create_chat_invite_link(int(REQST_CHANNEL))
-        btn = [[
-                InlineKeyboardButton("Join Our Offer Zone 🤑", url=OFR_CNL),
-                InlineKeyboardButton('Search Group', url=GRP_LNK)
-              ]]
-        await message.reply_text("<b>Your request has been sent to our admin! Please wait for some time.\n\nJoin This Channel For Great Deals On Amazon Flipkart etc.</b>", reply_markup=InlineKeyboardMarkup(btn))
-    
-@Client.on_message(filters.command("send") & filters.user(ADMINS))
-async def send_msg(bot, message):
-    if message.reply_to_message:
-        target_id = message.text.split(" ", 1)[1]
-        out = "Users Saved In DB Are:\n\n"
-        success = False
         try:
-            user = await bot.get_users(target_id)
-            users = await db.get_all_users()
-            async for usr in users:
-                out += f"{usr['id']}"
-                out += '\n'
-            if str(user.id) in str(out):
-                await message.reply_to_message.copy(int(user.id))
-                success = True
-            else:
-                success = False
-            if success:
-                await message.reply_text(f"<b>Your message has been successfully send to {user.mention}.</b>")
-            else:
-                await message.reply_text("<b>This user didn't started this bot yet !</b>")
+            logger.info(f"Request successfully processed for {mention}. Creating invite link.")
+            link = await client.create_chat_invite_link(int(REQST_CHANNEL))
+            btn = [[
+                    InlineKeyboardButton("Join Our Offer Zone 🤑", url=OFR_CNL),
+                    InlineKeyboardButton('Search Group', url=GRP_LNK)
+                ]]
+            await message.reply_text(
+                "<b>Your request has been sent to our admin! Please wait for some time.\n\nJoin This Channel For Great Deals On Amazon Flipkart etc.</b>", 
+                reply_markup=InlineKeyboardMarkup(btn)
+            )
+            logger.info(f"Invite link created and response sent to {mention}.")
         except Exception as e:
-            await message.reply_text(f"<b>Error: {e}</b>")
-    else:
-        await message.reply_text("<b>Use this command as a reply to any message using the target chat id. For eg: /send userid</b>")
-
+            logger.error(f"Error while creating invite link or sending response for {mention}: {e}")
+            await message.reply_text(f"Error: {e}")
+            
 @Client.on_message(filters.command("deletefiles") & filters.user(ADMINS))
 async def deletemultiplefiles(bot, message):
     chat_type = message.chat.type
