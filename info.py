@@ -16,7 +16,10 @@ SESSION = environ.get('SESSION', 'TechVJBot')
 API_ID = int(environ.get('API_ID', ''))
 API_HASH = environ.get('API_HASH', '')
 BOT_TOKEN = environ.get('BOT_TOKEN', "")
-
+DELETEMSG = """❗️❗️❗️IMPORTANT❗️️❗️❗️</u></b>\n\n
+This Movie Files/Videos will be deleted in <b><u>24 Hours</u> 🫥</b> <i>(Due to Copyright Issues)</i>.\n\n
+<b><i>Please forward this ALL Files/Videos to your Saved Messages and Start Download there</i></b>
+"""
 # Bot settings
 CACHE_TIME = int(environ.get('CACHE_TIME', 1800))
 PICS = (environ.get('PICS', 'https://graph.org/file/ce1723991756e48c35aa1.jpg')).split() #SAMPLE PIC
