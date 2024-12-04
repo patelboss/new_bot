@@ -170,100 +170,52 @@ async def start(client, message):
         )
         return
     data = message.command[1]
-    if data.split("-", 1)[0] == "VJ":
-        user_id = int(data.split("-", 1)[1])
-        vj = await referal_add_user(user_id, message.from_user.id)
-        if vj and PREMIUM_AND_REFERAL_MODE == True:
-            await message.reply(f"<b>You have joined using the referral link of user with ID {user_id}\n\nSend /start again to use the bot</b>")
-            num_referrals = await get_referal_users_count(user_id)
-            await client.send_message(chat_id = user_id, text = "<b>{} start the bot with your referral link\n\nTotal Referals - {}</b>".format(message.from_user.mention, num_referrals))
-            if num_referrals == REFERAL_COUNT:
-                time = REFERAL_PREMEIUM_TIME       
-                seconds = await get_seconds(time)
-                if seconds > 0:
-                    expiry_time = datetime.datetime.now() + datetime.timedelta(seconds=seconds)
-                    user_data = {"id": user_id, "expiry_time": expiry_time} 
-                    await db.update_user(user_data)  # Use the update_user method to update or insert user data
-                    await delete_all_referal_users(user_id)
-                    await client.send_message(chat_id = user_id, text = "<b>You Have Successfully Completed Total Referal.\n\nYou Added In Premium For {}</b>".format(REFERAL_PREMEIUM_TIME))
-                    return 
-        else:
-            if PREMIUM_AND_REFERAL_MODE == True:
-                buttons = [[
-                InlineKeyboardButton('Share Us 💕🫶🏻', url=Share_msg)
-            ],[
-                InlineKeyboardButton('⌬ Mᴏᴠɪᴇ Gʀᴏᴜᴘ', url=GRP_LNK)
-            ],[
-                InlineKeyboardButton('〄 Hᴇʟᴘ', callback_data='help'),
-                InlineKeyboardButton('⍟ Aʙᴏᴜᴛ', callback_data='about')
-            ],[
-                InlineKeyboardButton('✇ Jᴏɪɴ Uᴘᴅᴀᴛᴇs Cʜᴀɴɴᴇʟ ✇', url=CHNL_LNK),
-                InlineKeyboardButton('💳 Discount & Offer 🤑', url=OFR_CNL)
-            ]]
-            else:
-                buttons = [[
-                InlineKeyboardButton('Share Us 💕🫶🏻', url=Share_msg)
-            ],[
-                InlineKeyboardButton('⌬ Mᴏᴠɪᴇ Gʀᴏᴜᴘ', url=GRP_LNK)
-            ],[
-                InlineKeyboardButton('〄 Hᴇʟᴘ', callback_data='help'),
-                InlineKeyboardButton('⍟ Aʙᴏᴜᴛ', callback_data='about')
-            ],[
-                InlineKeyboardButton('✇ Jᴏɪɴ Uᴘᴅᴀᴛᴇs Cʜᴀɴɴᴇʟ ✇', url=CHNL_LNK),
-                InlineKeyboardButton('💳 Discount & Offer 🤑', url=OFR_CNL)
-            ]]
-            if CLONE_MODE == True:
-                buttons.append([InlineKeyboardButton('🤖 Cʀᴇᴀᴛᴇ Yᴏᴜʀ Oᴡɴ Cʟᴏɴᴇ Bᴏᴛ 🤖', callback_data='clone')])
-            reply_markup = InlineKeyboardMarkup(buttons)
-            m=await message.reply_sticker("CAACAgIAAxkBAAIMU2dBzBWjzGCg_x2tFumZ76z5l5JiAAJiAANOXNIpTqLDGEjEK3EeBA") 
-            await asyncio.sleep(1)
-            await m.delete()
-            await message.reply_photo(
-                photo=random.choice(PICS),
-                caption=script.START_TXT.format(message.from_user.mention, temp.U_NAME, temp.B_NAME),
-                reply_markup=reply_markup,
-                parse_mode=enums.ParseMode.HTML
-            )
-            return 
-    try:
-        pre, file_id = data.split('_', 1)
-    except:
-        file_id = data
-        pre = ""
     if data.split("-", 1)[0] == "BATCH":
         sts = await message.reply("<b>Please wait...</b>")
         file_id = data.split("-", 1)[1]
+
+    # Check if the file has been cached in the BATCH_FILES dictionary
         msgs = BATCH_FILES.get(file_id)
         if not msgs:
+        # If not cached, download the file from Telegram
             file = await client.download_media(file_id)
-            try: 
+            try:
                 with open(file) as file_data:
-                    msgs=json.loads(file_data.read())
-            except:
+                    msgs = json.loads(file_data.read())  # Decode the batch data
+            except Exception as e:
                 await sts.edit("FAILED")
-                return await client.send_message(LOG_CHANNEL, "UNABLE TO OPEN FILE.")
+                return await client.send_message(LOG_CHANNEL, f"UNABLE TO OPEN FILE: {str(e)}")
             os.remove(file)
-            BATCH_FILES[file_id] = msgs
+            BATCH_FILES[file_id] = msgs  # Cache the decoded data for future use
 
         filesarr = []
         for msg in msgs:
             title = msg.get("title")
-            size=get_size(int(msg.get("size", 0)))
-            f_caption=msg.get("caption", "")
+            size = get_size(int(msg.get("size", 0)))
+            f_caption = msg.get("caption", "")
+
+        # If BATCH_FILE_CAPTION is defined, format the caption
             if BATCH_FILE_CAPTION:
                 try:
-                    f_caption=BATCH_FILE_CAPTION.format(file_name= '' if title is None else title, file_size='' if size is None else size, file_caption='' if f_caption is None else f_caption)
+                    f_caption = BATCH_FILE_CAPTION.format(
+                        file_name='' if title is None else title,
+                        file_size='' if size is None else size,
+                        file_caption='' if f_caption is None else f_caption
+                    )
                 except Exception as e:
                     logger.exception(e)
-                    f_caption=f_caption
+                    f_caption = f_caption
+        
             if f_caption is None:
                 f_caption = f"{title}"
-            try:
-                if STREAM_MODE == True:
-                    # Create the inline keyboard button with callback_data
-                    user_id = message.from_user.id
-                    username =  message.from_user.mention 
 
+            try:
+                if STREAM_MODE:
+                # Generate the inline keyboard buttons with callback_data
+                    user_id = message.from_user.id
+                    username = message.from_user.mention 
+
+                # Log the media to the log channel
                     log_msg = await client.send_cached_media(
                         chat_id=LOG_CHANNEL,
                         file_id=msg.get("file_id"),
@@ -272,25 +224,24 @@ async def start(client, message):
                     stream = f"{URL}watch/{str(log_msg.id)}/{quote_plus(get_name(log_msg))}?hash={get_hash(log_msg)}"
                     download = f"{URL}{str(log_msg.id)}/{quote_plus(get_name(log_msg))}?hash={get_hash(log_msg)}"
  
+                # Send the generated message to the user
                     await log_msg.reply_text(
                         text=f"•• ʟɪɴᴋ ɢᴇɴᴇʀᴀᴛᴇᴅ ꜰᴏʀ ɪᴅ #{user_id} \n•• ᴜꜱᴇʀɴᴀᴍᴇ : {username} \n\n•• ᖴᎥᒪᗴ Nᗩᗰᗴ : {fileName}",
                         quote=True,
                         disable_web_page_preview=True,
-                        reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Join Our Offer Zone 🤑", url=f'https://t.me/+4dWp2gDjwC43YmJl'),  # we download Link
-                                                            InlineKeyboardButton('💳 Dᴏɴᴀᴛᴇ', callback_data='donation')]])  # web stream Link
+                        reply_markup=InlineKeyboardMarkup([[
+                            InlineKeyboardButton("Join Our Offer Zone 🤑", url=f'https://t.me/+4dWp2gDjwC43YmJl'),  # Stream link
+                            InlineKeyboardButton('💳 Dᴏɴᴀᴛᴇ', callback_data='donation')  # Donation link
+                        ]])  
                     )
-                if STREAM_MODE == True:
-                    button = [[
-                        InlineKeyboardButton("Join Our Offer Zone 🤑", url=OFR_CNL)
-                    ],[
-                        InlineKeyboardButton('💳 Dᴏɴᴀᴛᴇ', callback_data='donation')
-                    ]]
-                else:
-                    button = [[
-                        InlineKeyboardButton("Join Our Offer Zone 🤑", url=OFR_CNL)
-                    ],[
-                        InlineKeyboardButton('💳 Dᴏɴᴀᴛᴇ', callback_data='donation')
-                    ]]
+
+            # Define the button layout
+                button = [
+                    [InlineKeyboardButton("Join Our Offer Zone 🤑", url=OFR_CNL)],
+                    [InlineKeyboardButton('💳 Dᴏɴᴀᴛᴇ', callback_data='donation')]
+                ]
+            
+                # Send the media to the user
                 msg = await client.send_cached_media(
                     chat_id=message.from_user.id,
                     file_id=msg.get("file_id"),
@@ -299,7 +250,7 @@ async def start(client, message):
                     reply_markup=InlineKeyboardMarkup(button)
                 )
                 filesarr.append(msg)
-                
+
             except FloodWait as e:
                 await asyncio.sleep(e.x)
                 logger.warning(f"Floodwait of {e.x} sec.")
@@ -311,24 +262,40 @@ async def start(client, message):
                     reply_markup=InlineKeyboardMarkup(button)
                 )
                 filesarr.append(msg)
-                k = await client.send_message(chat_id = message.from_user.id, text=f"<b><u>❗️❗️❗️IMPORTANT❗️️❗️❗️</u></b>\n\nThis Movie Files/Videos will be deleted in <b><u>24 Hours</u> 🫥 <i></b>(Due to Copyright Issues)</i>.\n\n<b><i>Please forward this ALL Files/Videos to your Saved Messages and Start Download there</i></b>")
+
+            # Send an important message about file deletion
+                k = await client.send_message(
+                    chat_id=message.from_user.id, 
+                    text=f"<b><u>❗️❗️❗️IMPORTANT❗️️❗️❗️</u></b>\n\nThis Movie Files/Videos will be deleted in <b><u>24 Hours</u> 🫥 <i></b>(Due to Copyright Issues)</i>.\n\n<b><i>Please forward this ALL Files/Videos to your Saved Messages and Start Download there</i></b>"
+                )
+
+            # Wait for 24 hours before deleting files
                 await asyncio.sleep(86400)
                 for x in filesarr:
                     await x.delete()
                 await k.edit_text("<b>Your All Files/Videos is successfully deleted!!!</b>")
-            
+        
             except Exception as e:
                 logger.warning(e, exc_info=True)
                 continue
-            await asyncio.sleep(1) 
+
+            await asyncio.sleep(1)
+    
         await sts.delete()
-        k = await client.send_message(chat_id = message.from_user.id, text=f"<b><u>❗️❗️❗️IMPORTANT❗️️❗️❗️</u></b>\n\nThis Movie Files/Videos will be deleted in <b><u>24 Hours</u> 🫥 <i></b>(Due to Copyright Issues)</i>.\n\n<b><i>Please forward this ALL Files/Videos to your Saved Messages and Start Download there</i></b>")
+
+    # Send a final reminder about file deletion
+        k = await client.send_message(
+            chat_id=message.from_user.id, 
+            text=f"<b><u>❗️❗️❗️IMPORTANT❗️️❗️❗️</u></b>\n\nThis Movie Files/Videos will be deleted in <b><u>24 Hours</u> 🫥 <i></b>(Due to Copyright Issues)</i>.\n\n<b><i>Please forward this ALL Files/Videos to your Saved Messages and Start Download there</i></b>"
+        )
+
         await asyncio.sleep(86400)
         for x in filesarr:
             await x.delete()
-        await k.edit_text("<b>Your All Files/Videos is successfully deleted!!!</b>")       
-        
-        return
+    
+        await k.edit_text("<b>Your All Files/Videos is successfully deleted!!!</b>")
+    
+        return    
     
     elif data.split("-", 1)[0] == "DSTORE":
         sts = await message.reply("<b>Please wait...</b>")
