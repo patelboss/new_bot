@@ -756,6 +756,14 @@ Also your tutorial will be Added Your Group..."""
 
 এছাড়াও আপনার দল ভিডিও সংগ্রহের প্রশিক্ষণ দেবে..."""
 
+    deletemsg = """
+<b><u>❗️❗️❗️IMPORTANT❗️️❗️❗️</u></b>\n\n
+This Movie Files/Videos will be deleted in <b><u>24 Hours</u> 🫥</b> <i>(Due to Copyright Issues)</i>
+
+<b><i>Please forward this ALL Files/Videos to your Saved Messages or our dumb group then Start Download there</i></b>
+Dumb Group Link: https://t.me/+4U2PRD2nYwQyNWM1
+
+"""
 
     DEVELOPER_TXT = """
 special Thanks To ❤️ Developers -
