@@ -756,7 +756,7 @@ Also your tutorial will be Added Your Group..."""
 
 এছাড়াও আপনার দল ভিডিও সংগ্রহের প্রশিক্ষণ দেবে..."""
 
-    deletemsg = """
+    DELETEMSG = """
 <b><u>❗️❗️❗️IMPORTANT❗️️❗️❗️</u></b>\n\n
 This Movie Files/Videos will be deleted in <b><u>24 Hours</u> 🫥</b> <i>(Due to Copyright Issues)</i>
 
