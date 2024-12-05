@@ -489,7 +489,7 @@ async def start(client, message):
                 reply_markup=InlineKeyboardMarkup(button)
             )
             filesarr.append(msg)
-        k = await client.send_message(chat_id = message.from_user.id, text=DELETEMSG)
+        k = await client.send_message(chat_id = message.from_user.id, Text = script.DELETEMSG)
         await asyncio.sleep(86400)
         for x in filesarr:
             await x.delete()
@@ -572,7 +572,7 @@ async def start(client, message):
             btn = [[
                 InlineKeyboardButton("Get File Again", callback_data=f'del#{file_id}')
             ]]
-            k = await msg.reply(DELETEMSG,quote=True)
+            k = await msg.reply(script.DELETEMSG ,quote=True)
             await asyncio.sleep(86400)
             await msg.delete()
             await k.edit_text("<b>Your File/Video is successfully deleted!!!\n\nClick below button to get your deleted file 👇</b>",reply_markup=InlineKeyboardMarkup(btn))
@@ -627,7 +627,7 @@ async def start(client, message):
     btn = [[
         InlineKeyboardButton("Get File Again", callback_data=f'del#{file_id}')
     ]]
-    k = await msg.reply(DELETEMSG,quote=True)
+    k = await msg.reply(script.DELETEMSG ,quote=True)
     await asyncio.sleep(86400)
     await msg.delete()
     await k.edit_text("<b>Your File/Video is successfully deleted!!!\n\nClick below button to get your deleted file 👇</b>",reply_markup=InlineKeyboardMarkup(btn))
