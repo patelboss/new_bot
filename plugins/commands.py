@@ -276,7 +276,7 @@ async def start(client, message):
                         text=f"•• ʟɪɴᴋ ɢᴇɴᴇʀᴀᴛᴇᴅ ꜰᴏʀ ɪᴅ #{user_id} \n•• ᴜꜱᴇʀɴᴀᴍᴇ : {username} \n\n•• ᖴᎥᒪᗴ Nᗩᗰᗴ : {fileName}",
                         quote=True,
                         disable_web_page_preview=True,
-                        reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Join Our Offer Zone 🤑", url=f'https://t.me/+4dWp2gDjwC43YmJl'),  # we download Link
+                        reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Join Our Offer Zone 🤑", url=OFR_CNL)),  # we download Link
                                                             InlineKeyboardButton('💳 Dᴏɴᴀᴛᴇ', callback_data='donation')]])  # web stream Link
                     )
                 if STREAM_MODE == True:
@@ -311,7 +311,7 @@ async def start(client, message):
                     reply_markup=InlineKeyboardMarkup(button)
                 )
                 filesarr.append(msg)
-                k = await client.send_message(chat_id = message.from_user.id, text=deletemsg)
+                k = await client.send_message(chat_id = message.from_user.id, text = script.DELETEMSG)
                 await asyncio.sleep(86400)
                 for x in filesarr:
                     await x.delete()
@@ -322,7 +322,7 @@ async def start(client, message):
                 continue
             await asyncio.sleep(1) 
         await sts.delete()
-        k = await client.send_message(chat_id = message.from_user.id, text=deletemsg)
+        k = await client.send_message(chat_id = message.from_user.id, text = script.DELETEMSG)
         await asyncio.sleep(86400)
         for x in filesarr:
             await x.delete()
