@@ -489,7 +489,7 @@ async def start(client, message):
                 reply_markup=InlineKeyboardMarkup(button)
             )
             filesarr.append(msg)
-        k = await client.send_message(chat_id = message.from_user.id, Text = script.DELETEMSG)
+        k = await client.send_message(chat_id = message.from_user.id, text = script.DELETEMSG)
         await asyncio.sleep(86400)
         for x in filesarr:
             await x.delete()
