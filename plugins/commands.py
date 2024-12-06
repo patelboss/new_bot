@@ -312,7 +312,7 @@ async def start(client, message):
                 )
                 filesarr.append(msg)
                 k = await client.send_message(chat_id = message.from_user.id, text = script.DELETEMSG)
-                await asyncio.sleep(86400)
+                await asyncio.sleep(4200)
                 for x in filesarr:
                     await x.delete()
                 await k.edit_text("<b>Your All Files/Videos is successfully deleted!!!</b>")
@@ -323,7 +323,7 @@ async def start(client, message):
             await asyncio.sleep(1) 
         await sts.delete()
         k = await client.send_message(chat_id = message.from_user.id, text = script.DELETEMSG)
-        await asyncio.sleep(86400)
+        await asyncio.sleep(4200)
         for x in filesarr:
             await x.delete()
         await k.edit_text("<b>Your All Files/Videos is successfully deleted!!!</b>")       
@@ -400,7 +400,7 @@ async def start(client, message):
         userid = message.from_user.id if message.from_user else None
         settings = await get_settings(chat_id)
         g = await get_shortlink(chat_id, f"https://telegram.me/{temp.U_NAME}?start=allfiles_{file_id}")
-        k = await client.send_message(chat_id=message.from_user.id,text=f"<b>Get All Files in a Single Click!!!\n\n📂 ʟɪɴᴋ ➠ : {g}\n\n<i>Note: This message is deleted in 24 hours to avoid copyrights. Save the link to Somewhere else</i></b>", reply_markup=InlineKeyboardMarkup(
+        k = await client.send_message(chat_id=message.from_user.id,text=f"<b>Get All Files in a Single Click!!!\n\n📂 ʟɪɴᴋ ➠ : {g}\n\n<i>Note: This message is deleted in 1 hour to avoid copyrights. Save the link to Somewhere else or forward to our dumb group\nᴅᴜᴍʙ ɢʀᴏᴜᴘ : https://t.me/+4U2PRD2nYwQyNWM1</i></b>", reply_markup=InlineKeyboardMarkup(
                 [
                     [
                         InlineKeyboardButton("Join Our Offer Zone 🤑", url=OFR_CNL)
@@ -422,7 +422,7 @@ async def start(client, message):
         files_ = await get_file_details(file_id)
         files = files_
         g = await get_shortlink(chat_id, f"https://telegram.me/{temp.U_NAME}?start=file_{file_id}")
-        k = await client.send_message(chat_id=user,text=f'<b>📕Nᴀᴍᴇ ➠ : <code>{files["file_name"]}</code> \n\n🔗Sɪᴢᴇ ➠ : {get_size(files["file_size"])}\n\n📂Fɪʟᴇ ʟɪɴᴋ ➠ : {g}\n\n<i>Note: This message is deleted in 24 hours to avoid copyrights. Save the link to Somewhere else like our dumb group</i></b>', reply_markup=InlineKeyboardMarkup(
+        k = await client.send_message(chat_id=user,text=f'<b>📕Nᴀᴍᴇ ➠ : <code>{files["file_name"]}</code> \n\n🔗Sɪᴢᴇ ➠ : {get_size(files["file_size"])}\n\n📂Fɪʟᴇ ʟɪɴᴋ ➠ : {g}\n\n<i>Note: This message is deleted in 1 hour to avoid copyrights. Save the link to Somewhere else\nᴅᴜᴍʙ ɢʀᴏᴜᴘ: https://t.me/+4U2PRD2nYwQyNWM1</i></b>', reply_markup=InlineKeyboardMarkup(
                 [
                     [
                         InlineKeyboardButton("Join Our Offer Zone 🤑", url=OFR_CNL)
@@ -432,7 +432,7 @@ async def start(client, message):
                 ]
             )
         )
-        await asyncio.sleep(86400)
+        await asyncio.sleep(4200)
         await k.edit("<b>Your message is successfully deleted!!!</b>")
         return
         
@@ -490,7 +490,7 @@ async def start(client, message):
             )
             filesarr.append(msg)
         k = await client.send_message(chat_id = message.from_user.id, text = script.DELETEMSG)
-        await asyncio.sleep(86400)
+        await asyncio.sleep(4200)
         for x in filesarr:
             await x.delete()
         await k.edit_text("<b>Your All Files/Videos is successfully deleted!!!</b>")
@@ -517,7 +517,7 @@ async def start(client, message):
                 ]
                 )
             )
-            await asyncio.sleep(86400)
+            await asyncio.sleep(4200)
             await k.edit("<b>Your message is successfully deleted!!!</b>")
             return
     user = message.from_user.id
@@ -573,7 +573,7 @@ async def start(client, message):
                 InlineKeyboardButton("Get File Again", callback_data=f'del#{file_id}')
             ]]
             k = await msg.reply(script.DELETEMSG ,quote=True)
-            await asyncio.sleep(86400)
+            await asyncio.sleep(4200)
             await msg.delete()
             await k.edit_text("<b>Your File/Video is successfully deleted!!!\n\nClick below button to get your deleted file 👇</b>",reply_markup=InlineKeyboardMarkup(btn))
             return
@@ -628,7 +628,7 @@ async def start(client, message):
         InlineKeyboardButton("Get File Again", callback_data=f'del#{file_id}')
     ]]
     k = await msg.reply(script.DELETEMSG ,quote=True)
-    await asyncio.sleep(86400)
+    await asyncio.sleep(4200)
     await msg.delete()
     await k.edit_text("<b>Your File/Video is successfully deleted!!!\n\nClick below button to get your deleted file 👇</b>",reply_markup=InlineKeyboardMarkup(btn))
     return   
