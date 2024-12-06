@@ -276,7 +276,7 @@ async def start(client, message):
                         text=f"•• ʟɪɴᴋ ɢᴇɴᴇʀᴀᴛᴇᴅ ꜰᴏʀ ɪᴅ #{user_id} \n•• ᴜꜱᴇʀɴᴀᴍᴇ : {username} \n\n•• ᖴᎥᒪᗴ Nᗩᗰᗴ : {fileName}",
                         quote=True,
                         disable_web_page_preview=True,
-                        reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Join Our Offer Zone 🤑", url=OFR_CNL)),  # we download Link
+                        reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Join Our Offer Zone 🤑", url=OFR_CNL),  # we download Link
                                                             InlineKeyboardButton('💳 Dᴏɴᴀᴛᴇ', callback_data='donation')]])  # web stream Link
                     )
                 if STREAM_MODE == True:
