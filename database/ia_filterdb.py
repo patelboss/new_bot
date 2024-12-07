@@ -272,4 +272,4 @@ async def save_batch_details(batch_id, file_data, batch_name, optional_message=N
     }
     try:
         col.insert_one(batch_details)  # Save batch details in the main collection
-        logger.info(f"Batch {batch_id}
+        logger.info(f"Batch {batch_id}")
