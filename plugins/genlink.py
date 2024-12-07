@@ -7,7 +7,7 @@ import hashlib
 from pyrogram import Client, filters, enums
 from pyrogram.errors.exceptions.bad_request_400 import ChannelInvalid, UsernameInvalid, UsernameNotModified
 from info import LOG_CHANNEL, FILE_STORE_CHANNEL, PUBLIC_FILE_STORE
-from database.ia_filterdb import unpack_new_file_id, save_batch_details, get_latest_batch_sequence
+from database.ia_filterdb import unpack_new_file_id, save_batch_details
 from utils import temp
 
 logger = logging.getLogger(__name__)
@@ -73,17 +73,6 @@ async def gen_link_batch(bot, message):
 
     chat_id = next(iter(chat_ids))
 
-    # Verify chat
-    try:
-        chat_id = (await bot.get_chat(chat_id)).id
-        logger.info("Verified chat ID: %s for user: %s", chat_id, message.from_user.id)
-    except (ChannelInvalid, UsernameInvalid, UsernameNotModified) as e:
-        logger.error("Chat verification failed for user %s: %s", message.from_user.id, str(e))
-        return await message.reply("Error accessing chat. Ensure the bot has admin access.")
-    except Exception as e:
-        logger.exception("Unexpected error during chat verification for user %s: %s", message.from_user.id, str(e))
-        return await message.reply(f"Error: {e}")
-
     # Ask for batch name and optional message
     await message.reply("Please provide a name for this batch and an optional message (separate them by `|`).\n"
                         "Example: `My Batch Name | Optional message.`")
@@ -97,6 +86,9 @@ async def gen_link_batch(bot, message):
     sts = await message.reply("Processing your batch. This may take a while...")
     outlist = []
     links_sent = 0
+
+    # Initialize the batch sequence number
+    sequence = 1  # Start from 1 for the sequence number
 
     for _, msg_id in processed_links:
         try:
@@ -113,6 +105,7 @@ async def gen_link_batch(bot, message):
                     "caption": caption.html if caption else '',
                     "title": getattr(file, "file_name", ''),
                     "size": getattr(file, "file_size", 0),
+                    "sequence": f"{sequence:02d}",  # Add sequence number
                     "protect": cmd.lower() == "/pbatch",
                 })
 
@@ -124,12 +117,14 @@ async def gen_link_batch(bot, message):
                     file_name=getattr(file, "file_name", "File"),
                 )
                 links_sent += 1
+                sequence += 1  # Increment sequence for each file
         except Exception as e:
             logger.warning("Error processing message %s: %s", msg_id, str(e))
 
+    # Generate the batch ID using the batch name and the sequence number
+    batch_id = hashlib.sha256(batch_name.encode()).hexdigest()[:15] + f"-{sequence:03d}"
+
     # Save metadata in the database
-    sequence = get_latest_batch_sequence()
-    batch_id = hashlib.sha256(batch_name.encode()).hexdigest()[:15] + f"{sequence:03d}"
     save_batch_details(batch_id, outlist, batch_name, optional_message)
 
     # Generate and send the link
