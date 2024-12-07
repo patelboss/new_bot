@@ -235,8 +235,8 @@ async def start(client, message):
         batch_id = data.split("-", 1)[1]
 
     # Fetch batch metadata from the database
-        from database.batch_mdb import get_batch_metadata
-        batch_metadata = get_batch_metadata(batch_id)
+        from database.ia_filterdb import get_batch_by_id
+        batch_metadata = get_batch_by_id(batch_id)
 
         if not batch_metadata:
             logger.error("Batch ID not found: %s", batch_id)
