@@ -19,7 +19,6 @@ async def allowed(_, __, message):
         return True
     return True  # Anyone can use it now
 
-# Link generation for individual files
 @Client.on_message(filters.command(['link', 'plink']) & filters.create(allowed))
 async def gen_link_s(bot, message):
     vj = await bot.ask(chat_id=message.from_user.id, text="Now Send Me Your Message Which You Want To Store.")
@@ -28,13 +27,12 @@ async def gen_link_s(bot, message):
         return await vj.reply("Send me only video, audio, file, or document.")
     if message.has_protected_content and message.chat.id not in ADMINS:
         return await message.reply("okDa")
-    file_id, ref = unpack_new_file_id((getattr(vj, file_type.value)).file_id))
+    file_id, ref = unpack_new_file_id((getattr(vj, file_type.value)).file_id)
     string = 'filep_' if message.text.lower().strip() == "/plink" else 'file_'
     string += file_id
     outstr = base64.urlsafe_b64encode(string.encode("ascii")).decode().strip("=")
     await message.reply(f"Here is your Link:\nhttps://t.me/{temp.U_NAME}?start={outstr}")
 
-# Link generation for batches
 @Client.on_message(filters.command(['batch', 'pbatch']) & filters.create(allowed))
 async def gen_link_batch(bot, message):
     logger.info("Received batch command from user: %s", message.from_user.id)
