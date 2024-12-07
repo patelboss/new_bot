@@ -247,7 +247,7 @@ async def start(client, message):
     # Extract metadata
         files_metadata = batch_metadata.get("files")
         batch_name = batch_metadata.get("name", "Unnamed Batch")
-        optional_message = batch_metadata.get("message", "")
+        optional_message = batch_metadata.get("message", "")    
         files_sent = []
 
     # Notify user about the batch details
@@ -255,7 +255,7 @@ async def start(client, message):
                             f"<b>Message:</b> {optional_message if optional_message else 'No message provided.'}\n"
                             f"Processing {len(files_metadata)} files...")
 
-        for file_metadata in files_metadata:
+        for index, file_metadata in enumerate(files_metadata, start=1):  # start=1 for sequence number
             try:
                 title = file_metadata.get("title")
                 size = get_size(int(file_metadata.get("size", 0)))
@@ -263,7 +263,7 @@ async def start(client, message):
                 protect = file_metadata.get("protect", False)
 
             # Apply custom caption logic
-                if BATCH_FILE_CAPTION:
+                if "BATCH_FILE_CAPTION" in globals() and BATCH_FILE_CAPTION:
                     try:
                         caption = BATCH_FILE_CAPTION.format(
                             file_name=title or "",
@@ -274,18 +274,31 @@ async def start(client, message):
                         logger.exception("Error formatting custom caption: %s", str(e))
                         caption = caption or title or "File"
 
-            # Send file to the user
-                msg = await client.send_cached_media(
-                    chat_id=message.from_user.id,
-                    file_id=file_metadata.get("file_id"),
-                    caption=caption,
-                    protect_content=protect,
-                    reply_markup=InlineKeyboardMarkup([
-                        [InlineKeyboardButton("Join Our Offer Zone 🤑", url=OFR_CNL)],
-                        [InlineKeyboardButton('💳 Donate', callback_data='donation')]
-                    ])
-                )
-                files_sent.append(msg)
+                # Generate the unique batch link for each file in the batch
+                file_id = file_metadata.get("file_id")
+                link = generate_file_link(file_id, index)  # Assuming generate_file_link generates a link with the sequence number
+
+            # Fetch the file using the generated link (assuming fetch_file_by_link exists)
+                logger.info("Fetching file for link: %s", link)
+                file = await fetch_file_by_link(link)  # This function should retrieve the file from the store
+
+                if file:
+                # Send the file to the user
+                    logger.info("Sending file ID: %s with link: %s to user", file_id, link)
+                    msg = await client.send_cached_media(
+                        chat_id=message.from_user.id,
+                        media=file,  # Sending the file retrieved from the link
+                        caption=f"{caption}\n\nDownload Link: {link}",
+                        protect_content=protect,
+                        reply_markup=InlineKeyboardMarkup([
+                            [InlineKeyboardButton("Join Our Offer Zone 🤑", url=OFR_CNL)],
+                            [InlineKeyboardButton('💳 Donate', callback_data='donation')]
+                        ])
+                    )
+                    files_sent.append(msg)
+                    logger.info("File ID %s successfully sent to user with link: %s", file_id, link)
+                else:
+                    logger.error("File not found for link: %s", link)
 
             except FloodWait as e:
                 logger.warning(f"FloodWait of {e.x} seconds while sending file.")
@@ -301,21 +314,22 @@ async def start(client, message):
         await sts.delete()
 
     # Optional cleanup after some time
+        logger.info("Cleaning up after sending files.")
         cleanup_msg = await client.send_message(
             chat_id=message.from_user.id,
-            text=script.DELETEMSG
+            text="Files sent, cleaning up after some time."
         )
         await asyncio.sleep(4200)  # Adjust duration as needed
 
         for msg in files_sent:
             try:
                 await msg.delete()
+                logger.info("Deleted message for file ID: %s", msg.message_id)
             except Exception as e:
                 logger.warning("Error deleting message: %s", str(e))
 
         await cleanup_msg.edit_text("<b>Your All Files/Videos have been successfully deleted!</b>")
-        logger.info("Batch processing completed for Batch ID: %s", batch_id)
-    
+        logger.info("Batch processing completed for Batch ID: %s", batch_id)        
     elif data.split("-", 1)[0] == "DSTORE":
         sts = await message.reply("<b>Please wait...</b>")
         b_string = data.split("-", 1)[1]
