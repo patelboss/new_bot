@@ -1,6 +1,3 @@
-# Don't Remove Credit @VJ_Botz
-# Subscribe YouTube Channel For Amazing Bot @Tech_VJ
-# Ask Doubt on telegram @KingVJ01
 
 import logging
 from struct import pack
@@ -9,14 +6,14 @@ import base64
 from pyrogram.file_id import FileId
 from pymongo import MongoClient
 from pymongo.errors import DuplicateKeyError
-from info import FILE_DB_URI, SEC_FILE_DB_URI, DATABASE_NAME, COLLECTION_NAME, MULTIPLE_DATABASE, USE_CAPTION_FILTER, MAX_B_TN
+from info import *
 from utils import get_settings, save_group_settings
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 
-client = MongoClient(FILE_DB_URI)
+client = MongoClient(DATABASE_URI)
 db = client[DATABASE_NAME]
 col = db[COLLECTION_NAME]
 
@@ -240,7 +237,7 @@ import hashlib
 import logging
 
 # Ensure that MongoDB client and collections are initialized properly
-client = MongoClient(FILE_DB_URI)
+client = MongoClient(DATABASE_URI)
 db = client[DATABASE_NAME]
 col = db[COLLECTION_NAME]
 
