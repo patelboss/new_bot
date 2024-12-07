@@ -20,32 +20,6 @@ async def allowed(_, __, message):
     return True  # Anyone can use it now
 
 
-@Client.on_message(filters.command(['link', 'plink']) & filters.create(allowed))
-async def gen_link_s(bot, message):
-    logger.info("Received link generation request from user: %s", message.from_user.id)
-    
-    vj = await bot.ask(chat_id=message.from_user.id, text="Now send me the message you want to store.")
-    logger.info("Waiting for message from user: %s", message.from_user.id)
-
-    file_type = vj.media
-    if file_type not in [enums.MessageMediaType.VIDEO, enums.MessageMediaType.AUDIO, enums.MessageMediaType.DOCUMENT]:
-        logger.warning("Invalid media type received: %s", file_type)
-        return await vj.reply("Send me only video, audio, file, or document.")
-    
-    if message.has_protected_content:
-        logger.warning("Protected content detected, cannot process file")
-        return await message.reply("This file has protected content and cannot be processed.")
-
-    file_id, ref = unpack_new_file_id((getattr(vj, file_type.value)).file_id)
-    string = 'filep_' if message.text.lower().strip() == "/plink" else 'file_'
-    string += file_id
-    outstr = base64.urlsafe_b64encode(string.encode("ascii")).decode().strip("=")
-    
-    logger.info("Generated link for file ID: %s", file_id)
-    await message.reply(f"Here is your link:\nhttps://t.me/{temp.U_NAME}?start={outstr}")
-    logger.info("Reply sent to user with generated link")
-
-
 @Client.on_message(filters.command(['batch', 'pbatch']) & filters.create(allowed))
 async def gen_link_batch(bot, message):
     logger.info("Received batch command from user: %s", message.from_user.id)
@@ -115,8 +89,9 @@ async def gen_link_batch(bot, message):
 
     outlist = []
     links_sent = 0
+    last_sequence_number = len(links)
 
-    for _, msg_id in processed_links:
+    for sequence_num, (_, msg_id) in enumerate(processed_links, 1):
         try:
             logger.info("Fetching message with ID: %s", msg_id)
             msg = await bot.get_messages(chat_id=chat_id, message_ids=msg_id)
@@ -125,33 +100,43 @@ async def gen_link_batch(bot, message):
 
             file = getattr(msg, msg.media.value)
             caption = getattr(msg, 'caption', '') or ''
+            title = getattr(file, "file_name", '')
+            size = getattr(file, "file_size", 0)
+
+            # Create unique hash for each file (hash + sequence number)
+            file_hash = hashlib.sha256(f"{batch_name}{file.file_id}{sequence_num}".encode()).hexdigest()[:15]
+            unique_link = f"{file_hash}-{str(sequence_num).zfill(2)}"  # Add sequence number for unique link
+
             outlist.append({
                 "file_id": file.file_id,
                 "caption": caption,
-                "title": getattr(file, "file_name", ''),
-                "size": getattr(file, "file_size", 0),
+                "title": title,
+                "size": size,
                 "protect": cmd.lower() == "/pbatch",
+                "unique_link": unique_link
             })
 
-            # Send the file without a forward tag
+            # Send the file to PUBLIC_FILE_STORE without a forward tag
             logger.info("Sending file ID: %s to PUBLIC_FILE_CHANNEL", file.file_id)
             await bot.send_document(
-                PUBLIC_FILE_CHANNEL,
+                PUBLIC_FILE_STORE,
                 file.file_id,
                 caption=caption,
-                file_name=getattr(file, "file_name", "File"),
+                file_name=title or "File",
                 protect_content=False
             )
             links_sent += 1
         except Exception as e:
             logger.warning("Error processing message %s: %s", msg_id, str(e))
 
-    sequence = get_latest_batch_sequence()
-    batch_id = hashlib.sha256(batch_name.encode()).hexdigest()[:15] + f"{sequence:03d}"
+    # Generate the final batch ID (hash + last sequence number)
+    batch_id = hashlib.sha256(batch_name.encode()).hexdigest()[:15] + f"{last_sequence_number:03d}"
 
+    # Save batch metadata to the database
     await save_batch_details(batch_id, outlist, batch_name, optional_message)
     logger.info("Batch details saved in db for Batch ID: %s", batch_id)
 
+    # Create the final batch link with the last sequence number
     short_link = f"https://t.me/{temp.U_NAME}?start=BATCH-{batch_id}"
     await sts.edit(f"Batch created successfully!\n"
                    f"Batch Name: {batch_name}\n"
@@ -159,6 +144,7 @@ async def gen_link_batch(bot, message):
                    f"Link: {short_link}")
     logger.info("Batch creation status sent to user")
 
+    # Send log to the admin channel
     await bot.send_message(
         LOG_CHANNEL,
         f"New Batch Created:\nBatch ID: {batch_id}\nName: {batch_name}\nMessage: {optional_message}\n"
