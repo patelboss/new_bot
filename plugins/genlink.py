@@ -35,7 +35,7 @@ import re
 import hashlib
 from pyrogram import Client, filters
 from pyrogram.errors import ChannelInvalid, UsernameInvalid, UsernameNotModified
-from database.ia_filterdb import save_batch_metadata, get_last_sequence
+from database.ia_filterdb import save_batch_details, get_latest_batch_sequence
 from utils import allowed, LOG_CHANNEL, get_size
 
 @Client.on_message(filters.command(['batch', 'pbatch']) & filters.create(allowed))
@@ -133,9 +133,9 @@ async def gen_link_batch(bot, message):
             logger.warning("Error processing message %s: %s", msg_id, str(e))
 
     # Save metadata in the database
-    sequence = get_last_sequence()
+    sequence = get_latest_batch_sequence()
     batch_id = hashlib.sha256(batch_name.encode()).hexdigest()[:15] + f"{sequence:03d}"
-    save_batch_metadata(batch_id, outlist, batch_name, optional_message)
+    save_batch_details(batch_id, outlist, batch_name, optional_message)
 
     # Generate and send the link
     short_link = f"https://t.me/{temp.U_NAME}?start={batch_id}"
