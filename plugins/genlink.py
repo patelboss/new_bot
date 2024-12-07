@@ -9,16 +9,15 @@ from pyrogram.errors.exceptions.bad_request_400 import ChannelInvalid, UsernameI
 from info import LOG_CHANNEL, FILE_STORE_CHANNEL, PUBLIC_FILE_STORE
 from database.ia_filterdb import *
 from utils import temp
+from database import save_batch_details, generate_batch_id  # Assuming `save_batch_details` is updated as required.
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
-
 
 # Remove admin verification: Allow everyone
 async def allowed(_, __, message):
     logger.info("Access granted to user: %s", message.from_user.id)
     return True  # Anyone can use it now
-
 
 @Client.on_message(filters.command(['batch', 'pbatch']) & filters.create(allowed))
 async def gen_link_batch(bot, message):
@@ -45,7 +44,7 @@ async def gen_link_batch(bot, message):
         chat_id = match.group(4)
         msg_id = int(match.group(5))
         if chat_id.isnumeric():
-            chat_id = int("-100" + chat_id)
+            chat_id = int("-100" + chat_id)  # Convert to negative for supergroups
         return chat_id, msg_id
 
     processed_links = [validate_link(link) for link in links]
@@ -100,10 +99,10 @@ async def gen_link_batch(bot, message):
 
             file = getattr(msg, msg.media.value)
             caption = getattr(msg, 'caption', '') or ''
-            title = getattr(file, "file_name", '')
+            title = getattr(file, "file_name", 'Unnamed file')
             size = getattr(file, "file_size", 0)
 
-            # Create unique hash for each file (hash + sequence number)
+            # Generate a unique hash for each file (hash + sequence number)
             file_hash = hashlib.sha256(f"{batch_name}{file.file_id}{sequence_num}".encode()).hexdigest()[:15]
             unique_link = f"{file_hash}-{str(sequence_num).zfill(2)}"  # Add sequence number for unique link
 
@@ -112,7 +111,7 @@ async def gen_link_batch(bot, message):
                 "caption": caption,
                 "title": title,
                 "size": size,
-                "protect": cmd.lower() == "/pbatch",
+                "protect": cmd.lower() == "/pbatch",  # Optional protection for batch
                 "unique_link": unique_link
             })
 
@@ -130,9 +129,7 @@ async def gen_link_batch(bot, message):
             logger.warning("Error processing message %s: %s", msg_id, str(e))
 
     # Generate the final batch ID (hash + last sequence number)
-    batch_id = hashlib.sha256(batch_name.encode()).hexdigest()[:15] + f"{last_sequence_number:03d}"
-
-    # Save batch metadata to the database
+    batch_id = generate_batch_id(batch_name)  # Generate the batch ID
     await save_batch_details(batch_id, outlist, batch_name, optional_message)
     logger.info("Batch details saved in db for Batch ID: %s", batch_id)
 
