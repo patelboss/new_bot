@@ -271,7 +271,7 @@ def get_latest_batch_sequence():
     return 0  # If no batches exist, start with sequence number 0
 
 # Function to save batch details to the database
-async def save_batch_details(file_data, batch_name, optional_message=None):
+async def save_batch_details(batch_id, file_data, batch_name, optional_message=None):
     batch_id = generate_batch_id()  # Generate a unique batch ID
     batch_details = {
         "batch_id": batch_id,
