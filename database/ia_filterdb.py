@@ -261,6 +261,7 @@ def get_latest_batch_sequence():
     return 0  # If no batches exist, start with sequence number 0
 
 # Function to save batch details to the database
+# Function to save batch details to the database
 async def save_batch_details(batch_id, file_data, batch_name, optional_message=None):
     batch_id = generate_batch_id()  # Generate a unique batch ID
     batch_details = {
@@ -272,4 +273,6 @@ async def save_batch_details(batch_id, file_data, batch_name, optional_message=N
     }
     try:
         col.insert_one(batch_details)  # Save batch details in the main collection
-        logger.info(f"Batch {batch_id}")
+        logger.info(f"Batch {batch_id}")  # Corrected line
+    except Exception as e:
+        logger.error(f"Error saving batch {batch_id}: {str(e)}")
