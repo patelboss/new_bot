@@ -7,7 +7,7 @@ import hashlib
 from pyrogram import Client, filters, enums
 from pyrogram.errors.exceptions.bad_request_400 import ChannelInvalid, UsernameInvalid, UsernameNotModified
 from info import LOG_CHANNEL, FILE_STORE_CHANNEL, PUBLIC_FILE_STORE
-from database.ia_filterdb import unpack_new_file_id, save_batch_details, get_latest_batch_sequence
+from database.ia_filterdb import *
 from utils import temp
 
 logger = logging.getLogger(__name__)
@@ -104,8 +104,14 @@ async def gen_link_batch(bot, message):
             if msg.empty or msg.service or not msg.media:
                 continue
 
-            file_type = msg.media
-            file = getattr(msg, file_type.value, None)
+            if msg.video:
+                file = msg.video
+            elif msg.document:
+                file = msg.document
+            elif msg.photo:
+                file = msg.photo
+            else:
+                continue
             caption = getattr(msg, 'caption', '') or ''
             if file:
                 outlist.append({
@@ -132,10 +138,10 @@ async def gen_link_batch(bot, message):
     batch_id = hashlib.sha256(batch_name.encode()).hexdigest()[:15] + f"{sequence:03d}"
 
     # Save metadata in the database
-    save_batch_details(batch_id, outlist, batch_name, optional_message)
+    await save_batch_details(batch_id, outlist, batch_name, optional_message)
 
     # Generate and send the link
-    short_link = f"https://t.me/{temp.U_NAME}?start={batch_id}"
+    short_link = f"https://t.me/{temp.U_NAME}?start=BATCH-{batch_id}"
     await sts.edit(f"Batch created successfully!\n"
                    f"Batch Name: {batch_name}\n"
                    f"Contains `{links_sent}` files.\n"
