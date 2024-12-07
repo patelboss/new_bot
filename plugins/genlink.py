@@ -1,26 +1,30 @@
-import re, os, json, base64, logging
-from utils import temp
-from pyrogram import filters, Client, enums
+import re
+import os
+import json
+import base64
+import logging
+import hashlib
+from pyrogram import Client, filters, enums
 from pyrogram.errors.exceptions.bad_request_400 import ChannelInvalid, UsernameInvalid, UsernameNotModified
-from info import ADMINS, LOG_CHANNEL, FILE_STORE_CHANNEL, PUBLIC_FILE_STORE
-from database.ia_filterdb import unpack_new_file_id
+from info import LOG_CHANNEL, FILE_STORE_CHANNEL, PUBLIC_FILE_STORE
+from database.ia_filterdb import unpack_new_file_id, save_batch_details, get_latest_batch_sequence
+from utils import temp
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
+# Remove admin verification: Allow everyone
 async def allowed(_, __, message):
     if PUBLIC_FILE_STORE:
         return True
-    if message.from_user and message.from_user.id in ADMINS:
-        return True
-    return False
+    return True  # Anyone can use it now
 
 @Client.on_message(filters.command(['link', 'plink']) & filters.create(allowed))
 async def gen_link_s(bot, message):
-    vj = await bot.ask(chat_id = message.from_user.id, text = "Now Send Me Your Message Which You Want To Store.")
+    vj = await bot.ask(chat_id=message.from_user.id, text="Now Send Me Your Message Which You Want To Store.")
     file_type = vj.media
     if file_type not in [enums.MessageMediaType.VIDEO, enums.MessageMediaType.AUDIO, enums.MessageMediaType.DOCUMENT]:
-        return await vj.reply("Send me only video,audio,file or document.")
+        return await vj.reply("Send me only video, audio, file, or document.")
     if message.has_protected_content and message.chat.id not in ADMINS:
         return await message.reply("okDa")
     file_id, ref = unpack_new_file_id((getattr(vj, file_type.value)).file_id)
@@ -28,15 +32,6 @@ async def gen_link_s(bot, message):
     string += file_id
     outstr = base64.urlsafe_b64encode(string.encode("ascii")).decode().strip("=")
     await message.reply(f"Here is your Link:\nhttps://t.me/{temp.U_NAME}?start={outstr}")    
-    
-import os
-import json
-import re
-import hashlib
-from pyrogram import Client, filters
-from pyrogram.errors import ChannelInvalid, UsernameInvalid, UsernameNotModified
-from database.ia_filterdb import save_batch_details, get_latest_batch_sequence
-from utils import allowed, LOG_CHANNEL, get_size
 
 @Client.on_message(filters.command(['batch', 'pbatch']) & filters.create(allowed))
 async def gen_link_batch(bot, message):
