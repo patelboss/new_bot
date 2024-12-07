@@ -234,6 +234,19 @@ import json
 from datetime import datetime
 
 # Function to generate a unique batch ID (e.g., BATCH-XXXXXXXXXX-01)
+from pymongo import MongoClient
+from datetime import datetime
+import hashlib
+import logging
+
+# Ensure that MongoDB client and collections are initialized properly
+client = MongoClient(FILE_DB_URI)
+db = client[DATABASE_NAME]
+col = db[COLLECTION_NAME]
+
+logger = logging.getLogger(__name__)
+
+# Function to generate a unique batch ID (e.g., BATCH-XXXXXXXXXX-01)
 def generate_batch_id():
     current_timestamp = datetime.now().strftime("%Y%m%d%H%M%S")  # Unique timestamp for uniqueness
     hash_part = hashlib.sha256(current_timestamp.encode()).hexdigest()[:10]  # First 10 chars of hash for uniqueness
@@ -245,7 +258,16 @@ def get_latest_batch_sequence():
     latest_batch = col.find().sort("batch_id", -1).limit(1)  # Get the most recent batch
     if latest_batch.count() > 0:
         latest_batch_data = latest_batch[0]
-        return int(latest_batch_data["batch_id"].split("-")[-1])  # Extract sequence number
+        batch_id = latest_batch_data.get("batch_id", "")
+        if batch_id:
+            try:
+                return int(batch_id.split("-")[-1])  # Extract sequence number
+            except ValueError:
+                logger.warning("Invalid batch_id format: %s", batch_id)
+                return 0  # If the split fails, return 0
+        else:
+            logger.warning("Missing batch_id in batch document.")
+            return 0
     return 0  # If no batches exist, start with sequence number 0
 
 # Function to save batch details to the database
