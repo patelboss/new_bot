@@ -228,3 +228,49 @@ def unpack_new_file_id(new_file_id):
     )
     file_ref = encode_file_ref(decoded.file_reference)
     return file_id, file_ref
+from pymongo import UpdateOne
+import hashlib
+import json
+from datetime import datetime
+
+# Function to generate a unique batch ID (e.g., BATCH-XXXXXXXXXX-01)
+def generate_batch_id():
+    current_timestamp = datetime.now().strftime("%Y%m%d%H%M%S")  # Unique timestamp for uniqueness
+    hash_part = hashlib.sha256(current_timestamp.encode()).hexdigest()[:10]  # First 10 chars of hash for uniqueness
+    sequence_number = get_latest_batch_sequence() + 1  # Get the latest sequence and increment
+    return f"BATCH-{hash_part}-{str(sequence_number).zfill(2)}"
+
+# Function to get the latest batch sequence number (for uniqueness)
+def get_latest_batch_sequence():
+    latest_batch = col.find().sort("batch_id", -1).limit(1)  # Get the most recent batch
+    if latest_batch.count() > 0:
+        latest_batch_data = latest_batch[0]
+        return int(latest_batch_data["batch_id"].split("-")[-1])  # Extract sequence number
+    return 0  # If no batches exist, start with sequence number 0
+
+# Function to save batch details to the database
+async def save_batch_details(file_data, batch_name, optional_message=None):
+    batch_id = generate_batch_id()  # Generate a unique batch ID
+    batch_details = {
+        "batch_id": batch_id,
+        "file_data": file_data,
+        "batch_name": batch_name,
+        "optional_message": optional_message,
+        "created_at": datetime.now()
+    }
+    try:
+        col.insert_one(batch_details)  # Save batch details in the main collection
+        logger.info(f"Batch {batch_id} successfully saved to database.")
+        return batch_id
+    except Exception as e:
+        logger.error(f"Error saving batch {batch_id}: {str(e)}")
+        return None
+
+# Function to retrieve batch metadata by batch_id
+async def get_batch_by_id(batch_id):
+    batch_details = col.find_one({"batch_id": batch_id})
+    if batch_details:
+        return batch_details
+    else:
+        logger.warning(f"Batch {batch_id} not found.")
+        return None
