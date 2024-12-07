@@ -230,105 +230,91 @@ async def start(client, message):
     except:
         file_id = data
         pre = ""
-    if data.split("-", 1)[0] == "BATCH":
+    elif data.startswith("BATCH-"):
         sts = await message.reply("<b>Please wait...</b>")
-        file_id = data.split("-", 1)[1]
-        msgs = BATCH_FILES.get(file_id)
-        if not msgs:
-            file = await client.download_media(file_id)
-            try: 
-                with open(file) as file_data:
-                    msgs=json.loads(file_data.read())
-            except:
-                await sts.edit("FAILED")
-                return await client.send_message(LOG_CHANNEL, "UNABLE TO OPEN FILE.")
-            os.remove(file)
-            BATCH_FILES[file_id] = msgs
+        batch_id = data.split("-", 1)[1]
 
-        filesarr = []
-        for msg in msgs:
-            title = msg.get("title")
-            size=get_size(int(msg.get("size", 0)))
-            f_caption=msg.get("caption", "")
-            if BATCH_FILE_CAPTION:
-                try:
-                    f_caption=BATCH_FILE_CAPTION.format(file_name= '' if title is None else title, file_size='' if size is None else size, file_caption='' if f_caption is None else f_caption)
-                except Exception as e:
-                    logger.exception(e)
-                    f_caption=f_caption
-            if f_caption is None:
-                f_caption = f"{title}"
+    # Fetch batch metadata from the database
+        from database.batch_mdb import get_batch_metadata
+        batch_metadata = get_batch_metadata(batch_id)
+
+        if not batch_metadata:
+            logger.error("Batch ID not found: %s", batch_id)
+            return await sts.edit("Invalid or expired batch link.")
+
+        logger.info("Batch ID %s found. Processing...", batch_id)
+
+    # Extract metadata
+        files_metadata = batch_metadata.get("files")
+        batch_name = batch_metadata.get("name", "Unnamed Batch")
+        optional_message = batch_metadata.get("message", "")
+        files_sent = []
+
+    # Notify user about the batch details
+        await message.reply(f"<b>Batch Name:</b> {batch_name}\n"
+                            f"<b>Message:</b> {optional_message if optional_message else 'No message provided.'}\n"
+                            f"Processing {len(files_metadata)} files...")
+
+        for file_metadata in files_metadata:
             try:
-                if STREAM_MODE == True:
-                    # Create the inline keyboard button with callback_data
-                    user_id = message.from_user.id
-                    username =  message.from_user.mention 
+                title = file_metadata.get("title")
+                size = get_size(int(file_metadata.get("size", 0)))
+                caption = file_metadata.get("caption", "")
+                protect = file_metadata.get("protect", False)
 
-                    log_msg = await client.send_cached_media(
-                        chat_id=LOG_CHANNEL,
-                        file_id=msg.get("file_id"),
-                    )
-                    fileName = {quote_plus(get_name(log_msg))}
-                    stream = f"{URL}watch/{str(log_msg.id)}/{quote_plus(get_name(log_msg))}?hash={get_hash(log_msg)}"
-                    download = f"{URL}{str(log_msg.id)}/{quote_plus(get_name(log_msg))}?hash={get_hash(log_msg)}"
- 
-                    await log_msg.reply_text(
-                        text=f"•• ʟɪɴᴋ ɢᴇɴᴇʀᴀᴛᴇᴅ ꜰᴏʀ ɪᴅ #{user_id} \n•• ᴜꜱᴇʀɴᴀᴍᴇ : {username} \n\n•• ᖴᎥᒪᗴ Nᗩᗰᗴ : {fileName}",
-                        quote=True,
-                        disable_web_page_preview=True,
-                        reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Join Our Offer Zone 🤑", url=OFR_CNL),  # we download Link
-                                                            InlineKeyboardButton('💳 Dᴏɴᴀᴛᴇ', callback_data='donation')]])  # web stream Link
-                    )
-                if STREAM_MODE == True:
-                    button = [[
-                        InlineKeyboardButton("Join Our Offer Zone 🤑", url=OFR_CNL)
-                    ],[
-                        InlineKeyboardButton('💳 Dᴏɴᴀᴛᴇ', callback_data='donation')
-                    ]]
-                else:
-                    button = [[
-                        InlineKeyboardButton("Join Our Offer Zone 🤑", url=OFR_CNL)
-                    ],[
-                        InlineKeyboardButton('💳 Dᴏɴᴀᴛᴇ', callback_data='donation')
-                    ]]
+            # Apply custom caption logic
+                if BATCH_FILE_CAPTION:
+                    try:
+                        caption = BATCH_FILE_CAPTION.format(
+                            file_name=title or "",
+                            file_size=size or "",
+                            file_caption=caption or ""
+                        )
+                    except Exception as e:
+                        logger.exception("Error formatting custom caption: %s", str(e))
+                        caption = caption or title or "File"
+
+            # Send file to the user
                 msg = await client.send_cached_media(
                     chat_id=message.from_user.id,
-                    file_id=msg.get("file_id"),
-                    caption=f_caption,
-                    protect_content=msg.get('protect', False),
-                    reply_markup=InlineKeyboardMarkup(button)
+                    file_id=file_metadata.get("file_id"),
+                    caption=caption,
+                    protect_content=protect,
+                    reply_markup=InlineKeyboardMarkup([
+                        [InlineKeyboardButton("Join Our Offer Zone 🤑", url=OFR_CNL)],
+                        [InlineKeyboardButton('💳 Donate', callback_data='donation')]
+                    ])
                 )
-                filesarr.append(msg)
-                
+                files_sent.append(msg)
+
             except FloodWait as e:
+                logger.warning(f"FloodWait of {e.x} seconds while sending file.")
                 await asyncio.sleep(e.x)
-                logger.warning(f"Floodwait of {e.x} sec.")
-                msg = await client.send_cached_media(
-                    chat_id=message.from_user.id,
-                    file_id=msg.get("file_id"),
-                    caption=f_caption,
-                    protect_content=msg.get('protect', False),
-                    reply_markup=InlineKeyboardMarkup(button)
-                )
-                filesarr.append(msg)
-                k = await client.send_message(chat_id = message.from_user.id, text = script.DELETEMSG)
-                await asyncio.sleep(4200)
-                for x in filesarr:
-                    await x.delete()
-                await k.edit_text("<b>Your All Files/Videos is successfully deleted!!!</b>")
-            
-            except Exception as e:
-                logger.warning(e, exc_info=True)
                 continue
-            await asyncio.sleep(1) 
+
+            except Exception as e:
+                logger.warning("Error sending file: %s", str(e))
+                continue
+
+            await asyncio.sleep(1)  # Prevent rate-limiting
+
         await sts.delete()
-        k = await client.send_message(chat_id = message.from_user.id, text = script.DELETEMSG)
-        await asyncio.sleep(4200)
-        for x in filesarr:
-            await x.delete()
-        await k.edit_text("<b>Your All Files/Videos is successfully deleted!!!</b>")       
-        
-        return
+
+    # Optional cleanup after some time
+        cleanup_msg = await client.send_message(
+            chat_id=message.from_user.id,
+            text=script.DELETEMSG
+        )
+        await asyncio.sleep(4200)  # Adjust duration as needed
+
+        for msg in files_sent:
+            try:
+                await msg.delete()
+            except Exception as e:
+                logger.warning("Error deleting message: %s", str(e))
+
+        await cleanup_msg.edit_text("<b>Your All Files/Videos have been successfully deleted!</b>")
+        logger.info("Batch processing completed for Batch ID: %s", batch_id)
     
     elif data.split("-", 1)[0] == "DSTORE":
         sts = await message.reply("<b>Please wait...</b>")
