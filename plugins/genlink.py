@@ -152,22 +152,16 @@ async def gen_link_batch(bot, message):
 
 import hashlib
 
-def generate_file_link(file_id, file_index):
+def generate_file_link(unique_link):
     """
-    Generate a unique link for each file based on its file_id and sequence index.
+    Generate a unique link for each file based on its unique_link.
     
     Args:
-        file_id (str): The file ID from the Telegram API for the file.
-        index (int): The sequence number of the file in the batch.
+        unique_link (str): The unique link identifier for the file.
 
     Returns:
         str: A unique file link.
     """
-    # Create a unique hash based on the file ID and index
-    file_data = f"{file_id}-{file_index}"
-    unique_hash = hashlib.sha256(file_data.encode()).hexdigest()[:20]  # Shorten the hash for a clean link
-
-    # Construct a unique file link using the batch identifier and the generated hash
-    file_link = f"https://t.me/{temp.U_NAME}?start=BATCH1-{unique_hash}-{file_index}"
-
+    # Simply return the unique link or use it to construct a new link
+    file_link = f"https://t.me/{temp.U_NAME}?start=BATCH-{unique_link}"
     return file_link
