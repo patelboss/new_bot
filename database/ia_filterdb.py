@@ -330,10 +330,17 @@ async def get_batch_by_id(batch_id):
     :return: A dictionary containing batch details if found, otherwise None.
     """
     try:
+        # Log the batch_id to ensure it is correct
         logger.info(f"Attempting to retrieve batch with ID: {batch_id}")
         
+        # Create an index on batch_id for faster lookups (this can be run separately to ensure index is created)
+        col.create_index("batch_id")
+        
         # Query the database for the batch
-        batch_details = col.find_one({"batch_id": batch_id})
+        batch_details = await col.find_one({"batch_id": batch_id})
+        
+        # Log the raw result from the query to see what is being returned
+        logger.info(f"Retrieved batch details: {batch_details}")
         
         if batch_details:
             logger.info(f"Batch {batch_id} found in the database. Details: {batch_details}")
@@ -341,6 +348,8 @@ async def get_batch_by_id(batch_id):
         else:
             logger.warning(f"Batch {batch_id} not found in the database.")
             return None
+
     except PyMongoError as e:
+        # Log any errors that occur during the query process
         logger.error(f"Error retrieving batch {batch_id} from the database: {str(e)}")
         return None
