@@ -250,6 +250,9 @@ async def start(client, message):
         optional_message = batch_metadata.get("optional_message", "")
         files_sent = []
 
+        logger.debug(f"Type of files_metadata: {type(files_metadata)}")
+        logger.debug(f"Content of files_metadata: {files_metadata}")
+
 # Check # Check if files_metadata exists and is iterable
         if not files_metadata:
             await message.reply("No files found in this batch.")
