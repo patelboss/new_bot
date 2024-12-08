@@ -253,7 +253,7 @@ async def start(client, message):
     # Notify user about the batch details
         await message.reply(f"<b>Batch Name:</b> {batch_name}\n"
                             f"<b>Message:</b> {optional_message if optional_message else 'No message provided.'}\n"
-                            f"Processing {len(files_metadata)} files...")
+                            f"Processing {len(files_metadata) if files_metadata else 0} files...")
 
         for index, file_metadata in enumerate(files_metadata, start=1):  # start=1 for sequence number
             try:
