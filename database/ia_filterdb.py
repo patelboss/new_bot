@@ -353,30 +353,48 @@ async def get_batch_by_id(batch_id):
         # Log any errors that occur during the query process
         logger.error(f"Error retrieving batch {batch_id} from the database: {str(e)}")
         return None
-async def get_file_by_id(file_id: str):
+
+async def get_file_from_batch(batch_id: str, file_index: int):
     """
-    Fetches a file from the database using its file ID.
+    Fetches a specific file from a batch by index.
 
     Args:
-        file_id (str): The unique identifier of the file.
+        batch_id (str): The unique ID of the batch.
+        file_index (int): The index of the file in the batch.
 
     Returns:
-        dict: The file document from the database, or None if not found.
+        dict: The file metadata if found, or None if not.
     """
     try:
-        # Log the file ID for debugging
-        logger.info(f"Attempting to retrieve file with ID: {file_id}")
+        # Log the input parameters
+        logger.info(f"Fetching file from batch: batch_id={batch_id}, file_index={file_index}")
 
-        # Query the database for the file
-        file_data = await files_collection.find_one({"file_id": file_id})
-
-        if file_data:
-            logger.info(f"File {file_id} found in the database.")
-            return file_data
-        else:
-            logger.error(f"No file found for file ID: {file_id}")
+        # Retrieve the batch details using batch_id
+        batch_metadata = await get_batch_by_id(batch_id)
+        if not batch_metadata:
+            logger.error(f"Batch {batch_id} not found in the database.")
             return None
 
-    except PyMongoError as e:
-        logger.error(f"Error retrieving file {file_id} from the database: {str(e)}")
+        logger.info(f"Batch {batch_id} found. Metadata: {batch_metadata}")
+
+        # Retrieve file_data from the batch
+        files_metadata = batch_metadata.get("file_data", [])
+        if not files_metadata or not isinstance(files_metadata, list):
+            logger.error(f"No files found in batch {batch_id}.")
+            return None
+
+        logger.info(f"Batch {batch_id} contains {len(files_metadata)} files.")
+
+        # Ensure the file_index is valid
+        if 0 <= file_index < len(files_metadata):
+            file_metadata = files_metadata[file_index]
+            logger.info(f"File at index {file_index} retrieved from batch {batch_id}: {file_metadata}")
+            return file_metadata
+        else:
+            logger.error(f"Invalid file index {file_index} for batch {batch_id}.")
+            return None
+
+    except Exception as e:
+        # Log any unexpected errors
+        logger.exception(f"Error retrieving file from batch {batch_id}: {str(e)}")
         return None
