@@ -233,64 +233,69 @@ async def start(client, message):
     if data.split("-", 1)[0] == "BATCH":
         sts = await message.reply("<b>Please wait...</b>")
         file_id = data.split("-", 1)[1]
+    
+    # Retrieve batch metadata
         msgs = BATCH_FILES.get(file_id)
         if not msgs:
-            file = await client.download_media(file_id)
-            try: 
-                with open(file) as file_data:
-                    msgs=json.loads(file_data.read())
-            except:
-                await sts.edit("FAILED")
-                return await client.send_message(LOG_CHANNEL, "UNABLE TO OPEN FILE.")
-            os.remove(file)
-            BATCH_FILES[file_id] = msgs
+        # Fetch metadata from database
+            try:
+                result = db.fetch_one("SELECT metadata FROM batch_links WHERE hash = %s", (file_id,))
+                if result:
+                    msgs = json.loads(result[0])  # Convert JSON string back to dictionary
+                    BATCH_FILES[file_id] = msgs  # Cache the result for future use
+                else:
+                    await sts.edit("Batch not found in database.")
+                    return
+            except Exception as e:
+                logger.exception("Failed to fetch batch from database: %s", str(e))
+                await sts.edit("An error occurred while retrieving the batch.")
+                return
 
         filesarr = []
         for msg in msgs:
             title = msg.get("title")
-            size=get_size(int(msg.get("size", 0)))
-            f_caption=msg.get("caption", "")
+            size = get_size(int(msg.get("size", 0)))
+            f_caption = msg.get("caption", "")
+
+        # Format the caption if custom formatting is enabled
             if BATCH_FILE_CAPTION:
                 try:
-                    f_caption=BATCH_FILE_CAPTION.format(file_name= '' if title is None else title, file_size='' if size is None else size, file_caption='' if f_caption is None else f_caption)
+                    f_caption = BATCH_FILE_CAPTION.format(
+                        file_name=title or '',
+                        file_size=size or '',
+                        file_caption=f_caption or ''
+                    )
                 except Exception as e:
-                    logger.exception(e)
-                    f_caption=f_caption
-            if f_caption is None:
-                f_caption = f"{title}"
-            try:
-                if STREAM_MODE == True:
-                    # Create the inline keyboard button with callback_data
-                    user_id = message.from_user.id
-                    username =  message.from_user.mention 
+                    logger.exception("Caption formatting failed: %s", str(e))
+                    f_caption = f_caption or f"{title}"
 
+            try:
+            # Handle streaming or downloading links
+                if STREAM_MODE:
+                    user_id = message.from_user.id
+                    username = message.from_user.mention
                     log_msg = await client.send_cached_media(
                         chat_id=LOG_CHANNEL,
                         file_id=msg.get("file_id"),
                     )
-                    fileName = {quote_plus(get_name(log_msg))}
-                    stream = f"{URL}watch/{str(log_msg.id)}/{quote_plus(get_name(log_msg))}?hash={get_hash(log_msg)}"
-                    download = f"{URL}{str(log_msg.id)}/{quote_plus(get_name(log_msg))}?hash={get_hash(log_msg)}"
- 
+                    file_name = quote_plus(get_name(log_msg))
+                    stream = f"{URL}watch/{log_msg.id}/{file_name}?hash={get_hash(log_msg)}"
+                    download = f"{URL}{log_msg.id}/{file_name}?hash={get_hash(log_msg)}"
+
                     await log_msg.reply_text(
-                        text=f"•• ʟɪɴᴋ ɢᴇɴᴇʀᴀᴛᴇᴅ ꜰᴏʀ ɪᴅ #{user_id} \n•• ᴜꜱᴇʀɴᴀᴍᴇ : {username} \n\n•• ᖴᎥᒪᗴ Nᗩᗰᗴ : {fileName}",
+                        text=f"•• ʟɪɴᴋ ɢᴇɴᴇʀᴀᴛᴇᴅ ꜰᴏʀ ɪᴅ #{user_id} \n•• ᴜꜱᴇʀɴᴀᴍᴇ : {username} \n\n•• ᖴᎥᒪᗴ Nᗩᗰᗴ : {file_name}",
                         quote=True,
                         disable_web_page_preview=True,
-                        reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Join Our Offer Zone 🤑", url=OFR_CNL),  # we download Link
-                                                            InlineKeyboardButton('💳 Dᴏɴᴀᴛᴇ', callback_data='donation')]])  # web stream Link
+                        reply_markup=InlineKeyboardMarkup([
+                            [InlineKeyboardButton("Join Our Offer Zone 🤑", url=OFR_CNL)],
+                            [InlineKeyboardButton('💳 Dᴏɴᴀᴛᴇ', callback_data='donation')]
+                        ])
                     )
-                if STREAM_MODE == True:
-                    button = [[
-                        InlineKeyboardButton("Join Our Offer Zone 🤑", url=OFR_CNL)
-                    ],[
-                        InlineKeyboardButton('💳 Dᴏɴᴀᴛᴇ', callback_data='donation')
-                    ]]
-                else:
-                    button = [[
-                        InlineKeyboardButton("Join Our Offer Zone 🤑", url=OFR_CNL)
-                    ],[
-                        InlineKeyboardButton('💳 Dᴏɴᴀᴛᴇ', callback_data='donation')
-                    ]]
+
+            # Send the file to the user
+                button = [[InlineKeyboardButton("Join Our Offer Zone 🤑", url=OFR_CNL)],
+                          [InlineKeyboardButton('💳 Dᴏɴᴀᴛᴇ', callback_data='donation')]]
+
                 msg = await client.send_cached_media(
                     chat_id=message.from_user.id,
                     file_id=msg.get("file_id"),
@@ -299,36 +304,28 @@ async def start(client, message):
                     reply_markup=InlineKeyboardMarkup(button)
                 )
                 filesarr.append(msg)
-                
+
             except FloodWait as e:
+                logger.warning(f"FloodWait detected: {e.x} seconds.")
                 await asyncio.sleep(e.x)
-                logger.warning(f"Floodwait of {e.x} sec.")
-                msg = await client.send_cached_media(
-                    chat_id=message.from_user.id,
-                    file_id=msg.get("file_id"),
-                    caption=f_caption,
-                    protect_content=msg.get('protect', False),
-                    reply_markup=InlineKeyboardMarkup(button)
-                )
-                filesarr.append(msg)
-                k = await client.send_message(chat_id = message.from_user.id, text = script.DELETEMSG)
-                await asyncio.sleep(4200)
-                for x in filesarr:
-                    await x.delete()
-                await k.edit_text("<b>Your All Files/Videos is successfully deleted!!!</b>")
-            
-            except Exception as e:
-                logger.warning(e, exc_info=True)
                 continue
-            await asyncio.sleep(1) 
+            except Exception as e:
+                logger.warning("Error while sending file: %s", str(e))
+                continue
+
+            await asyncio.sleep(1)
+
         await sts.delete()
-        k = await client.send_message(chat_id = message.from_user.id, text = script.DELETEMSG)
-        await asyncio.sleep(4200)
-        for x in filesarr:
-            await x.delete()
-        await k.edit_text("<b>Your All Files/Videos is successfully deleted!!!</b>")       
-        
-        return
+
+    # Auto-delete files after a specified period
+        try:
+            k = await client.send_message(chat_id=message.from_user.id, text=script.DELETEMSG)
+            await asyncio.sleep(4200)  # Wait before deletion
+            for x in filesarr:
+                await x.delete()
+            await k.edit_text("<b>Your All Files/Videos have been successfully deleted!!!</b>")
+        except Exception as e:
+            logger.warning("Failed to delete files: %s", str(e))
     
     elif data.split("-", 1)[0] == "DSTORE":
         sts = await message.reply("<b>Please wait...</b>")
