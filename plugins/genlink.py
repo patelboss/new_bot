@@ -24,7 +24,7 @@ async def gen_link_batch(bot, message):
 
     links = message.text.strip().split(" ")
     logger.info("Parsing batch links from user: %s", message.from_user.id)
-    
+
     if len(links) < 3:  # Minimum: Command + at least 2 links
         logger.warning("Incorrect batch command format from user: %s", message.from_user.id)
         return await message.reply(
@@ -89,27 +89,25 @@ async def gen_link_batch(bot, message):
     links_sent = 0
     last_sequence_number = len(links)
 
-import hashlib
-
     for sequence_num, (_, msg_id) in enumerate(processed_links, 1):
         try:
             logger.info("Fetching message with ID: %s", msg_id)
             msg = await bot.get_messages(chat_id=chat_id, message_ids=msg_id)
-        
-        # Ensure the message has media and is either a document, video, or photo
+
+            # Ensure the message has media and is either a document, video, or photo
             if not msg or msg.empty or not msg.media:
                 continue
-        
+
             file = getattr(msg, msg.media.value)
             caption = getattr(msg, 'caption', '') or ''
             title = getattr(file, "file_name", 'Unnamed file')
             size = getattr(file, "file_size", 0)
 
-        # Generate a unique hash for each file based on file_id and sequence_num, ensuring uniqueness
+            # Generate a unique hash for each file based on file_id and sequence_num, ensuring uniqueness
             file_hash = hashlib.sha256(f"{file.file_id}{sequence_num}".encode()).hexdigest()[:15]  # Make sure the hash is < 20 characters
             unique_link = file_hash  # Use the file hash directly as the unique link without adding additional prefixes
 
-        # Create the metadata for each file to send to the public file store
+            # Create the metadata for each file to send to the public file store
             outlist.append({
                 "file_id": file.file_id,
                 "caption": caption,
@@ -119,10 +117,10 @@ import hashlib
                 "unique_link": unique_link
             })
 
-        # Check if the file is video, audio, or document to ensure proper handling
+            # Check if the file is video, audio, or document to ensure proper handling
             logger.info("Sending file ID: %s to PUBLIC_FILE_CHANNEL", file.file_id)
             if file.mime_type and "video" in file.mime_type.lower():
-            # Handle video files specifically
+                # Handle video files specifically
                 await bot.send_video(
                     PUBLIC_FILE_STORE,
                     file.file_id,
@@ -131,7 +129,7 @@ import hashlib
                     protect_content=False
                 )
             elif file.mime_type and "audio" in file.mime_type.lower():
-            # Handle audio files (optional, based on your use case)
+                # Handle audio files (optional, based on your use case)
                 await bot.send_audio(
                     PUBLIC_FILE_STORE,
                     file.file_id,
@@ -140,7 +138,7 @@ import hashlib
                     protect_content=False
                 )
             else:
-            # For documents and other file types
+                # For documents and other file types
                 await bot.send_document(
                     PUBLIC_FILE_STORE,
                     file.file_id,
@@ -151,10 +149,11 @@ import hashlib
 
         except Exception as e:
             logger.exception("Error processing message ID: %s", msg_id)
+
     # Generate the final batch ID (hash + last sequence number)
     batch_id = generate_batch_id()  # Generate the batch ID
     await save_batch_details(batch_id, outlist, batch_name, optional_message)
-    logger.info("Batch details saving in db for Batch ID: %s", batch_id)
+    logger.info("Batch details saved in db for Batch ID: %s", batch_id)
 
     # Create the final batch link with the last sequence number
     short_link = f"https://t.me/{temp.U_NAME}?start=BATCH-{batch_id}"
@@ -174,7 +173,14 @@ import hashlib
 
     logger.info("Batch created successfully. Batch ID: %s, User: %s", batch_id, message.from_user.id)
 
-import hashlib
+
+def generate_batch_id():
+    """
+    Generate a unique batch ID (hash + sequence number)
+    """
+    # You can create a custom batch ID generation logic here
+    return hashlib.sha256(os.urandom(64)).hexdigest()[:15]  # Generate a 15-character batch ID
+
 
 def generate_file_link(unique_link):
     """
