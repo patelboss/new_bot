@@ -267,7 +267,7 @@ async def start(client, message):
                                 f"<b>Message:</b> {optional_message if optional_message else 'No message provided.'}\n"
                                 f"Processing {len(files_metadata)} files...")
 
-            for file_index, file_metadata in enumerate(files_metadata, start=1):  # start=1 for sequence number
+            for file_metadata in files_metadata:  # start=1 for sequence number
                 try:
                     title = file_metadata.get("title")
                     size = get_size(int(file_metadata.get("size", 0)))  # Assuming get_size is a function to get human-readable size
@@ -286,17 +286,17 @@ async def start(client, message):
                             logger.exception("Error formatting custom caption: %s", str(e))
                             caption = caption or title or "File"
 
-                # Generate the unique batch link for each file in the batch
-                    file_id = file_metadata.get("file_id")
-                    link = generate_file_link(file_id, file_index)  # Generate the link with sequence number
-
+                 # Generate the unique batch link for each file in the batch
+                    unique_link = file_metadata.get("unique_link")  # Use unique_link directly from the database
+                    link = generate_file_link(unique_link)  # Generate the link using the unique_link
+                   
                 # Fetch the file using the generated link
                     logger.info("Fetching file for link: %s", link)
-                    file = await fetch_file_by_link(link, file_index)  # This function should retrieve the file from the store
+                    file = await fetch_file_by_link(link)  # This function should retrieve the file from the store
 
                     if file:
                     # Send the file to the user
-                        logger.info("Sending file ID: %s with link: %s to user", file_id, link)
+                        logger.info("Sending file ID: %s with link: %s to user", unique_link, link)
                         msg = await bot.send_cached_media(
                             chat_id=message.from_user.id,
                             media=file,  # Sending the file retrieved from the link
@@ -308,7 +308,7 @@ async def start(client, message):
                             ])
                         )
                         files_sent.append(msg)
-                        logger.info("File ID %s successfully sent to user with link: %s", file_id, link)
+                        logger.info("File ID %s successfully sent to user with link: %s", unique_link, link)
                     else:
                         logger.error("File not found for link: %s", link)
 
