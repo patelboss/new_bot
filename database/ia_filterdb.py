@@ -230,10 +230,11 @@ from datetime import datetime
 import hashlib
 import logging
 
+COLLECTIONB_NAME = "Batched"
 # Ensure that MongoDB client and collections are initialized properly
 client = MongoClient(FILE_DB_URI)
 db = client[DATABASE_NAME]
-col = db[COLLECTION_NAME]
+col = db[COLLECTIONB_NAME]
 
 logger = logging.getLogger(__name__)
 
