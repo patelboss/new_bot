@@ -128,7 +128,7 @@ async def gen_link_batch(bot, message):
             logger.warning("Error processing message %s: %s", msg_id, str(e))
 
     # Generate the final batch ID (hash + last sequence number)
-    batch_id = generate_batch_id(batch_name)  # Generate the batch ID
+    batch_id = generate_batch_id()  # Generate the batch ID
     await save_batch_details(batch_id, outlist, batch_name, optional_message)
     logger.info("Batch details saved in db for Batch ID: %s", batch_id)
 
