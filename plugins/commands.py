@@ -291,7 +291,7 @@ async def start(client, message):
                     link = generate_file_link(unique_link)  # Generate the link using the unique_link
                    
                 # Fetch the file using the generated link
-                    logger.info("Fetching file for link: %s", link)
+                    logger.info("Fetching file for link: %s", unique_link)
                     file = await fetch_file_by_link(unique_link, batch_id)  # This function should retrieve the file from the store
 
                     if file:
