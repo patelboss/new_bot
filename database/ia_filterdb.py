@@ -353,3 +353,30 @@ async def get_batch_by_id(batch_id):
         # Log any errors that occur during the query process
         logger.error(f"Error retrieving batch {batch_id} from the database: {str(e)}")
         return None
+async def get_file_by_id(file_id: str):
+    """
+    Fetches a file from the database using its file ID.
+
+    Args:
+        file_id (str): The unique identifier of the file.
+
+    Returns:
+        dict: The file document from the database, or None if not found.
+    """
+    try:
+        # Log the file ID for debugging
+        logger.info(f"Attempting to retrieve file with ID: {file_id}")
+
+        # Query the database for the file
+        file_data = await files_collection.find_one({"file_id": file_id})
+
+        if file_data:
+            logger.info(f"File {file_id} found in the database.")
+            return file_data
+        else:
+            logger.error(f"No file found for file ID: {file_id}")
+            return None
+
+    except PyMongoError as e:
+        logger.error(f"Error retrieving file {file_id} from the database: {str(e)}")
+        return None
