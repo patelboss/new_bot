@@ -292,7 +292,7 @@ async def start(client, message):
 
                 # Fetch the file using the generated link
                     logger.info("Fetching file for link: %s", link)
-                    file = await fetch_file_by_link(link)  # This function should retrieve the file from the store
+                    file = await fetch_file_by_link(link, file_index)  # This function should retrieve the file from the store
 
                     if file:
                     # Send the file to the user
