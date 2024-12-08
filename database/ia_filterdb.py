@@ -354,7 +354,7 @@ async def get_batch_by_id(batch_id):
         logger.error(f"Error retrieving batch {batch_id} from the database: {str(e)}")
         return None
 
-async def get_file_from_batch(batch_id: str, file_index: int):
+async def fetch_file_by_link(batch_id: str, file_index: int):
     """
     Fetches a specific file from a batch by index.
 
