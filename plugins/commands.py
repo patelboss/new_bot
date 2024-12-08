@@ -232,164 +232,118 @@ async def start(client, message):
         file_id = data
         pre = ""
     if data.split("-", 1)[0] == "BATCH":
-        sts = await message.reply("<b>Please wait...</b>")
-        batch_id = data.split("-", 1)[1]
+        # Notify user that the process is starting
+            sts = await message.reply("<b>Please wait...</b>")
+            batch_id = data.split("-", 1)[1]
 
-    # Fetch batch metadata from the database
-        from database.ia_filterdb import get_batch_by_id
-        batch_metadata = await get_batch_by_id(batch_id)
+        # Fetch batch metadata from the database
+            batch_metadata = await get_batch_by_id(batch_id)
 
-        if not batch_metadata:
-            logger.error("Batch ID not found: %s", batch_id)
-            return await sts.edit("Invalid or expired batch link.")
+            if not batch_metadata:
+                logger.error("Batch ID not found: %s", batch_id)
+                return await sts.edit("Invalid or expired batch link.")
 
-        logger.info("Batch ID %s found. Processing...", batch_id)
+            logger.info("Batch ID %s found. Processing...", batch_id)
 
-    # Extract metadata
-        files_metadata = batch_metadata.get("file_data")  # Use the correct key for files
-        batch_name = batch_metadata.get("batch_name", "Unnamed Batch")
-        optional_message = batch_metadata.get("optional_message", "")
-        files_sent = []
+        # Extract metadata
+            files_metadata = batch_metadata.get("file_data")
+            batch_name = batch_metadata.get("batch_name", "Unnamed Batch")
+            optional_message = batch_metadata.get("optional_message", "")
+            files_sent = []
 
-        logger.debug(f"Type of files_metadata: {type(files_metadata)}")
-        logger.debug(f"Content of files_metadata: {files_metadata}")
+        # Check if files_metadata exists and is iterable
+            if not files_metadata:
+                await message.reply("No files found in this batch.")
+                logger.error(f"files_metadata is None or empty for batch {batch_metadata.get('batch_id', 'Unknown')}")
+                return
 
-# Check # Check if files_metadata exists and is iterable
-        if not files_metadata:
-            await message.reply("No files found in this batch.")
-            logger.error(f"files_metadata is None or empty for batch {batch_metadata.get('batch_id', 'Unknown')}")
-            return
+            if not isinstance(files_metadata, list):
+                await message.reply("Invalid file data format in this batch.")
+                logger.error(f"files_metadata is not a list for batch {batch_metadata.get('batch_id', 'Unknown')}. Type: {type(files_metadata)}")
+                return
 
-        if not isinstance(files_metadata, builtins.list):
-            logger.error(f"files_metadata is not a list. It is of type: {type(files_metadata)}")
-            await message.reply("No files found in this batch.")
-            logger.error(f"files_metadata is not a list for batch {batch_metadata.get('batch_id', 'Unknown')}. Type: {type(files_metadata)}")
-            return
+        # Notify user about the batch details
+            await message.reply(f"<b>Batch Name:</b> {batch_name}\n"
+                                f"<b>Message:</b> {optional_message if optional_message else 'No message provided.'}\n"
+                                f"Processing {len(files_metadata)} files...")
 
-# Notify user about the batch details
-        await message.reply(f"<b>Batch Name:</b> {batch_name}\n"
-                            f"<b>Message:</b> {optional_message if optional_message else 'No message provided.'}\n"
-                            f"Processing {len(files_metadata)} files...")
-        for index, file_metadata in enumerate(files_metadata, start=1):  # start=1 for sequence number
-            try:
-                title = file_metadata.get("title")
-                size = get_size(int(file_metadata.get("size", 0)))
-                caption = file_metadata.get("caption", "")
-                protect = file_metadata.get("protect", False)
+            for index, file_metadata in enumerate(files_metadata, start=1):  # start=1 for sequence number
+                try:
+                    title = file_metadata.get("title")
+                    size = get_size(int(file_metadata.get("size", 0)))  # Assuming get_size is a function to get human-readable size
+                    caption = file_metadata.get("caption", "")
+                    protect = file_metadata.get("protect", False)
 
-            # Apply custom caption logic
-                if "BATCH_FILE_CAPTION" in globals() and BATCH_FILE_CAPTION:
-                    try:
-                        caption = BATCH_FILE_CAPTION.format(
-                            file_name=title or "",
-                            file_size=size or "",
-                            file_caption=caption or ""
-                        )
-                    except Exception as e:
-                        logger.exception("Error formatting custom caption: %s", str(e))
-                        caption = caption or title or "File"
+                # Apply custom caption logic (if defined)
+                    if "BATCH_FILE_CAPTION" in globals() and BATCH_FILE_CAPTION:
+                        try:
+                            caption = BATCH_FILE_CAPTION.format(
+                                file_name=title or "",
+                                file_size=size or "",
+                                file_caption=caption or ""
+                            )
+                        except Exception as e:
+                            logger.exception("Error formatting custom caption: %s", str(e))
+                            caption = caption or title or "File"
 
                 # Generate the unique batch link for each file in the batch
-                file_id = file_metadata.get("file_id")
-                link = generate_file_link(file_id, index)  # Assuming generate_file_link generates a link with the sequence number
+                    file_id = file_metadata.get("file_id")
+                    link = generate_file_link(file_id, index)  # Generate the link with sequence number
 
-            # Fetch the file using the generated link (assuming fetch_file_by_link exists)
-                logger.info("Fetching file for link: %s", link)
-                file = await fetch_file_by_link(link)  # This function should retrieve the file from the store
+                # Fetch the file using the generated link
+                    logger.info("Fetching file for link: %s", link)
+                    file = await fetch_file_by_link(link)  # This function should retrieve the file from the store
 
-                if file:
-                # Send the file to the user
-                    logger.info("Sending file ID: %s with link: %s to user", file_id, link)
-                    msg = await client.send_cached_media(
-                        chat_id=message.from_user.id,
-                        media=file,  # Sending the file retrieved from the link
-                        caption=f"{caption}\n\nDownload Link: {link}",
-                        protect_content=protect,
-                        reply_markup=InlineKeyboardMarkup([
-                            [InlineKeyboardButton("Join Our Offer Zone 🤑", url=OFR_CNL)],
-                            [InlineKeyboardButton('💳 Donate', callback_data='donation')]
-                        ])
-                    )
-                    files_sent.append(msg)
-                    logger.info("File ID %s successfully sent to user with link: %s", file_id, link)
-                else:
-                    logger.error("File not found for link: %s", link)
+                    if file:
+                    # Send the file to the user
+                        logger.info("Sending file ID: %s with link: %s to user", file_id, link)
+                        msg = await bot.send_cached_media(
+                            chat_id=message.from_user.id,
+                            media=file,  # Sending the file retrieved from the link
+                            caption=f"{caption}\n\nDownload Link: {link}",
+                            protect_content=protect,
+                            reply_markup=InlineKeyboardMarkup([
+                                [InlineKeyboardButton("Join Our Offer Zone 🤑", url=OFR_CNL)],
+                                [InlineKeyboardButton('💳 Donate', callback_data='donation')]
+                            ])
+                        )
+                        files_sent.append(msg)
+                        logger.info("File ID %s successfully sent to user with link: %s", file_id, link)
+                    else:
+                        logger.error("File not found for link: %s", link)
 
-            except FloodWait as e:
-                logger.warning(f"FloodWait of {e.x} seconds while sending file.")
-                await asyncio.sleep(e.x)
-                continue
-
-            except Exception as e:
-                logger.warning("Error sending file: %s", str(e))
-                continue
-
-            await asyncio.sleep(1)  # Prevent rate-limiting
-
-        await sts.delete()
-
-    # Optional cleanup after some time
-        logger.info("Cleaning up after sending files.")
-        cleanup_msg = await client.send_message(
-            chat_id=message.from_user.id,
-            text="Files sent, cleaning up after some time."
-        )
-        await asyncio.sleep(4200)  # Adjust duration as needed
-
-        for msg in files_sent:
-            try:
-                await msg.delete()
-                logger.info("Deleted message for file ID: %s", msg.message_id)
-            except Exception as e:
-                logger.warning("Error deleting message: %s", str(e))
-
-        await cleanup_msg.edit_text("<b>Your All Files/Videos have been successfully deleted!</b>")
-        logger.info("Batch processing completed for Batch ID: %s", batch_id)        
-    elif data.split("-", 1)[0] == "DSTORE":
-        sts = await message.reply("<b>Please wait...</b>")
-        b_string = data.split("-", 1)[1]
-        decoded = (base64.urlsafe_b64decode(b_string + "=" * (-len(b_string) % 4))).decode("ascii")
-        try:
-            f_msg_id, l_msg_id, f_chat_id, protect = decoded.split("_", 3)
-        except:
-            f_msg_id, l_msg_id, f_chat_id = decoded.split("_", 2)
-            protect = "/pbatch" if PROTECT_CONTENT else "batch"
-        diff = int(l_msg_id) - int(f_msg_id)
-        async for msg in client.iter_messages(int(f_chat_id), int(l_msg_id), int(f_msg_id)):
-            if msg.media:
-                media = getattr(msg, msg.media.value)
-                if BATCH_FILE_CAPTION:
-                    try:
-                        f_caption=BATCH_FILE_CAPTION.format(file_name=getattr(media, 'file_name', ''), file_size=getattr(media, 'file_size', ''), file_caption=getattr(msg, 'caption', ''))
-                    except Exception as e:
-                        logger.exception(e)
-                        f_caption = getattr(msg, 'caption', '')
-                else:
-                    media = getattr(msg, msg.media.value)
-                    file_name = getattr(media, 'file_name', '')
-                    f_caption = getattr(msg, 'caption', file_name)
-                try:
-                    await msg.copy(message.chat.id, caption=f_caption, protect_content=True if protect == "/pbatch" else False)
                 except FloodWait as e:
+                    logger.warning(f"FloodWait of {e.x} seconds while sending file.")
                     await asyncio.sleep(e.x)
-                    await msg.copy(message.chat.id, caption=f_caption, protect_content=True if protect == "/pbatch" else False)
-                except Exception as e:
-                    logger.exception(e)
                     continue
-            elif msg.empty:
-                continue
-            else:
-                try:
-                    await msg.copy(message.chat.id, protect_content=True if protect == "/pbatch" else False)
-                except FloodWait as e:
-                    await asyncio.sleep(e.x)
-                    await msg.copy(message.chat.id, protect_content=True if protect == "/pbatch" else False)
-                except Exception as e:
-                    logger.exception(e)
-                    continue
-            await asyncio.sleep(1) 
-        return await sts.delete()
 
+                except Exception as e:
+                    logger.warning("Error sending file: %s", str(e))
+                    continue
+
+                await asyncio.sleep(1)  # Prevent rate-limiting
+
+        # Remove the initial status message
+            await sts.delete()
+
+        # Optional cleanup after some time
+            logger.info("Cleaning up after sending files.")
+            cleanup_msg = await bot.send_message(
+                chat_id=message.from_user.id,
+                text="Files sent, cleaning up after some time."
+            )
+            await asyncio.sleep(100)  # Adjust duration as needed
+
+            for msg in files_sent:
+                try:
+                    await msg.delete()
+                    logger.info("Deleted message for file ID: %s", msg.message_id)
+                except Exception as e:
+                    logger.warning("Error deleting message: %s", str(e))
+
+            await cleanup_msg.edit_text("<b>Your All Files/Videos have been successfully deleted!</b>")
+            logger.info("Batch processing completed for Batch ID: %s", batch_id)
+        
     elif data.split("-", 1)[0] == "verify":
         userid = data.split("-", 2)[1]
         token = data.split("-", 3)[2]
