@@ -354,20 +354,20 @@ async def get_batch_by_id(batch_id):
         logger.error(f"Error retrieving batch {batch_id} from the database: {str(e)}")
         return None
 
-async def fetch_file_by_link(batch_id: str, file_index: int):
+async def fetch_file_by_link(batch_id: str, unique_link: str):
     """
-    Fetches a specific file from a batch by index.
+    Fetches a specific file from a batch by its unique link.
 
     Args:
         batch_id (str): The unique ID of the batch.
-        file_index (int): The index of the file in the batch.
+        unique_link (str): The unique link identifier for the file.
 
     Returns:
         dict: The file metadata if found, or None if not.
     """
     try:
         # Log the input parameters
-        logger.info(f"Fetching file from batch: batch_id={batch_id}, file_index={file_index}")
+        logger.info(f"Fetching file from batch: batch_id={batch_id}, unique_link={unique_link}")
 
         # Retrieve the batch details using batch_id
         batch_metadata = await get_batch_by_id(batch_id)
@@ -385,14 +385,15 @@ async def fetch_file_by_link(batch_id: str, file_index: int):
 
         logger.info(f"Batch {batch_id} contains {len(files_metadata)} files.")
 
-        # Ensure the file_index is valid
-        if 0 <= file_index < len(files_metadata):
-            file_metadata = files_metadata[file_index]
-            logger.info(f"File at index {file_index} retrieved from batch {batch_id}: {file_metadata}")
-            return file_metadata
-        else:
-            logger.error(f"Invalid file index {file_index} for batch {batch_id}.")
-            return None
+        # Search for the file using its unique_link
+        for file_metadata in files_metadata:
+            if file_metadata.get("unique_link") == unique_link:
+                logger.info(f"File with unique_link {unique_link} retrieved from batch {batch_id}: {file_metadata}")
+                return file_metadata
+
+        # If the file with the unique_link is not found
+        logger.error(f"File with unique_link {unique_link} not found in batch {batch_id}.")
+        return None
 
     except Exception as e:
         # Log any unexpected errors
