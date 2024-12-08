@@ -12,6 +12,7 @@ from database.connections_mdb import active_connection
 from urllib.parse import quote_plus
 from TechVJ.util.file_properties import get_name, get_hash, get_media_file_size
 logger = logging.getLogger(__name__)
+import builtins
 
 BATCH_FILES = {}
 join_db = JoinReqs
@@ -259,8 +260,8 @@ async def start(client, message):
             logger.error(f"files_metadata is None or empty for batch {batch_metadata.get('batch_id', 'Unknown')}")
             return
 
-        if not isinstance(files_metadata, list):
-            await message.reply("Invalid file data format in this batch.")
+        if not isinstance(files_metadata, builtins.list):
+            await message.reply("No files found in this batch.")
             logger.error(f"files_metadata is not a list for batch {batch_metadata.get('batch_id', 'Unknown')}. Type: {type(files_metadata)}")
             return
 
