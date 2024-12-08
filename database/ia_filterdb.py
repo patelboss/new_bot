@@ -353,52 +353,65 @@ async def get_batch_by_id(batch_id):
         # Log any errors that occur during the query process
         logger.error(f"Error retrieving batch {batch_id} from the database: {str(e)}")
         return None
+import asyncio
+
 async def fetch_file_by_link(batch_id: str, unique_link: str):
     """
-    Fetches a specific file from a batch by its unique link.
+    Fetch a file from the database using the batch ID and unique link.
 
     Args:
-        batch_id (str): The unique ID of the batch.
-        unique_link (str): The unique link identifier for the file.
+        batch_id (str): The ID of the batch.
+        unique_link (str): The unique identifier for the specific file.
 
     Returns:
-        file: The file object that can be sent to the user, or None if not found.
+        dict: File metadata if found, None otherwise.
     """
+    from pymongo.errors import PyMongoError
+
+    logger.info("Starting fetch_file_by_link process...")
+    await asyncio.sleep(3)
+
+    # Log the batch ID and unique link
+    logger.info("Batch ID provided: %s", batch_id)
+    await asyncio.sleep(3)
+    logger.info("Unique Link provided: %s", unique_link)
+    await asyncio.sleep(3)
+
     try:
-        # Log the input parameters
-        logger.info(f"Fetching file from batch: batch_id={batch_id}, unique_link={unique_link}")
-
-        # Retrieve the batch details using batch_id
-        batch_metadata = await get_batch_by_id(batch_id)
+        # Fetch the batch details from the database
+        logger.info("Attempting to retrieve batch with ID: %s", batch_id)
+        await asyncio.sleep(3)
+        batch_metadata = col.find_one({"batch_id": batch_id})
+        
         if not batch_metadata:
-            logger.error(f"Batch {batch_id} not found in the database.")
+            logger.error("Batch not found for batch ID: %s", batch_id)
             return None
 
-        logger.info(f"Batch {batch_id} found. Metadata: {batch_metadata}")
+        logger.info("Batch found for batch ID: %s", batch_id)
+        await asyncio.sleep(3)
+        logger.info("Batch metadata: %s", batch_metadata)
+        await asyncio.sleep(3)
 
-        # Retrieve file_data from the batch
-        files_metadata = batch_metadata.get("file_data", [])
-        if not files_metadata or not isinstance(files_metadata, list):
-            logger.error(f"No files found in batch {batch_id}.")
+        # Search for the file within the batch using the unique link
+        logger.info("Searching for file with unique link: %s", unique_link)
+        await asyncio.sleep(3)
+        file_metadata = next(
+            (file for file in batch_metadata.get("file_data", []) if file.get("unique_link") == unique_link),
+            None
+        )
+
+        if not file_metadata:
+            logger.error("File not found for unique link: %s in batch ID: %s", unique_link, batch_id)
             return None
 
-        logger.info(f"Batch {batch_id} contains {len(files_metadata)} files.")
+        logger.info("File found: %s", file_metadata)
+        await asyncio.sleep(3)
+        return file_metadata
 
-        # Search for the file using its unique_link
-        for file_metadata in files_metadata:
-            if file_metadata.get("unique_link") == unique_link:
-                logger.info(f"File with unique_link {unique_link} retrieved from batch {batch_id}: {file_metadata}")
-                
-                # Return the file_id, which will be used to send the file to the user
-                file_id = file_metadata.get("file_id")
-                if file_id:
-                    return file_id  # Return the file ID to send the file
-
-        # If the file with the unique_link is not found
-        logger.error(f"File with unique_link {unique_link} not found in batch {batch_id}.")
+    except PyMongoError as e:
+        logger.exception("Database error occurred: %s", str(e))
         return None
 
     except Exception as e:
-        # Log any unexpected errors
-        logger.exception(f"Error retrieving file from batch {batch_id}: {str(e)}")
+        logger.exception("Unexpected error in fetch_file_by_link: %s", str(e))
         return None
