@@ -337,7 +337,7 @@ async def get_batch_by_id(batch_id):
         col.create_index("batch_id")
         
         # Query the database for the batch
-        batch_details = await col.find_one({"batch_id": batch_id})
+        batch_details = col.find_one({"batch_id": batch_id})
         
         # Log the raw result from the query to see what is being returned
         logger.info(f"Retrieved batch details: {batch_details}")
