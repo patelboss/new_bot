@@ -168,6 +168,6 @@ def generate_file_link(file_id, file_index):
     unique_hash = hashlib.sha256(file_data.encode()).hexdigest()[:20]  # Shorten the hash for a clean link
 
     # Construct a unique file link using the batch identifier and the generated hash
-    file_link = f"https://t.me/{temp.U_NAME}?start=BATCH-{unique_hash}"
+    file_link = f"https://t.me/{temp.U_NAME}?start=BATCH-{unique_hash}-{file_index}"
 
     return file_link
