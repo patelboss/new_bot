@@ -298,8 +298,8 @@ async def start(client, message):
                     logger.info("Sending file ID: %s to user", unique_link)
                     msg = await client.send_cached_media(
                         chat_id=message.from_user.id,
-                        media=file,  # Sending the file retrieved from the link
-                        caption=caption,
+                        media=file_id,  # Sending the file retrieved from the link
+                        caption=f_caption,
                         protect_content=protect,
                         reply_markup=InlineKeyboardMarkup([
                             [InlineKeyboardButton("Join Our Offer Zone 🤑", url=OFR_CNL)],
