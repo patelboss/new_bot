@@ -296,7 +296,7 @@ async def start(client, message):
                 if file:
                     # Send the file to the user
                     logger.info("Sending file ID: %s to user", unique_link)
-                    msg = await bot.send_cached_media(
+                    msg = await client.send_cached_media(
                         chat_id=message.from_user.id,
                         media=file,  # Sending the file retrieved from the link
                         caption=caption,
