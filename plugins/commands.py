@@ -287,8 +287,8 @@ async def start(client, message):
                             caption = caption or title or "File"
 
                 # Generate the unique batch link for each file in the batch
-                    file_id = file_metadata.get("file_id, index")
-                    link = generate_file_link(file_id)  # Generate the link with sequence number
+                    file_id = file_metadata.get("file_id")
+                    link = generate_file_link(file_id, file_index)  # Generate the link with sequence number
 
                 # Fetch the file using the generated link
                     logger.info("Fetching file for link: %s", link)
