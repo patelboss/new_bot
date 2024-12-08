@@ -225,3 +225,79 @@ def unpack_new_file_id(new_file_id):
     )
     file_ref = encode_file_ref(decoded.file_reference)
     return file_id, file_ref
+import logging
+import json
+from pymongo import MongoClient
+from pymongo.errors import DuplicateKeyError
+from info import FILE_DB_URI, DATABASE_NAME, COLLECTION_NAME
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+# MongoDB Client Setup
+client = MongoClient(FILE_DB_URI)
+db = client[DATABASE_NAME]
+file_col = db[COLLECTION_NAME]
+batch_col = db["batch_links"]  # New collection for batch metadata
+
+
+async def save_batch(hash_code, user_id, metadata):
+    """
+    Save batch metadata to the database.
+    """
+    try:
+        batch_data = {
+            "hash": hash_code,
+            "user_id": user_id,
+            "metadata": metadata,
+            "created_at": datetime.now()
+        }
+        batch_col.insert_one(batch_data)
+        logger.info(f"Batch {hash_code} successfully saved.")
+    except DuplicateKeyError:
+        logger.warning(f"Batch {hash_code} already exists.")
+        raise
+    except Exception as e:
+        logger.exception(f"Error saving batch {hash_code}: {str(e)}")
+        raise
+
+async def get_batch(hash_code):
+    """
+    Retrieve batch metadata from the database.
+    """
+    try:
+        batch_data = batch_col.find_one({"hash": hash_code})
+        if not batch_data:
+            logger.warning(f"Batch {hash_code} not found.")
+            return None
+        logger.info(f"Batch {hash_code} retrieved successfully.")
+        return batch_data["metadata"]
+    except Exception as e:
+        logger.exception(f"Error retrieving batch {hash_code}: {str(e)}")
+        raise
+
+async def delete_batch(hash_code):
+    """
+    Delete batch metadata from the database.
+    """
+    try:
+        result = batch_col.delete_one({"hash": hash_code})
+        if result.deleted_count > 0:
+            logger.info(f"Batch {hash_code} deleted successfully.")
+            return True
+        else:
+            logger.warning(f"Batch {hash_code} not found for deletion.")
+            return False
+    except Exception as e:
+        logger.exception(f"Error deleting batch {hash_code}: {str(e)}")
+        raise
+
+async def get_file_details(file_id):
+    """
+    Retrieve file details using `file_id`.
+    """
+    filter = {'file_id': file_id}
+    filedetails = file_col.find_one(filter)
+    return filedetails
+
+# Other existing functions remain unchanged
