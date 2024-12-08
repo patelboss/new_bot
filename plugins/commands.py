@@ -287,7 +287,7 @@ async def start(client, message):
                             caption = caption or title or "File"
 
                 # Generate the unique batch link for each file in the batch
-                    file_id = file_metadata.get("file_id")
+                    file_id = file_metadata.get("file_id, index")
                     link = generate_file_link(file_id)  # Generate the link with sequence number
 
                 # Fetch the file using the generated link
@@ -329,6 +329,7 @@ async def start(client, message):
         # Optional cleanup after some time
             logger.info("Cleaning up after sending files.")
             cleanup_msg = await Client.send_message(
+                self,
                 chat_id=message.from_user.id,
                 text="Files sent, cleaning up after some time."
             )
