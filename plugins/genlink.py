@@ -12,130 +12,75 @@ from database.ia_filterdb import unpack_new_file_id, save_batch_metadata  # Assu
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
+# File: genlink.py
+import hashlib
+from datetime import datetime
+import logging
 
-async def allowed(_, __, message):
-    if PUBLIC_FILE_STORE:
-        return True
-    if message.from_user and message.from_user.id in ADMINS:
-        return True
-    return False
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
-def generate_file_hash(file_name):
-    """Generate a 20 character hash for the file."""
-    hash_object = hashlib.sha1(file_name.encode())
-    return hash_object.hexdigest()[:20]
+def generate_unique_id(base_id, sequence_number):
+    """
+    Generate a unique ID for files in the format [20 characters]+[sequence_number].
+    This ensures batch identification for each file.
+    """
+    unique_part = hashlib.sha256(base_id.encode()).hexdigest()[:20]
+    return f"{unique_part}+{sequence_number:02}"
 
-def generate_unique_id(sequence_number):
-    """Generate a unique ID in the format: [20 characters]+[sequence_number]."""
-    file_hash = generate_file_hash(str(sequence_number))  # Use sequence number for uniqueness
-    return f"{file_hash}+{sequence_number:02d}"
+def generate_batch_hash(batch_metadata):
+    """
+    Create a unique hash for the batch using SHA-256.
+    The hash is 20 characters long and includes metadata for uniqueness.
+    """
+    hash_input = str(batch_metadata).encode()
+    return hashlib.sha256(hash_input).hexdigest()[:20]
 
-@Client.on_message(filters.command(['link', 'plink']) & filters.create(allowed))
-async def gen_link_s(bot, message):
-    vj = await bot.ask(chat_id=message.from_user.id, text="Now Send Me Your Message Which You Want To Store.")
-    file_type = vj.media
-    if file_type not in [enums.MessageMediaType.VIDEO, enums.MessageMediaType.AUDIO, enums.MessageMediaType.DOCUMENT]:
-        return await vj.reply("Send me only video, audio, file or document.")
-    if message.has_protected_content and message.chat.id not in ADMINS:
-        return await message.reply("okDa")
-    
-    file_id, ref = unpack_new_file_id((getattr(vj, file_type.value)).file_id)
-    string = 'filep_' if message.text.lower().strip() == "/plink" else 'file_'
-    string += file_id
-    outstr = base64.urlsafe_b64encode(string.encode("ascii")).decode().strip("=")
-    await message.reply(f"Here is your Link:\nhttps://t.me/{temp.U_NAME}?start={outstr}")
-
-@Client.on_message(filters.command(['batch', 'pbatch']) & filters.create(allowed))
-async def gen_link_batch(bot, message):
-    logger.info("Received batch command from user: %s", message.from_user.id)
-
-    # Validate the command format
-    links = message.text.strip().split(" ")
-    if len(links) < 3:  # Minimum: Command + at least 2 links
-        logger.warning("Incorrect format provided by user: %s", message.from_user.id)
-        return await message.reply(
-            "Use correct format.\nExample: <code>/batch https://t.me/c/123456789/1 https://t.me/c/123456789/2</code>."
-        )
-
-    cmd = links[0]
-    links = links[1:]  # Remove the command from the links
-
-    # Validate links
-    def validate_link(link):
-        regex = re.compile(r"(https://)?(t\.me/|telegram\.me/|telegram\.dog/)(c/)?(\d+|[a-zA-Z_0-9]+)/(\d+)$")
-        match = regex.match(link)
-        if not match:
-            return None, None
-        chat_id = match.group(4)
-        msg_id = int(match.group(5))
-        if chat_id.isnumeric():
-            chat_id = int("-100" + chat_id)
-        return chat_id, msg_id
-
-    processed_links = [validate_link(link) for link in links]
-    if any(link is None for link in processed_links):
-        logger.error("Invalid links provided by user: %s", message.from_user.id)
-        return await message.reply("Invalid link(s) provided.")
-
-    # Ensure all chat IDs match
-    chat_ids = {chat_id for chat_id, _ in processed_links if chat_id}
-    if len(chat_ids) > 1:
-        logger.error("Chat IDs do not match for user: %s", message.from_user.id)
-        return await message.reply("All links must belong to the same chat.")
-
-    chat_id = next(iter(chat_ids))
-
-    # Verify chat
+def save_batch_to_db(db, hash_code, user_id, metadata):
+    """
+    Save the batch metadata and hash to the database for persistence.
+    """
     try:
-        chat_id = (await bot.get_chat(chat_id)).id
-        logger.info("Verified chat ID: %s for user: %s", chat_id, message.from_user.id)
-    except (ChannelInvalid, UsernameInvalid, UsernameNotModified) as e:
-        logger.error("Chat verification failed for user %s: %s", message.from_user.id, str(e))
-        return await message.reply("Error accessing chat. Ensure the bot has admin access.")
+        db.execute(
+            "INSERT INTO batch_links (hash, user_id, metadata, created_at) VALUES (%s, %s, %s, %s)",
+            (hash_code, user_id, metadata, datetime.now()),
+        )
+        db.commit()
+        logger.info("Batch metadata saved to the database: %s", hash_code)
     except Exception as e:
-        logger.exception("Unexpected error during chat verification for user %s: %s", message.from_user.id, str(e))
-        return await message.reply(f"Error: {e}")
+        logger.exception("Failed to save batch metadata: %s", str(e))
+        raise
 
-    # Start Processing
-    sts = await message.reply("Generating links for your messages. This may take some time.")
-    outlist = []
-    links_sent = 0
+def fetch_batch_from_db(db, hash_code):
+    """
+    Fetch batch metadata from the database using the hash.
+    """
+    try:
+        result = db.fetch_one(
+            "SELECT metadata FROM batch_links WHERE hash = %s", (hash_code,)
+        )
+        if result:
+            logger.info("Fetched batch metadata for hash: %s", hash_code)
+            return result[0]  # Metadata is stored as JSON
+        else:
+            logger.warning("No batch found for hash: %s", hash_code)
+            return None
+    except Exception as e:
+        logger.exception("Failed to fetch batch metadata: %s", str(e))
+        raise
 
-    # Process each link
-    for index, (_, msg_id) in enumerate(processed_links):
-        try:
-            msg = await bot.get_messages(chat_id=chat_id, message_ids=msg_id)
-            if msg.empty or msg.service or not msg.media:
-                continue
+def generate_shareable_link(base_url, batch_hash):
+    """
+    Generate a shareable link for the batch using the unique hash.
+    """
+    return f"{base_url}?start=BATCH-{batch_hash}"
 
-            file_type = msg.media
-            file = getattr(msg, file_type.value, None)
-            caption = getattr(msg, 'caption', '') or ''
-            if file:
-                unique_id = generate_unique_id(index + 1)
-                outlist.append({
-                    "file_id": file.file_id,
-                    "caption": caption.html if caption else '',
-                    "title": getattr(file, "file_name", ''),
-                    "size": getattr(file, "file_size", 0),
-                    "protect": cmd.lower() == "/pbatch",
-                    "unique_id": unique_id
-                })
-
-                # Send file to the file store channel
-                await bot.send_document(
-                    LOG_CHANNEL,
-                    file.file_id,
-                    caption=caption,
-                    file_name=getattr(file, "file_name", "File"),
-                )
-                links_sent += 1
-        except Exception as e:
-            logger.warning("Error processing message %s: %s", msg_id, str(e))
-
-    # Save Results
-    json_file = f"batch_{message.from_user.id}.json"
-    with open(json_file, "w") as f:
+def log_operation(operation, status, details=""):
+    """
+    Log bot operations with consistent formatting.
+    """
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    logger.info("[%s] %s - %s: %s", timestamp, operation, status, details)    with open(json_file, "w") as f:
         json.dump(outlist, f)
 
     # Generate Shortened `start` Parameter
