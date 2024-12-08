@@ -245,16 +245,21 @@ async def start(client, message):
         logger.info("Batch ID %s found. Processing...", batch_id)
 
     # Extract metadata
-        files_metadata = batch_metadata.get("files")
-        batch_name = batch_metadata.get("name", "Unnamed Batch")
-        optional_message = batch_metadata.get("message", "")    
+        files_metadata = batch_metadata.get("file_data")  # Use the correct key for files
+        batch_name = batch_metadata.get("batch_name", "Unnamed Batch")
+        optional_message = batch_metadata.get("optional_message", "")
         files_sent = []
 
-    # Notify user about the batch details
+# Check if files_metadata exists and is iterable
+        if not files_metadata or not isinstance(files_metadata, list):
+            await message.reply("No valid files found in this batch.")
+            logger.error(f"No valid files found in batch {batch_metadata.get('batch_id', 'Unknown')}")
+            return
+
+# Notify user about the batch details
         await message.reply(f"<b>Batch Name:</b> {batch_name}\n"
                             f"<b>Message:</b> {optional_message if optional_message else 'No message provided.'}\n"
-                            f"Processing {len(files_metadata) if files_metadata else 0} files...")
-
+                            f"Processing {len(files_metadata)} files...")
         for index, file_metadata in enumerate(files_metadata, start=1):  # start=1 for sequence number
             try:
                 title = file_metadata.get("title")
