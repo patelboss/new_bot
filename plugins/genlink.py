@@ -122,7 +122,7 @@ async def gen_link_batch(bot, message):
             if file.mime_type and "video" in file.mime_type.lower():
                 # Handle video files specifically
                 await bot.send_video(
-                    PUBLIC_FILE_STORE,
+                    PUBLIC_FILE_CHANNEL,
                     file.file_id,
                     caption=caption,
                     file_name=title or "File",
@@ -131,7 +131,7 @@ async def gen_link_batch(bot, message):
             elif file.mime_type and "audio" in file.mime_type.lower():
                 # Handle audio files (optional, based on your use case)
                 await bot.send_audio(
-                    PUBLIC_FILE_STORE,
+                    PUBLIC_FILE_CHANNEL,
                     file.file_id,
                     caption=caption,
                     file_name=title or "File",
@@ -140,7 +140,7 @@ async def gen_link_batch(bot, message):
             else:
                 # For documents and other file types
                 await bot.send_document(
-                    PUBLIC_FILE_STORE,
+                    PUBLIC_FILE_CHANNEL,
                     file.file_id,
                     caption=caption,
                     file_name=title or "File",
