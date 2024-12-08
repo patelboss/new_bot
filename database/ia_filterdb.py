@@ -353,7 +353,6 @@ async def get_batch_by_id(batch_id):
         # Log any errors that occur during the query process
         logger.error(f"Error retrieving batch {batch_id} from the database: {str(e)}")
         return None
-
 async def fetch_file_by_link(batch_id: str, unique_link: str):
     """
     Fetches a specific file from a batch by its unique link.
@@ -363,7 +362,7 @@ async def fetch_file_by_link(batch_id: str, unique_link: str):
         unique_link (str): The unique link identifier for the file.
 
     Returns:
-        dict: The file metadata if found, or None if not.
+        file: The file object that can be sent to the user, or None if not found.
     """
     try:
         # Log the input parameters
@@ -389,7 +388,11 @@ async def fetch_file_by_link(batch_id: str, unique_link: str):
         for file_metadata in files_metadata:
             if file_metadata.get("unique_link") == unique_link:
                 logger.info(f"File with unique_link {unique_link} retrieved from batch {batch_id}: {file_metadata}")
-                return file_metadata
+                
+                # Return the file_id, which will be used to send the file to the user
+                file_id = file_metadata.get("file_id")
+                if file_id:
+                    return file_id  # Return the file ID to send the file
 
         # If the file with the unique_link is not found
         logger.error(f"File with unique_link {unique_link} not found in batch {batch_id}.")
