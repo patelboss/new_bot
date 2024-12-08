@@ -9,7 +9,6 @@ from pyrogram.errors.exceptions.bad_request_400 import ChannelInvalid, UsernameI
 from info import LOG_CHANNEL, FILE_STORE_CHANNEL, PUBLIC_FILE_STORE
 from database.ia_filterdb import *
 from utils import temp
-from database import save_batch_details, generate_batch_id  # Assuming `save_batch_details` is updated as required.
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
