@@ -152,7 +152,7 @@ async def gen_link_batch(bot, message):
 
 import hashlib
 
-def generate_file_link(file_id, index):
+def generate_file_link(file_id):
     """
     Generate a unique link for each file based on its file_id and sequence index.
     
@@ -164,10 +164,10 @@ def generate_file_link(file_id, index):
         str: A unique file link.
     """
     # Create a unique hash based on the file ID and index
-    file_data = f"{file_id}-{index}"
+    file_data = f"{file_id}"
     unique_hash = hashlib.sha256(file_data.encode()).hexdigest()[:20]  # Shorten the hash for a clean link
 
     # Construct a unique file link using the batch identifier and the generated hash
-    file_link = f"https://t.me/{temp.U_NAME}?start=BATCH-{unique_hash}-{index}"
+    file_link = f"https://t.me/{temp.U_NAME}?start=BATCH-{unique_hash}"
 
     return file_link
