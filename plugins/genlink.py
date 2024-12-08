@@ -130,7 +130,7 @@ async def gen_link_batch(bot, message):
     # Generate the final batch ID (hash + last sequence number)
     batch_id = generate_batch_id()  # Generate the batch ID
     await save_batch_details(batch_id, outlist, batch_name, optional_message)
-    logger.info("Batch details saved in db for Batch ID: %s", batch_id)
+    logger.info("Batch details saving in db for Batch ID: %s", batch_id)
 
     # Create the final batch link with the last sequence number
     short_link = f"https://t.me/{temp.U_NAME}?start=BATCH-{batch_id}"
