@@ -267,7 +267,7 @@ async def start(client, message):
                                 f"<b>Message:</b> {optional_message if optional_message else 'No message provided.'}\n"
                                 f"Processing {len(files_metadata)} files...")
 
-            for index, file_metadata in enumerate(files_metadata, start=1):  # start=1 for sequence number
+            for file_index, file_metadata in enumerate(files_metadata, start=1):  # start=1 for sequence number
                 try:
                     title = file_metadata.get("title")
                     size = get_size(int(file_metadata.get("size", 0)))  # Assuming get_size is a function to get human-readable size
@@ -328,8 +328,8 @@ async def start(client, message):
 
         # Optional cleanup after some time
             logger.info("Cleaning up after sending files.")
-            cleanup_msg = await Client.send_message(
-                self,
+            cleanup_msg = await client.send_message(
+                
                 chat_id=message.from_user.id,
                 text="Files sent, cleaning up after some time."
             )
