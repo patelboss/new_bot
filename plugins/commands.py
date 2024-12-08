@@ -328,7 +328,7 @@ async def start(client, message):
 
         # Optional cleanup after some time
             logger.info("Cleaning up after sending files.")
-            cleanup_msg = await bot.send_message(
+            cleanup_msg = await Client.send_message(
                 chat_id=message.from_user.id,
                 text="Files sent, cleaning up after some time."
             )
