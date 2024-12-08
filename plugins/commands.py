@@ -250,10 +250,15 @@ async def start(client, message):
         optional_message = batch_metadata.get("optional_message", "")
         files_sent = []
 
-# Check if files_metadata exists and is iterable
-        if not files_metadata or not isinstance(files_metadata, list):
-            await message.reply("No valid files found in this batch.")
-            logger.error(f"No valid files found in batch {batch_metadata.get('batch_id', 'Unknown')}")
+# Check # Check if files_metadata exists and is iterable
+        if not files_metadata:
+            await message.reply("No files found in this batch.")
+            logger.error(f"files_metadata is None or empty for batch {batch_metadata.get('batch_id', 'Unknown')}")
+            return
+
+        if not isinstance(files_metadata, list):
+            await message.reply("Invalid file data format in this batch.")
+            logger.error(f"files_metadata is not a list for batch {batch_metadata.get('batch_id', 'Unknown')}. Type: {type(files_metadata)}")
             return
 
 # Notify user about the batch details
