@@ -6,7 +6,7 @@ import logging
 import hashlib
 from pyrogram import Client, filters, enums
 from pyrogram.errors.exceptions.bad_request_400 import ChannelInvalid, UsernameInvalid, UsernameNotModified
-from info import LOG_CHANNEL, FILE_STORE_CHANNEL, PUBLIC_FILE_STORE
+from info import LOG_CHANNEL, PUBLIC_FILE_STORE
 from database.ia_filterdb import *
 from utils import temp
 
