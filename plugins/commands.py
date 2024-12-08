@@ -261,6 +261,7 @@ async def start(client, message):
             return
 
         if not isinstance(files_metadata, builtins.list):
+            logger.error(f"files_metadata is not a list. It is of type: {type(files_metadata)}")
             await message.reply("No files found in this batch.")
             logger.error(f"files_metadata is not a list for batch {batch_metadata.get('batch_id', 'Unknown')}. Type: {type(files_metadata)}")
             return
