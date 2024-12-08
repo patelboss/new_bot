@@ -7,6 +7,7 @@ from pymongo import MongoClient
 from pymongo.errors import DuplicateKeyError
 from info import FILE_DB_URI, SEC_FILE_DB_URI, DATABASE_NAME, COLLECTION_NAME, MULTIPLE_DATABASE, USE_CAPTION_FILTER, MAX_B_TN
 from utils import get_settings, save_group_settings
+from pymongo.errors import PyMongoError
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -276,3 +277,23 @@ async def save_batch_details(batch_id, file_data, batch_name, optional_message=N
         logger.info(f"Batch {batch_id}")  # Corrected line
     except Exception as e:
         logger.error(f"Error saving batch {batch_id}: {str(e)}")
+
+async def get_batch_by_id(batch_id):
+    """
+    Retrieve batch details from the database using batch_id.
+    
+    :param batch_id: The unique ID of the batch to retrieve.
+    :return: A dictionary containing batch details if found, otherwise None.
+    """
+    try:
+        # Query the database for the batch
+        batch_details = col.find_one({"batch_id": batch_id})
+        if batch_details:
+            logger.info(f"Batch {batch_id} found in the database.")
+            return batch_details
+        else:
+            logger.warning(f"Batch {batch_id} not found in the database.")
+            return None
+    except PyMongoError as e:
+        logger.error(f"Error retrieving batch {batch_id} from database: {str(e)}")
+        return None
