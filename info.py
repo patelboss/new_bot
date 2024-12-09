@@ -44,6 +44,7 @@ SUPPORT_CHAT_ID = int(support_chat_id) if support_chat_id and id_pattern.search(
 INDEX_REQ_CHANNEL = int(environ.get('INDEX_REQ_CHANNEL', LOG_CHANNEL))
 FILE_STORE_CHANNEL = [int(ch) for ch in (environ.get('FILE_STORE_CHANNEL', '')).split()]
 DELETE_CHANNELS = [int(dch) if id_pattern.search(dch) else dch for dch in environ.get('DELETE_CHANNELS', '0').split()]
+BATCH_FILE_CHANNEL = [int(ch) for ch in (environ.get('BATCH_FILE_CHANNEL', '')).split()]
 
 # MongoDB information
 MULTIPLE_DATABASE = False # Set True or False
