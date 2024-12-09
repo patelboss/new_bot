@@ -245,56 +245,56 @@ def generate_batch_id():
     try:
         # Generate a unique timestamp
         current_timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
-        logger.debug(f"Generated timestamp for batch ID: {current_timestamp}")
+#        logger.debug(f"Generated timestamp for batch ID: {current_timestamp}")
 
         # Generate a hash part for the batch ID
         hash_part = hashlib.sha256(current_timestamp.encode()).hexdigest()[:10]
-        logger.debug(f"Generated hash part for batch ID: {hash_part}")
+ #       logger.debug(f"Generated hash part for batch ID: {hash_part}")
 
         # Get the latest sequence number
         sequence_number = get_latest_batch_sequence() + 1
-        logger.info(f"Retrieved and incremented sequence number for batch ID: {sequence_number}")
+#        logger.info(f"Retrieved and incremented sequence number for batch ID: {sequence_number}")
 
         # Combine to create the batch ID
-        batch_id = f"BATCH-{hash_part}-{str(sequence_number).zfill(2)}"
-        logger.info(f"Generated batch ID: {batch_id}")
+        batch_id = f"Filmykeedha-{hash_part}-{str(sequence_number).zfill(2)}"
+#        logger.info(f"Generated batch ID: {batch_id}")
 
         return batch_id
     except Exception as e:
-        logger.error(f"Error generating batch ID: {str(e)}")
+#        logger.error(f"Error generating batch ID: {str(e)}")
         raise  # Re-raise the exception to allow for further handling if needed
 # Function to get the latest batch sequence number (for uniqueness)
 
 def get_latest_batch_sequence():
     try:
-        logger.info("Attempting to retrieve the latest batch sequence number.")
+#        logger.info("Attempting to retrieve the latest batch sequence number.")
         
         # Query to find the most recent batch
         latest_batch = col.find().sort("batch_id", -1).limit(1)
-        logger.debug("Query executed to find the latest batch.")
+#        logger.debug("Query executed to find the latest batch.")
 
         if latest_batch.count() > 0:
             latest_batch_data = latest_batch[0]
             batch_id = latest_batch_data.get("batch_id", "")
 
             if batch_id:
-                logger.info(f"Found latest batch_id: {batch_id}")
+#                logger.info(f"Found latest batch_id: {batch_id}")
                 try:
                     # Extract and return the sequence number
                     sequence_number = int(batch_id.split("-")[-1])
-                    logger.info(f"Extracted sequence number: {sequence_number}")
+#                    logger.info(f"Extracted sequence number: {sequence_number}")
                     return sequence_number
                 except ValueError:
-                    logger.warning(f"Invalid batch_id format encountered: {batch_id}")
+#                    logger.warning(f"Invalid batch_id format encountered: {batch_id}")
                     return 0
             else:
-                logger.warning("Batch document found but missing 'batch_id' field.")
+#                logger.warning("Batch document found but missing 'batch_id' field.")
                 return 0
         else:
-            logger.info("No batches found in the collection. Starting with sequence number 0.")
+#            logger.info("No batches found in the collection. Starting with sequence number 0.")
             return 0
     except Exception as e:
-        logger.error(f"Error retrieving the latest batch sequence: {str(e)}")
+#        logger.error(f"Error retrieving the latest batch sequence: {str(e)}")
         return 0
 # Function to save batch details to the database
 
@@ -302,7 +302,7 @@ async def save_batch_details(batch_id, file_data, batch_name, optional_message=N
     try:
         # Generate a unique batch ID
         batch_id = generate_batch_id()
-        logger.info(f"Generated batch ID: {batch_id}")
+#        logger.info(f"Generated batch ID: {batch_id}")
 
         # Prepare batch details
         batch_details = {
@@ -312,14 +312,14 @@ async def save_batch_details(batch_id, file_data, batch_name, optional_message=N
             "optional_message": optional_message,
             "created_at": datetime.now()
         }
-        logger.debug(f"Batch details prepared: {batch_details}")
+#        logger.debug(f"Batch details prepared: {batch_details}")
 
         # Save batch details in the main collection
         col.insert_one(batch_details)
-        logger.info(f"Batch {batch_id} saved successfully with name '{batch_name}'")
+#        logger.info(f"Batch {batch_id} saved successfully with name '{batch_name}'")
     except Exception as e:
         # Log the error
-        logger.error(f"Error saving batch {batch_id}: {str(e)}")
+#        logger.error(f"Error saving batch {batch_id}: {str(e)}")
         raise  # Re-raise the exception for further handling if needed
 
 async def get_batch_by_id(batch_id):
@@ -331,7 +331,7 @@ async def get_batch_by_id(batch_id):
     """
     try:
         # Log the batch_id to ensure it is correct
-        logger.info(f"Attempting to retrieve batch with ID: {batch_id}")
+#        logger.info(f"Attempting to retrieve batch with ID: {batch_id}")
         
         # Create an index on batch_id for faster lookups (this can be run separately to ensure index is created)
         col.create_index("batch_id")
@@ -340,18 +340,18 @@ async def get_batch_by_id(batch_id):
         batch_details = col.find_one({"batch_id": batch_id})
         
         # Log the raw result from the query to see what is being returned
-        logger.info(f"Retrieved batch details: {batch_details}")
+ #       logger.info(f"Retrieved batch details: {batch_details}")
         
         if batch_details:
-            logger.info(f"Batch {batch_id} found in the database. Details: {batch_details}")
+ #           logger.info(f"Batch {batch_id} found in the database. Details: {batch_details}")
             return batch_details
         else:
-            logger.warning(f"Batch {batch_id} not found in the database.")
+ #           logger.warning(f"Batch {batch_id} not found in the database.")
             return None
 
     except PyMongoError as e:
         # Log any errors that occur during the query process
-        logger.error(f"Error retrieving batch {batch_id} from the database: {str(e)}")
+ #       logger.error(f"Error retrieving batch {batch_id} from the database: {str(e)}")
         return None
 import asyncio
 
@@ -368,50 +368,50 @@ async def fetch_file_by_link(batch_id: str, unique_link: str):
     """
     from pymongo.errors import PyMongoError
 
-    logger.info("Starting fetch_file_by_link process...")
-    await asyncio.sleep(3)
+#    logger.info("Starting fetch_file_by_link process...")
+#    await asyncio.sleep(3)
 
     # Log the batch ID and unique link
-    logger.info("Batch ID provided: %s", batch_id)
-    await asyncio.sleep(3)
-    logger.info("Unique Link provided: %s", unique_link)
-    await asyncio.sleep(3)
+#    logger.info("Batch ID provided: %s", batch_id)
+#    await asyncio.sleep(3)
+#    logger.info("Unique Link provided: %s", unique_link)
+#    await asyncio.sleep(3)
 
     try:
         # Fetch the batch details from the database
-        logger.info("Attempting to retrieve batch with ID: %s", batch_id)
-        await asyncio.sleep(3)
+#        logger.info("Attempting to retrieve batch with ID: %s", batch_id)
+#        await asyncio.sleep(3)
         batch_metadata = col.find_one({"batch_id": batch_id})
         
         if not batch_metadata:
-            logger.error("Batch not found for batch ID: %s", batch_id)
+#            logger.error("Batch not found for batch ID: %s", batch_id)
             return None
 
-        logger.info("Batch found for batch ID: %s", batch_id)
-        await asyncio.sleep(3)
-        logger.info("Batch metadata: %s", batch_metadata)
-        await asyncio.sleep(3)
+#        logger.info("Batch found for batch ID: %s", batch_id)
+#        await asyncio.sleep(3)
+#        logger.info("Batch metadata: %s", batch_metadata)
+#        await asyncio.sleep(3)
 
         # Search for the file within the batch using the unique link
-        logger.info("Searching for file with unique link: %s", unique_link)
-        await asyncio.sleep(3)
+#        logger.info("Searching for file with unique link: %s", unique_link)
+#        await asyncio.sleep(3)
         file_metadata = next(
             (file for file in batch_metadata.get("file_data", []) if file.get("unique_link") == unique_link),
             None
         )
 
         if not file_metadata:
-            logger.error("File not found for unique link: %s in batch ID: %s", unique_link, batch_id)
+#            logger.error("File not found for unique link: %s in batch ID: %s", unique_link, batch_id)
             return None
 
-        logger.info("File found: %s", file_metadata)
-        await asyncio.sleep(3)
+#        logger.info("File found: %s", file_metadata)
+#        await asyncio.sleep(3)
         return file_metadata
 
     except PyMongoError as e:
-        logger.exception("Database error occurred: %s", str(e))
+#        logger.exception("Database error occurred: %s", str(e))
         return None
 
     except Exception as e:
-        logger.exception("Unexpected error in fetch_file_by_link: %s", str(e))
+#        logger.exception("Unexpected error in fetch_file_by_link: %s", str(e))
         return None
