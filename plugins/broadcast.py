@@ -12,7 +12,7 @@ logger = logging.getLogger("broadcast")
 @Client.on_message(filters.command("broadcast") & filters.user(ADMINS))
 async def pm_broadcast(bot, message):
     try:
-        logger.info("PM Broadcast initiated by admin.")
+#        logger.info("PM Broadcast initiated by admin.")
         b_msg = await bot.ask(chat_id=message.from_user.id, text="Send your broadcast message (type or forward).")
 
         forward_msg = b_msg.forward_from or b_msg.forward_from_chat
@@ -56,7 +56,7 @@ async def pm_broadcast(bot, message):
 @Client.on_message(filters.command("grp_broadcast") & filters.user(ADMINS))
 async def broadcast_group(bot, message):
     try:
-        logger.info("Group Broadcast initiated by admin.")
+#        logger.info("Group Broadcast initiated by admin.")
         b_msg = await bot.ask(chat_id=message.from_user.id, text="Send your broadcast message (type or forward).")
 
         forward_msg = b_msg.forward_from or b_msg.forward_from_chat
