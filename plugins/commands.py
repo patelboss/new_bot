@@ -1554,6 +1554,8 @@ async def send_msg(client, message):
     """
     Admin command to send a message to any user who has interacted with the bot.
     The admin must reply to a message and specify the target user ID.
+    This handles sending media like photos, videos, documents along with captions,
+    without the 'Forwarded from' tag.
     """
     if message.reply_to_message:
         # Extract the target user ID from the command
@@ -1570,13 +1572,30 @@ async def send_msg(client, message):
         try:
             # Check if the target user exists
             target_user = await client.get_users(target_id)
-            users = await db.get_all_users()  # Fetch all users from the DB
-            user_ids_in_db = [str(usr['id']) for usr in users]
+            
+            # Fetch all users from the DB
+            users_cursor = await db.get_all_users()  # This returns a cursor, not a list
+            user_ids_in_db = []
+
+            # Properly iterate through the cursor and collect user IDs
+            async for usr in users_cursor:
+                user_ids_in_db.append(str(usr['id']))
 
             # Check if the target user is in the database
             if str(target_user.id) in user_ids_in_db:
-                # Forward the admin's reply message to the target user
-                await message.reply_to_message.copy(target_user.id)
+                # Forward the admin's reply message to the target user without forward tag
+                if message.reply_to_message.photo:
+                    # If the message contains a photo
+                    await message.reply_to_message.copy(target_user.id, caption=message.reply_to_message.caption)
+                elif message.reply_to_message.video:
+                    # If the message contains a video
+                    await message.reply_to_message.copy(target_user.id, caption=message.reply_to_message.caption)
+                elif message.reply_to_message.document:
+                    # If the message contains a document
+                    await message.reply_to_message.copy(target_user.id, caption=message.reply_to_message.caption)
+                else:
+                    # If the message does not contain media (text only)
+                    await message.reply_to_message.copy(target_user.id)
                 success = True
             else:
                 success = False
