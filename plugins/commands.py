@@ -338,7 +338,7 @@ async def start(client, message):
             chat_id=message.from_user.id,
             text = script.DELETEMSG
         )
-        await asyncio.sleep(100)  # Adjust duration as needed
+        await asyncio.sleep(DLTTM)  # Adjust duration as needed
 
         for msg in files_sent:
             try:
@@ -385,7 +385,7 @@ async def start(client, message):
                 ]
             )
         )
-        await asyncio.sleep(4200)
+        await asyncio.sleep(DLTTM)
         await k.edit("<b>Your message is successfully deleted!!!</b>")
         return
         
@@ -407,7 +407,7 @@ async def start(client, message):
                 ]
             )
         )
-        await asyncio.sleep(4200)
+        await asyncio.sleep(DLTTM)
         await k.edit("<b>Your message is successfully deleted!!!</b>")
         return
         
@@ -465,7 +465,7 @@ async def start(client, message):
             )
             filesarr.append(msg)
         k = await client.send_message(chat_id = message.from_user.id, text = script.DELETEMSG)
-        await asyncio.sleep(4200)
+        await asyncio.sleep(DLTTM)
         for x in filesarr:
             await x.delete()
         await k.edit_text("<b>Your All Files/Videos is successfully deleted!!!</b>")
@@ -492,7 +492,7 @@ async def start(client, message):
                 ]
                 )
             )
-            await asyncio.sleep(4200)
+            await asyncio.sleep(DLTTM)
             await k.edit("<b>Your message is successfully deleted!!!</b>")
             return
     user = message.from_user.id
@@ -548,7 +548,7 @@ async def start(client, message):
                 InlineKeyboardButton("Get File Again", callback_data=f'del#{file_id}')
             ]]
             k = await msg.reply(script.DELETEMSG ,quote=True)
-            await asyncio.sleep(4200)
+            await asyncio.sleep(DLTTM)
             await msg.delete()
             await k.edit_text("<b>Your File/Video is successfully deleted!!!\n\nClick below button to get your deleted file 👇</b>",reply_markup=InlineKeyboardMarkup(btn))
             return
@@ -603,7 +603,7 @@ async def start(client, message):
         InlineKeyboardButton("Get File Again", callback_data=f'del#{file_id}')
     ]]
     k = await msg.reply(script.DELETEMSG ,quote=True)
-    await asyncio.sleep(4200)
+    await asyncio.sleep(DLTTM)
     await msg.delete()
     await k.edit_text("<b>Your File/Video is successfully deleted!!!\n\nClick below button to get your deleted file 👇</b>",reply_markup=InlineKeyboardMarkup(btn))
     return   
@@ -1126,10 +1126,10 @@ async def requests(client, message):
                     text=f"<b>𝖱𝖾𝗉𝗈𝗋𝗍𝖾𝗋 : {mention} ({reporter})\n\n𝖬𝖾𝗌𝗌𝖺𝗀𝖾 : {content}</b>", 
                     reply_markup=InlineKeyboardMarkup(btn)
                 )
-                logger.info(f"Request successfully sent to REQST_CHANNEL.")
+#                logger.info(f"Request successfully sent to REQST_CHANNEL.")
                 success = True
             elif len(content) >= 3:
-                logger.info(f"Content is valid (>= 3 characters), sending to admins.")
+#                logger.info(f"Content is valid (>= 3 characters), sending to admins.")
                 for admin in ADMINS:
                     btn = [[
                         InlineKeyboardButton('View Request', url=f"{message.link}"),
@@ -1548,29 +1548,4 @@ async def donation_callback(client, callback_query):
         reply_markup=reply_markup
     )
     
-@Client.on_message(filters.command("send") & filters.user(ADMINS))
-async def send_msg(bot, message):
-    if message.reply_to_message:
-        target_id = message.text.split(" ", 1)[1]
-        out = "Users Saved In DB Are:\n\n"
-        success = False
-        try:
-            user = await bot.get_users(target_id)
-            users = await db.get_all_users()
-            async for usr in users:
-                out += f"{usr['id']}"
-                out += '\n'
-            if str(user.id) in str(out):
-                await message.reply_to_message.copy(int(user.id))
-                success = True
-            else:
-                success = False
-            if success:
-                await message.reply_text(f"<b>Your message has been successfully send to {user.mention}.</b>")
-            else:
-                await message.reply_text("<b>This user didn't started this bot yet !</b>")
-        except Exception as e:
-            await message.reply_text(f"<b>Error: {e}</b>")
-    else:
-        await message.reply_text("<b>Use this command as a reply to any message using the target chat id. For eg: /send userid</b>")
-                    
+
