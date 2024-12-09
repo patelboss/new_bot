@@ -3,11 +3,11 @@ import logging
 import hashlib
 from pyrogram import Client, filters
 from pyrogram.errors.exceptions.bad_request_400 import ChannelInvalid, UsernameInvalid, UsernameNotModified
-from info import LOG_CHANNEL
+from info import LOG_CHANNEL, PUBLIC_FILE_CHANNEL
 from database.ia_filterdb import save_batch_details
 from utils import temp
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-PUBLIC_FILE_CHANNEL = '-1001817766666'
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
@@ -141,3 +141,20 @@ async def gen_link_batch(bot, message):
         f"Name: {batch_name}\nDetails: {optional_message}\n"
         f"Link: {short_link}"
 )
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+
+# Create an inline button with the link
+    inline_button = InlineKeyboardMarkup(
+        [[
+                InlineKeyboardButton(
+                    text="Open Batch", url=short_link
+                )
+        ]]
+    )
+
+# Send the message to the PUBLIC_FILE_CHANNEL with the inline button
+    await bot.send_message(
+        PUBLIC_FILE_CHANNEL,
+        f"Name: {batch_name}\nDetails: {optional_message}",
+        reply_markup=inline_button
+    )
