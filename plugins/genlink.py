@@ -3,7 +3,7 @@ import logging
 import hashlib
 from pyrogram import Client, filters
 from pyrogram.errors.exceptions.bad_request_400 import ChannelInvalid, UsernameInvalid, UsernameNotModified
-from info import LOG_CHANNEL, PUBLIC_FILE_CHANNEL, BATCH_FILE_CHANNEL
+from info import LOG_CHANNEL, PUBLIC_FILE_CHANNEL, BATCH_FILE_CHANNEL, ADMINS
 from database.batch_filedb import save_batch_details
 from utils import temp
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
