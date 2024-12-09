@@ -1549,3 +1549,48 @@ async def donation_callback(client, callback_query):
     )
     
 
+@Client.on_message(filters.command("send") & filters.user(ADMINS))
+async def send_msg(client, message):
+    """
+    Admin command to send a message to any user who has interacted with the bot.
+    The admin must reply to a message and specify the target user ID.
+    """
+    if message.reply_to_message:
+        # Extract the target user ID from the command
+        command_parts = message.text.split(" ", 1)
+        if len(command_parts) < 2:
+            return await message.reply_text("<b>Usage: /send <target_user_id></b>")
+
+        target_id = command_parts[1]
+
+        # Initialize the response message
+        out = "Users Saved In DB Are:\n\n"
+        success = False
+
+        try:
+            # Check if the target user exists
+            target_user = await client.get_users(target_id)
+            users = await db.get_all_users()  # Fetch all users from the DB
+            user_ids_in_db = [str(usr['id']) for usr in users]
+
+            # Check if the target user is in the database
+            if str(target_user.id) in user_ids_in_db:
+                # Forward the admin's reply message to the target user
+                await message.reply_to_message.copy(target_user.id)
+                success = True
+            else:
+                success = False
+
+            if success:
+                # Inform the admin that the message was successfully sent
+                await message.reply_text(f"<b>Your message has been successfully sent to {target_user.mention}.</b>")
+            else:
+                # Inform the admin if the user hasn't started the bot yet
+                await message.reply_text("<b>This user hasn't started the bot yet!</b>")
+
+        except Exception as e:
+            # Handle any errors that occur during the process
+            await message.reply_text(f"<b>Error: {e}</b>")
+    else:
+        # Inform the admin if the command is not used with a reply
+        await message.reply_text("<b>Use this command as a reply to a message, specifying the target user ID.</b>")
