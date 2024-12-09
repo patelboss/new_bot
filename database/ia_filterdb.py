@@ -8,6 +8,9 @@ from pymongo.errors import DuplicateKeyError
 from info import FILE_DB_URI, SEC_FILE_DB_URI, DATABASE_NAME, COLLECTION_NAME, MULTIPLE_DATABASE, USE_CAPTION_FILTER, MAX_B_TN
 from utils import get_settings, save_group_settings
 from pymongo.errors import PyMongoError
+from datetime import datetime
+import hashlib
+from pymongo.errors import PyMongoError
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -239,88 +242,97 @@ col = db[COLLECTIONB_NAME]
 logger = logging.getLogger(__name__)
 
 # Function to generate a unique batch ID (e.g., BATCH-XXXXXXXXXX-01)
-
-
 def generate_batch_id():
+    """
+    Generates a unique batch ID using a timestamp, hash, and sequence number.
+
+    Returns:
+        str: The generated batch ID.
+    """
     try:
-        # Generate a unique timestamp
-        current_timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
-#        logger.debug(f"Generated timestamp for batch ID: {current_timestamp}")
+        # Generate a unique timestamp for the batch ID
+        current_timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S")
+        logger.debug(f"Generated timestamp for batch ID: {current_timestamp}")
 
-        # Generate a hash part for the batch ID
+        # Generate a hash from the timestamp
         hash_part = hashlib.sha256(current_timestamp.encode()).hexdigest()[:10]
- #       logger.debug(f"Generated hash part for batch ID: {hash_part}")
+        logger.debug(f"Generated hash part for batch ID: {hash_part}")
 
-        # Get the latest sequence number
+        # Get the latest sequence number and increment it
         sequence_number = get_latest_batch_sequence() + 1
-#        logger.info(f"Retrieved and incremented sequence number for batch ID: {sequence_number}")
+        logger.info(f"Retrieved and incremented sequence number for batch ID: {sequence_number}")
 
-        # Combine to create the batch ID
+        # Combine the components to create the batch ID
         batch_id = f"Filmykeedha-{hash_part}-{str(sequence_number).zfill(2)}"
-#        logger.info(f"Generated batch ID: {batch_id}")
+        logger.info(f"Generated batch ID: {batch_id}")
 
         return batch_id
     except Exception as e:
-#        logger.error(f"Error generating batch ID: {str(e)}")
-        raise  # Re-raise the exception to allow for further handling if needed
+        logger.error(f"Error generating batch ID: {str(e)}")
+        raise  # Re-raise to allow higher-level handling
+
 # Function to get the latest batch sequence number (for uniqueness)
-
 def get_latest_batch_sequence():
+    """
+    Retrieves the latest sequence number for batch IDs from the database.
+
+    Returns:
+        int: The latest sequence number, or 0 if none exists.
+    """
     try:
-#        logger.info("Attempting to retrieve the latest batch sequence number.")
-        
-        # Query to find the most recent batch
-        latest_batch = col.find().sort("batch_id", -1).limit(1)
-#        logger.debug("Query executed to find the latest batch.")
-
-        if latest_batch.count() > 0:
-            latest_batch_data = latest_batch[0]
-            batch_id = latest_batch_data.get("batch_id", "")
-
-            if batch_id:
-#                logger.info(f"Found latest batch_id: {batch_id}")
-                try:
-                    # Extract and return the sequence number
-                    sequence_number = int(batch_id.split("-")[-1])
-#                    logger.info(f"Extracted sequence number: {sequence_number}")
-                    return sequence_number
-                except ValueError:
-#                    logger.warning(f"Invalid batch_id format encountered: {batch_id}")
-                    return 0
-            else:
-#                logger.warning("Batch document found but missing 'batch_id' field.")
-                return 0
-        else:
-#            logger.info("No batches found in the collection. Starting with sequence number 0.")
-            return 0
+        latest_batch = col.find_one(sort=[("created_at", -1)])  # Sort by most recent entry
+        if latest_batch and "batch_id" in latest_batch:
+            # Extract sequence number from batch ID (last component after the second dash)
+            sequence_number = int(latest_batch["batch_id"].split("-")[-1])
+            logger.debug(f"Latest sequence number retrieved: {sequence_number}")
+            return sequence_number
+        return 0  # No existing batches found
+    except PyMongoError as e:
+        logger.error(f"Database error retrieving latest batch sequence: {str(e)}")
+        raise Exception(f"Database error: {e}")  # Re-raise for handling
     except Exception as e:
-#        logger.error(f"Error retrieving the latest batch sequence: {str(e)}")
-        return 0
+        logger.error(f"Unexpected error retrieving latest batch sequence: {str(e)}")
+        raise  # Re-raise for further handling
 # Function to save batch details to the database
 
-async def save_batch_details(batch_id, file_data, batch_name, optional_message=None):
+async def save_batch_details(file_data, batch_name, optional_message=None):
+    """
+    Saves the batch details to the database and returns the generated batch ID.
+
+    Args:
+        file_data (list): List of file metadata for the batch.
+        batch_name (str): Name of the batch.
+        optional_message (str, optional): Additional message provided by the user.
+
+    Returns:
+        str: The generated batch ID.
+    """
     try:
         # Generate a unique batch ID
         batch_id = generate_batch_id()
-#        logger.info(f"Generated batch ID: {batch_id}")
+        logger.info(f"Generated batch ID: {batch_id}")
 
         # Prepare batch details
         batch_details = {
             "batch_id": batch_id,
             "file_data": file_data,
             "batch_name": batch_name,
-            "optional_message": optional_message,
-            "created_at": datetime.now()
+            "optional_message": optional_message if optional_message else "No message provided",
+            "created_at": datetime.utcnow()
         }
-#        logger.debug(f"Batch details prepared: {batch_details}")
+        logger.debug(f"Batch details prepared: {batch_details}")
 
         # Save batch details in the main collection
         col.insert_one(batch_details)
-#        logger.info(f"Batch {batch_id} saved successfully with name '{batch_name}'")
+        logger.info(f"Batch {batch_id} saved successfully with name '{batch_name}'")
+
+        return batch_id  # Return the generated batch ID
+    except PyMongoError as e:
+        logger.error(f"Database error saving batch {batch_id}: {str(e)}")
+        raise Exception(f"Database error: {e}")  # Re-raise for higher-level handling
     except Exception as e:
-        # Log the error
-#        logger.error(f"Error saving batch {batch_id}: {str(e)}")
-        raise  # Re-raise the exception for further handling if needed
+        logger.error(f"Unexpected error saving batch {batch_id}: {str(e)}")
+        raise  # Re-raise for further handling
 
 async def get_batch_by_id(batch_id):
     """
