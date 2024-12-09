@@ -291,25 +291,33 @@ async def start(client, message):
                 
                 # Fetch the file using the unique_link
                 logger.info("Fetching file for link: %s", unique_link)
-                file = await fetch_file_by_link(batch_id, unique_link)  # This function should retrieve the file from the store
+                file_metadata = await fetch_file_by_link(batch_id, unique_link)  # This function should retrieve the file from the store
 
-                if file:
+                if file_metadata:
+                    file_id = file_metadata.get('file_id')
+                    if file_id:
+    
+     
                     # Send the file to the user
-                    logger.info("Sending file ID: %s to user", unique_link)
-                    msg = await client.send_cached_media(
+                        logger.info("Sending file ID: %s to user", unique_link)
+                        msg = await client.send_cached_media(
                         chat_id=message.from_user.id,
-                        file_id=file.file_id,  # Sending the file retrieved from the link
-                        caption=caption,
-                        protect_content=protect,
-                        reply_markup=InlineKeyboardMarkup([
+                            file_id=file.file_id,  # Sending the file retrieved from the link
+                            caption=caption,
+                            protect_content=protect,
+                            reply_markup=InlineKeyboardMarkup([
                             [InlineKeyboardButton("Join Our Offer Zone 🤑", url=OFR_CNL)],
                             [InlineKeyboardButton('💳 Donate', callback_data='donation')]
-                        ])
-                    )
-                    files_sent.append(msg)
-                    logger.info("File ID %s successfully sent to user", unique_link)
+                            ])
+                        )
+                        files_sent.append(msg)
+                        logger.info("File ID %s successfully sent to user", unique_link)
+                    else:
+                        logger.error("File not found for link: %s", unique_link)
+
                 else:
-                    logger.error("File not found for link: %s", unique_link)
+                    logger.error("File metadata not found for link: %s", unique_link)
+
 
             except FloodWait as e:
                 logger.warning(f"FloodWait of {e.x} seconds while sending file.")
