@@ -89,7 +89,7 @@ TUTORIAL = environ.get('TUTORIAL', 'https://bit.ly/3OOoNpP')
 SUPPORT_CHAT = environ.get('SUPPORT_CHAT', 'iAmRashmibot') # Support Chat Link Without https:// or @
 
 # True Or False
-AI_SPELL_CHECK = bool(environ.get('AI_SPELL_CHECK', True))
+AI_SPELL_CHECK = True #bool(environ.get('AI_SPELL_CHECK', True))
 PM_SEARCH = bool(environ.get('PM_SEARCH', False))
 IS_SHORTLINK = bool(environ.get('IS_SHORTLINK', False))
 MAX_BTN = is_enabled((environ.get('MAX_BTN', "True")), True)
