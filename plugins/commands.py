@@ -242,7 +242,7 @@ async def start(client, message):
             logger.error("Batch ID not found: %s", batch_id)
             return await sts.edit("Invalid or expired batch link.")
 
-        logger.info("Batch ID %s found. Processing...", batch_id)
+#        logger.info("Batch ID %s found. Processing...", batch_id)
 
         # Extract metadata
         files_metadata = batch_metadata.get("file_data")
@@ -253,12 +253,12 @@ async def start(client, message):
         # Check if files_metadata exists and is iterable
         if not files_metadata:
             await message.reply("No files found in this batch.")
-            logger.error(f"files_metadata is None or empty for batch {batch_metadata.get('batch_id', 'Unknown')}")
+#            logger.error(f"files_metadata is None or empty for batch {batch_metadata.get('batch_id', 'Unknown')}")
             return
 
         if not isinstance(files_metadata, builtins.list):
             await message.reply("Invalid file data format in this batch.")
-            logger.error(f"files_metadata is not a list for batch {batch_metadata.get('batch_id', 'Unknown')}. Type: {type(files_metadata)}")
+#            logger.error(f"files_metadata is not a list for batch {batch_metadata.get('batch_id', 'Unknown')}. Type: {type(files_metadata)}")
             return
 
         # Notify user about the batch details
@@ -289,7 +289,7 @@ async def start(client, message):
                 unique_link = file_metadata.get("unique_link")  # Use unique_link directly from the database
                 
                 # Fetch the file using the unique_link
-                logger.info("Fetching file for link: %s", unique_link)
+#                logger.info("Fetching file for link: %s", unique_link)
                 file_metadata = await fetch_file_by_link(batch_id, unique_link)  # This function should retrieve the file from the store
 
                 if file_metadata:
@@ -298,7 +298,7 @@ async def start(client, message):
     
      
                     # Send the file to the user
-                        logger.info("Sending file ID: %s to user", unique_link)
+#                        logger.info("Sending file ID: %s to user", unique_link)
                         msg = await client.send_cached_media(
                         chat_id=message.from_user.id,
                             file_id=file_id,  # Sending the file retrieved from the link
@@ -310,16 +310,16 @@ async def start(client, message):
                             ])
                         )
                         files_sent.append(msg)
-                        logger.info("File ID %s successfully sent to user", unique_link)
+#                        logger.info("File ID %s successfully sent to user", unique_link)
                     else:
-                        logger.error("File not found for link: %s", unique_link)
+#                        logger.error("File not found for link: %s", unique_link)
 
                 else:
-                    logger.error("File metadata not found for link: %s", unique_link)
+#                    logger.error("File metadata not found for link: %s", unique_link)
 
 
             except FloodWait as e:
-                logger.warning(f"FloodWait of {e.x} seconds while sending file.")
+#                logger.warning(f"FloodWait of {e.x} seconds while sending file.")
                 await asyncio.sleep(e.x)
                 continue
 
@@ -333,22 +333,22 @@ async def start(client, message):
         await sts.delete()
 
         # Optional cleanup after some time
-        logger.info("Cleaning up after sending files.")
+#        logger.info("Cleaning up after sending files.")
         cleanup_msg = await client.send_message(
             chat_id=message.from_user.id,
-            text="Files sent, cleaning up after some time."
+            text = script.DELETEMSG
         )
-        await asyncio.sleep(100)  # Adjust duration as needed
+        await asyncio.sleep(4200)  # Adjust duration as needed
 
         for msg in files_sent:
             try:
                 await msg.delete()
-                logger.info("Deleted message for file ID: %s", msg.message_id)
+#                logger.info("Deleted message for file ID: %s", msg.message_id)
             except Exception as e:
                 logger.warning("Error deleting message: %s", str(e))
 
         await cleanup_msg.edit_text("<b>Your All Files/Videos have been successfully deleted!</b>")
-        logger.info("Batch processing completed for Batch ID: %s", batch_id)
+#        logger.info("Batch processing completed for Batch ID: %s", batch_id)
         
     elif data.split("-", 1)[0] == "verify":
         userid = data.split("-", 2)[1]
@@ -1052,7 +1052,7 @@ async def save_template(client, message):
 @Client.on_message((filters.command(["request", "Request"]) | filters.regex("#request") | filters.regex("#Request")) & filters.group)
 async def requests(client, message):
     if REQST_CHANNEL is None or SUPPORT_CHAT_ID is None:
-        logger.error("REQST_CHANNEL or SUPPORT_CHAT_ID is not set.")
+#        logger.error("REQST_CHANNEL or SUPPORT_CHAT_ID is not set.")
         return  # Must add REQST_CHANNEL and SUPPORT_CHAT_ID to use this feature
 
     # If the message is a reply in the support chat
@@ -1063,11 +1063,11 @@ async def requests(client, message):
         content = message.reply_to_message.text
         success = True
 
-        logger.info(f"Received request from {mention} ({reporter}) in support chat. Content: {content}")
+#        logger.info(f"Received request from {mention} ({reporter}) in support chat. Content: {content}")
 
         try:
             if REQST_CHANNEL is not None:
-                logger.info(f"Sending request to REQST_CHANNEL {REQST_CHANNEL}.")
+#                logger.info(f"Sending request to REQST_CHANNEL {REQST_CHANNEL}.")
                 btn = [[
                         InlineKeyboardButton('View Request', url=f"{message.reply_to_message.link}"),
                         InlineKeyboardButton('Show Options', callback_data=f'show_option#{reporter}')
@@ -1077,10 +1077,10 @@ async def requests(client, message):
                     text=f"<b>𝖱𝖾𝗉𝗈𝗋𝗍𝖾𝗋 : {mention} ({reporter})\n\n𝖬𝖾𝗌𝗌𝖺𝗀𝖾 : {content}</b>", 
                     reply_markup=InlineKeyboardMarkup(btn)
                 )
-                logger.info(f"Request successfully sent to REQST_CHANNEL.")
+#                logger.info(f"Request successfully sent to REQST_CHANNEL.")
                 success = True
             elif len(content) >= 3:
-                logger.info(f"Content is valid (>= 3 characters), sending to admins.")
+#                logger.info(f"Content is valid (>= 3 characters), sending to admins.")
                 for admin in ADMINS:
                     btn = [[
                         InlineKeyboardButton('View Request', url=f"{message.reply_to_message.link}"),
@@ -1091,14 +1091,14 @@ async def requests(client, message):
                         text=f"<b>𝖱𝖾𝗉𝗈𝗋𝗍𝖾𝗋 : {mention} ({reporter})\n\n𝖬𝖾𝗌𝗌𝖺𝗀𝖾 : {content}</b>", 
                         reply_markup=InlineKeyboardMarkup(btn)
                     )
-                    logger.info(f"Request successfully sent to admin {admin}.")
+#                    logger.info(f"Request successfully sent to admin {admin}.")
                 success = True
             else:
-                logger.warning(f"Content is too short (< 3 characters), replying with warning.")
+#                logger.warning(f"Content is too short (< 3 characters), replying with warning.")
                 await message.reply_text("<b>You must type about your request [Minimum 3 Characters]. Requests can't be empty.</b>")
                 success = False
         except Exception as e:
-            logger.error(f"Error while processing request from {mention}: {e}")
+#            logger.error(f"Error while processing request from {mention}: {e}")
             await message.reply_text(f"Error: {e}")
         
     # If the message is directly from the support chat (without a reply)
@@ -1112,11 +1112,11 @@ async def requests(client, message):
             if keyword in content:
                 content = content.replace(keyword, "")
         
-        logger.info(f"Received request from {mention} ({reporter}) with content: {content}")
+#        logger.info(f"Received request from {mention} ({reporter}) with content: {content}")
 
         try:
             if REQST_CHANNEL is not None and len(content) >= 3:
-                logger.info(f"Sending request to REQST_CHANNEL {REQST_CHANNEL}.")
+#                logger.info(f"Sending request to REQST_CHANNEL {REQST_CHANNEL}.")
                 btn = [[
                         InlineKeyboardButton('View Request', url=f"{message.link}"),
                         InlineKeyboardButton('Show Options', callback_data=f'show_option#{reporter}')
@@ -1140,23 +1140,23 @@ async def requests(client, message):
                         text=f"<b>𝖱𝖾𝗉𝗈𝗋𝗍𝖾𝗋 : {mention} ({reporter})\n\n𝖬𝖾𝗌𝗌𝖺𝗀𝖾 : {content}</b>", 
                         reply_markup=InlineKeyboardMarkup(btn)
                     )
-                    logger.info(f"Request successfully sent to admin {admin}.")
+#                    logger.info(f"Request successfully sent to admin {admin}.")
                 success = True
             else:
-                logger.warning(f"Content is too short (< 3 characters), replying with warning.")
+#                logger.warning(f"Content is too short (< 3 characters), replying with warning.")
                 await message.reply_text("<b>You must type about your request [Minimum 3 Characters]. Requests can't be empty.</b>")
                 success = False
         except Exception as e:
-            logger.error(f"Error while processing request from {mention}: {e}")
+#            logger.error(f"Error while processing request from {mention}: {e}")
             await message.reply_text(f"Error: {e}")
 
     else:
-        logger.warning("Message is from an invalid chat, request cannot be processed.")
+#        logger.warning("Message is from an invalid chat, request cannot be processed.")
         success = False
     
     if success:
         try:
-            logger.info(f"Request successfully processed for {mention}. Creating invite link.")
+#            logger.info(f"Request successfully processed for {mention}. Creating invite link.")
             link = await client.create_chat_invite_link(int(REQST_CHANNEL))
             btn = [[
                     InlineKeyboardButton("Join Our Offer Zone 🤑", url=OFR_CNL),
@@ -1166,7 +1166,7 @@ async def requests(client, message):
                 "<b>Your request has been sent to our admin! Please wait for some time.\n\nJoin This Channel For Great Deals On Amazon Flipkart etc.</b>", 
                 reply_markup=InlineKeyboardMarkup(btn)
             )
-            logger.info(f"Invite link created and response sent to {mention}.")
+#            logger.info(f"Invite link created and response sent to {mention}.")
         except Exception as e:
             logger.error(f"Error while creating invite link or sending response for {mention}: {e}")
             await message.reply_text(f"Error: {e}")
