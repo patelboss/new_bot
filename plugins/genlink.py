@@ -133,7 +133,7 @@ async def gen_link_batch(bot, message):
     # Send log to the admin channel
     await bot.send_message(
         LOG_CHANNEL,
-        f"New Batch Created:\nBatch ID: {batch_id}\nName: {batch_name}\nMessage: {optional_message}\n"
+        f"New Batch Created:\nBatch ID: {batch_id}\nName: {batch_name}\n\n"
         f"Link: {short_link}"
     )
     # Send the message with an inline button
@@ -141,6 +141,6 @@ async def gen_link_batch(bot, message):
         BATCH_FILE_CHANNEL,
          f"Name: {batch_name}\nDetails: {optional_message}",
         reply_markup=InlineKeyboardMarkup(
-            [[InlineKeyboardButton("Open Batch", url=short_link)]]
+            [[InlineKeyboardButton("Get All Files/Episodes", url=short_link)]]
         )
     )
