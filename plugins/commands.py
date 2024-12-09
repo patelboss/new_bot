@@ -12,7 +12,6 @@ from database.connections_mdb import active_connection
 from urllib.parse import quote_plus
 from TechVJ.util.file_properties import get_name, get_hash, get_media_file_size
 import builtins
-from plugins.genlink import generate_file_link
 BATCH_FILES = {}
 join_db = JoinReqs
 
