@@ -312,10 +312,10 @@ async def start(client, message):
                         files_sent.append(msg)
 #                        logger.info("File ID %s successfully sent to user", unique_link)
                     else:
-#                        logger.error("File not found for link: %s", unique_link)
+                        logger.error("File not found for link: %s", unique_link)
 
                 else:
-#                    logger.error("File metadata not found for link: %s", unique_link)
+                    logger.error("File metadata not found for link: %s", unique_link)
 
 
             except FloodWait as e:
@@ -338,7 +338,7 @@ async def start(client, message):
             chat_id=message.from_user.id,
             text = script.DELETEMSG
         )
-        await asyncio.sleep(4200)  # Adjust duration as needed
+        await asyncio.sleep(100)  # Adjust duration as needed
 
         for msg in files_sent:
             try:
