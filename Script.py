@@ -8,27 +8,13 @@ class script(object):
 <b><blockquote>👋 Hᴇʟʟᴏ <i>{}</i>,  
 ✨ ᴍʏ ɴᴀᴍᴇ ɪꜱ <a href="https://t.me/{}"><b>{}</b></a> ✨</blockquote>  
 
-<b><i>⚡ I am your ultimate File Sharing Bot powered by <a href="https://t.me/filmykeedha">@FilmyKeedha</a> ⚡</i></b>  
-<pre>
-📚 With the largest media database on Telegram, we've proudly served users since 2021 and are committed to staying completely FREE in the future!
-
-Hindi:
-मैं आपका फ़ाइल शेयरिंग बॉट हूँ।
-📚 टेलीग्राम पर सबसे बड़े मीडिया डेटाबेस के साथ, हम 2021 से उपयोगकर्ताओं को निःशुल्क सेवा प्रदान कर रहे हैं और भविष्य में भी पूरी तरह से मुफ़्त रहने की योजना है!
-</pre>
+<b><i>⚡ I am alternate of Rashmi powered by <a href="https://t.me/filmykeedha">@FilmyKeedha</a> ⚡</i></b>  
 """
     CLONE_START_TXT = """
 <b><blockquote>👋 Hᴇʟʟᴏ <i>{}</i>,  
 ✨ ᴍʏ ɴᴀᴍᴇ ɪꜱ <a href="https://t.me/{}"><b>{}</b></a> ✨</blockquote>  
 
-<b><i>⚡ I am your ultimate File Sharing Bot powered by <a href="https://t.me/filmykeedha">@FilmyKeedha</a> ⚡</i></b>  
-<pre>
-📚 With the largest media database on Telegram, we've proudly served users since 2021 and are committed to staying completely FREE in the future!
-
-Hindi:
-मैं आपका फ़ाइल शेयरिंग बॉट हूँ।
-📚 टेलीग्राम पर सबसे बड़े मीडिया डेटाबेस के साथ, हम 2021 से उपयोगकर्ताओं को निःशुल्क सेवा प्रदान कर रहे हैं और भविष्य में भी पूरी तरह से मुफ़्त रहने की योजना है!
-</pre>
+<b><i>⚡ I am alternate of Rashmi powered by <a href="https://t.me/filmykeedha">@FilmyKeedha</a> ⚡</i></b>  
 """
     HELP_TXT =""" <b>Hᴇʏ {} , What's up?</b>
 
@@ -758,7 +744,7 @@ Also your tutorial will be Added Your Group..."""
 
     DELETEMSG = """
 <b><u>❗️❗️❗️IMPORTANT❗️️❗️❗️</u></b>
-ɴᴏᴛᴇ:- ʏᴇ ꜰɪʟᴇꜱ 1 ɢʜᴀɴᴛᴇ ᴍᴇ ᴅᴇʟᴇᴛᴇ ʜᴏ ᴊᴀᴇɢɪ.
+ɴᴏᴛᴇ:- ʏᴇ ꜰɪʟᴇꜱ 10 MINUTES ᴍᴇ ᴅᴇʟᴇᴛᴇ ʜᴏ ᴊᴀᴇɢɪ.
 ɪꜱʟɪʏᴇ ɪꜱᴋᴏ ᴅᴜᴍʙ ɢʀᴏᴜᴘ ᴍᴇ ꜰᴏʀᴡᴀʀᴅ ᴋʀᴋᴇ ᴠᴀʜᴀ ꜱᴇ ᴅᴏᴡɴʟᴏᴀᴅ ᴋᴀʀᴇ
 ᴅᴜᴍʙ ɢʀᴏᴜᴘ: https://t.me/+4U2PRD2nYwQyNWM1
 
@@ -767,13 +753,13 @@ Also your tutorial will be Added Your Group..."""
     DEVELOPER_TXT = """
 special Thanks To ❤️ Developers -
 
--Dev 1 [Owner of this bot ]<a href='https://t.me/KingVj01'>VJ</a>
+-Dev 1 [Owner of this bot ]<a href='https://t.me/'>VJ</a>
 
--Dev 2 <a href='https://t.me/vjbots_bot'>VJ</a>
+-Dev 2 <a href='https://t.me/botfather'>XYZ</a>
 
--Dev 3 <a href='https://t.me/vj_botz>VJ Botz</a>
+-Dev 3 <a href='https://t.me/telegram>ABC</a>
 
-- Dev 4 <a href='https://t.me/vj_bots'>TEAM VJ</a>
+- Dev 4 <a href='https://t.me/Filmykeedha'>Filmykeedha</a>
 """
 
     RENAME_TXT = """
