@@ -174,12 +174,12 @@ async def gen_link_batch(bot, message):
     logger.info("Batch created successfully. Batch ID: %s, User: %s", batch_id, message.from_user.id)
 
 
-def generate_batch_id():
-    """
-    Generate a unique batch ID (hash + sequence number)
-    """
-    # You can create a custom batch ID generation logic here
-    return hashlib.sha256(os.urandom(64)).hexdigest()[:15]  # Generate a 15-character batch ID
+#def generate_batch_id():
+#    """
+#    Generate a unique batch ID (hash + sequence number)
+#    """
+#    # You can create a custom batch ID generation logic here
+#    return hashlib.sha256(os.urandom(64)).hexdigest()[:15]  # Generate a 15-character batch ID
 
 
 def generate_file_link(unique_link):
