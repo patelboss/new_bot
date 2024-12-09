@@ -299,7 +299,7 @@ async def start(client, message):
                     msg = await client.send_cached_media(
                         chat_id=message.from_user.id,
                         media=file_id,  # Sending the file retrieved from the link
-                        caption=f_caption,
+                        caption=caption,
                         protect_content=protect,
                         reply_markup=InlineKeyboardMarkup([
                             [InlineKeyboardButton("Join Our Offer Zone 🤑", url=OFR_CNL)],
