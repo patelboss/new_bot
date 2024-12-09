@@ -252,19 +252,19 @@ def generate_batch_id():
     try:
         # Generate a unique timestamp for the batch ID
         current_timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S")
-        logger.debug(f"Generated timestamp for batch ID: {current_timestamp}")
+#        logger.debug(f"Generated timestamp for batch ID: {current_timestamp}")
 
         # Generate a hash from the timestamp
         hash_part = hashlib.sha256(current_timestamp.encode()).hexdigest()[:10]
-        logger.debug(f"Generated hash part for batch ID: {hash_part}")
+#        logger.debug(f"Generated hash part for batch ID: {hash_part}")
 
         # Get the latest sequence number and increment it
         sequence_number = get_latest_batch_sequence() + 1
-        logger.info(f"Retrieved and incremented sequence number for batch ID: {sequence_number}")
+#        logger.info(f"Retrieved and incremented sequence number for batch ID: {sequence_number}")
 
         # Combine the components to create the batch ID
         batch_id = f"Filmykeedha-{hash_part}-{str(sequence_number).zfill(2)}"
-        logger.info(f"Generated batch ID: {batch_id}")
+#        logger.info(f"Generated batch ID: {batch_id}")
 
         return batch_id
     except Exception as e:
@@ -284,7 +284,7 @@ def get_latest_batch_sequence():
         if latest_batch and "batch_id" in latest_batch:
             # Extract sequence number from batch ID (last component after the second dash)
             sequence_number = int(latest_batch["batch_id"].split("-")[-1])
-            logger.debug(f"Latest sequence number retrieved: {sequence_number}")
+#            logger.debug(f"Latest sequence number retrieved: {sequence_number}")
             return sequence_number
         return 0  # No existing batches found
     except PyMongoError as e:
@@ -310,7 +310,7 @@ async def save_batch_details(file_data, batch_name, optional_message=None):
     try:
         # Generate a unique batch ID
         batch_id = generate_batch_id()
-        logger.info(f"Generated batch ID: {batch_id}")
+#        logger.info(f"Generated batch ID: {batch_id}")
 
         # Prepare batch details
         batch_details = {
@@ -320,11 +320,11 @@ async def save_batch_details(file_data, batch_name, optional_message=None):
             "optional_message": optional_message if optional_message else "No message provided",
             "created_at": datetime.utcnow()
         }
-        logger.debug(f"Batch details prepared: {batch_details}")
+#        logger.debug(f"Batch details prepared: {batch_details}")
 
         # Save batch details in the main collection
         col.insert_one(batch_details)
-        logger.info(f"Batch {batch_id} saved successfully with name '{batch_name}'")
+#        logger.info(f"Batch {batch_id} saved successfully with name '{batch_name}'")
 
         return batch_id  # Return the generated batch ID
     except PyMongoError as e:
@@ -421,9 +421,9 @@ async def fetch_file_by_link(batch_id: str, unique_link: str):
         return file_metadata
 
     except PyMongoError as e:
-#        logger.exception("Database error occurred: %s", str(e))
+        logger.exception("Database error occurred: %s", str(e))
         return None
 
     except Exception as e:
-#        logger.exception("Unexpected error in fetch_file_by_link: %s", str(e))
+        logger.exception("Unexpected error in fetch_file_by_link: %s", str(e))
         return None
