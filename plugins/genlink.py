@@ -73,16 +73,22 @@ async def gen_link_batch(bot, message):
 #        logger.error("Unexpected error: %s", str(e))
         return await message.reply(f"Error: {e}")
 
-    await message.reply("Provide a name for this batch and an optional message separated by `|`.")
-#    logger.info("Waiting for batch name and optional message from user: %s", message.from_user.id)
-    response = await bot.listen(message.chat.id)
-#    logger.info("Received user input for batch name and message: %s", response.text)
+    await message.reply("Provide a name for this batch.")  # Ask for the batch name
+    response = await bot.listen(message.chat.id)  # Wait for the user's input for the batch name
+    batch_name = response.text.strip()  # Assign the batch name
+    logger.info("Received batch name: %s", batch_name)
 
-    if "|" in response.text:
-        batch_name, optional_message = map(str.strip, response.text.split("|", 1))
-    else:
-        batch_name, optional_message = response.text.strip(), ""
+    await message.reply("Now, provide an optional message (or type 'pass' to skip).")  # Ask for the optional message
+    response = await bot.listen(message.chat.id)  # Wait for the user's input for the optional message
+    optional_message = response.text.strip()  # Assign the optional message
 
+# If no message is provided, set it to 'pass'
+    if not optional_message:
+        optional_message = "pass"
+
+    logger.info("Received optional message: %s", optional_message)
+
+# Continue with your logic for processing the batch
     sts = await message.reply("Processing your batch...")
    # logger.info("Sending processing status update to user")
 
@@ -172,6 +178,12 @@ async def gen_link_batch(bot, message):
         f"New Batch Created:\nBatch ID: {batch_id}\nName: {batch_name}\nMessage: {optional_message}\n"
         f"Link: {short_link}"
     )
+    await bot.send_message(
+        PUBLIC_FILE_CHANNEL,
+        f"Name: {batch_name}\Details: {optional_message}\n"
+        f"Link: {short_link}"
+    )
+
  #   logger.info("Batch creation log sent to LOG_CHANNEL")
 
  #   logger.info("Batch created successfully. Batch ID: %s, User: %s", batch_id, message.from_user.id)
