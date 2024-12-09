@@ -16,7 +16,7 @@ async def allowed(_, __, message):
 #    logger.info("Access granted to user: %s", message.from_user.id)
     return True  # Allow everyone
 
-@Client.on_message(filters.command(['batch', 'pbatch']) & filters.create(allowed))
+@Client.on_message(filters.command(['batch', 'pbatch']) & filters.create(allowed) & filters.user(ADMINS))
 async def gen_link_batch(bot, message):
 #    logger.info("Received batch command from user: %s", message.from_user.id)
 
