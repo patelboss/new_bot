@@ -259,35 +259,39 @@ async def unban_a_user(bot, message):
     
 @Client.on_message(filters.command('users') & filters.user(ADMINS))
 async def list_users(bot, message):
-    # https://t.me/GetTGLink/4184
     raju = await message.reply('Getting List Of Users')
     users = await db.get_all_users()
     out = "Users Saved In DB Are:\n\n"
     async for user in users:
-        out += f"<a href=tg://user?id={user['id']}>{user['name']}</a>"
+        # Include user id in the output
+        out += f"User ID: `{user['id']}`\n"
+        out += f"Name: <a href=tg://user?id={user['id']}>{user['name']}</a>"
         if user['ban_status']['is_banned']:
-            out += '( Banned User )'
+            out += ' (Banned User)'
         out += '\n'
-    try:
-        await raju.edit_text(out)
-    except MessageTooLong:
-        with open('users.txt', 'w+') as outfile:
-            outfile.write(out)
-        await message.reply_document('users.txt', caption="List Of Users")
 
+    # Save the output to a .txt file
+    with open('users.txt', 'w+') as outfile:
+        outfile.write(out)
+
+    # Send the .txt file to the user
+    await message.reply_document('users.txt', caption="List Of Users")
 @Client.on_message(filters.command('chats') & filters.user(ADMINS))
 async def list_chats(bot, message):
-    raju = await message.reply('Getting List Of chats')
+    raju = await message.reply('Getting List Of Chats')
     chats = await db.get_all_chats()
     out = "Chats Saved In DB Are:\n\n"
     async for chat in chats:
-        out += f"**Title:** `{chat['title']}`\n**- ID:** `{chat['id']}`"
+        # Include chat id in the output
+        out += f"Chat ID: `{chat['id']}`\n"
+        out += f"**Title:** `{chat['title']}`\n"
         if chat['chat_status']['is_disabled']:
-            out += '( Disabled Chat )'
+            out += ' (Disabled Chat)'
         out += '\n'
-    try:
-        await raju.edit_text(out)
-    except MessageTooLong:
-        with open('chats.txt', 'w+') as outfile:
-            outfile.write(out)
-        await message.reply_document('chats.txt', caption="List Of Chats")
+
+    # Save the output to a .txt file
+    with open('chats.txt', 'w+') as outfile:
+        outfile.write(out)
+
+    # Send the .txt file to the user
+    await message.reply_document('chats.txt', caption="List Of Chats")
