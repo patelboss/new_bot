@@ -6,10 +6,10 @@ import logging
 import hashlib
 from pyrogram import Client, filters, enums
 from pyrogram.errors.exceptions.bad_request_400 import ChannelInvalid, UsernameInvalid, UsernameNotModified
-from info import LOG_CHANNEL, PUBLIC_FILE_CHANNEL
+from info import LOG_CHANNEL
 from database.ia_filterdb import *
 from utils import temp
-
+PUBLIC_FILE_CHANNEL = '-1001817766666'
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
