@@ -79,7 +79,7 @@ async def gen_link_batch(bot, message):
 #    logger.info("Received user input for batch name and message: %s", response.text)
 
     if "|" in response.text:
-        batch_name, optional_message = map(str.strip, response.text.split("§", 1))
+        batch_name, optional_message = map(str.strip, response.text.split("|", 1))
     else:
         batch_name, optional_message = response.text.strip(), ""
 
