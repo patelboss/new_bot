@@ -9,24 +9,25 @@ from pyrogram.errors.exceptions.bad_request_400 import ChannelInvalid, UsernameI
 from info import LOG_CHANNEL
 from database.ia_filterdb import *
 from utils import temp
-PUBLIC_FILE_CHANNEL = '-1001817766666'
+
+PUBLIC_FILE_CHANNEL = '-1001817766666'  # Ensure this is the correct channel ID (negative for private channels)
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 # Remove admin verification: Allow everyone
 async def allowed(_, __, message):
-    logger.info("Access granted to user: %s", message.from_user.id)
+#    logger.info("Access granted to user: %s", message.from_user.id)
     return True  # Anyone can use it now
 
 @Client.on_message(filters.command(['batch', 'pbatch']) & filters.create(allowed))
 async def gen_link_batch(bot, message):
-    logger.info("Received batch command from user: %s", message.from_user.id)
+#    logger.info("Received batch command from user: %s", message.from_user.id)
 
     links = message.text.strip().split(" ")
-    logger.info("Parsing batch links from user: %s", message.from_user.id)
+#    logger.info("Parsing batch links from user: %s", message.from_user.id)
 
     if len(links) < 3:  # Minimum: Command + at least 2 links
-        logger.warning("Incorrect batch command format from user: %s", message.from_user.id)
+#        logger.warning("Incorrect batch command format from user: %s", message.from_user.id)
         return await message.reply(
             "Use correct format.\nExample: `/batch https://t.me/c/123456789/1 https://t.me/c/123456789/2`."
         )
@@ -38,7 +39,7 @@ async def gen_link_batch(bot, message):
         regex = re.compile(r"(https://)?(t\.me/|telegram\.me/|telegram\.dog/)(c/)?(\d+|[a-zA-Z_0-9]+)/(\d+)$")
         match = regex.match(link)
         if not match:
-            logger.warning("Invalid link format: %s", link)
+#            logger.warning("Invalid link format: %s", link)
             return None, None
         chat_id = match.group(4)
         msg_id = int(match.group(5))
@@ -47,35 +48,35 @@ async def gen_link_batch(bot, message):
         return chat_id, msg_id
 
     processed_links = [validate_link(link) for link in links]
-    logger.info("Validated links: %s", processed_links)
+#    logger.info("Validated links: %s", processed_links)
 
     if any(link is None for link in processed_links):
-        logger.warning("Invalid link(s) provided by user: %s", message.from_user.id)
+#        logger.warning("Invalid link(s) provided by user: %s", message.from_user.id)
         return await message.reply("Invalid link(s) provided.")
 
     chat_ids = {chat_id for chat_id, _ in processed_links if chat_id}
     if len(chat_ids) > 1:
-        logger.warning("Links from different chats detected: %s", message.from_user.id)
+#        logger.warning("Links from different chats detected: %s", message.from_user.id)
         return await message.reply("All links must belong to the same chat.")
 
     chat_id = next(iter(chat_ids))
-    logger.info("Resolved chat ID: %s", chat_id)
+#    logger.info("Resolved chat ID: %s", chat_id)
 
     try:
-        logger.info("Fetching chat details for chat ID: %s", chat_id)
+#        logger.info("Fetching chat details for chat ID: %s", chat_id)
         chat_id = (await bot.get_chat(chat_id)).id
-        logger.info("Chat ID resolved: %s", chat_id)
+#        logger.info("Chat ID resolved: %s", chat_id)
     except (ChannelInvalid, UsernameInvalid, UsernameNotModified) as e:
-        logger.error("Error accessing chat: %s", str(e))
+#        logger.error("Error accessing chat: %s", str(e))
         return await message.reply("Error accessing chat. Ensure the bot has admin access.")
     except Exception as e:
-        logger.error("Unexpected error: %s", str(e))
+#        logger.error("Unexpected error: %s", str(e))
         return await message.reply(f"Error: {e}")
 
     await message.reply("Provide a name for this batch and an optional message separated by `|`.")
-    logger.info("Waiting for batch name and optional message from user: %s", message.from_user.id)
+#    logger.info("Waiting for batch name and optional message from user: %s", message.from_user.id)
     response = await bot.listen(message.chat.id)
-    logger.info("Received user input for batch name and message: %s", response.text)
+#    logger.info("Received user input for batch name and message: %s", response.text)
 
     if "|" in response.text:
         batch_name, optional_message = map(str.strip, response.text.split("§", 1))
@@ -83,7 +84,7 @@ async def gen_link_batch(bot, message):
         batch_name, optional_message = response.text.strip(), ""
 
     sts = await message.reply("Processing your batch...")
-    logger.info("Sending processing status update to user")
+   # logger.info("Sending processing status update to user")
 
     outlist = []
     links_sent = 0
@@ -91,7 +92,7 @@ async def gen_link_batch(bot, message):
 
     for sequence_num, (_, msg_id) in enumerate(processed_links, 1):
         try:
-            logger.info("Fetching message with ID: %s", msg_id)
+ #           logger.info("Fetching message with ID: %s", msg_id)
             msg = await bot.get_messages(chat_id=chat_id, message_ids=msg_id)
 
             # Ensure the message has media and is either a document, video, or photo
@@ -147,13 +148,15 @@ async def gen_link_batch(bot, message):
                     protect_content=False
                 )
 
+            links_sent += 1
+
         except Exception as e:
             logger.exception("Error processing message ID: %s", msg_id)
 
     # Generate the final batch ID (hash + last sequence number)
     batch_id = generate_batch_id()  # Generate the batch ID
     await save_batch_details(batch_id, outlist, batch_name, optional_message)
-    logger.info("Batch details saved in db for Batch ID: %s", batch_id)
+   # logger.info("Batch details saved in db for Batch ID: %s", batch_id)
 
     # Create the final batch link with the last sequence number
     short_link = f"https://t.me/{temp.U_NAME}?start=BATCH-{batch_id}"
@@ -161,7 +164,7 @@ async def gen_link_batch(bot, message):
                    f"Batch Name: {batch_name}\n"
                    f"Contains `{links_sent}` files.\n"
                    f"Link: {short_link}")
-    logger.info("Batch creation status sent to user")
+  #  logger.info("Batch creation status sent to user")
 
     # Send log to the admin channel
     await bot.send_message(
@@ -169,29 +172,13 @@ async def gen_link_batch(bot, message):
         f"New Batch Created:\nBatch ID: {batch_id}\nName: {batch_name}\nMessage: {optional_message}\n"
         f"Link: {short_link}"
     )
-    logger.info("Batch creation log sent to LOG_CHANNEL")
+ #   logger.info("Batch creation log sent to LOG_CHANNEL")
 
-    logger.info("Batch created successfully. Batch ID: %s, User: %s", batch_id, message.from_user.id)
+ #   logger.info("Batch created successfully. Batch ID: %s, User: %s", batch_id, message.from_user.id)
 
 
 #def generate_batch_id():
 #    """
 #    Generate a unique batch ID (hash + sequence number)
 #    """
-#    # You can create a custom batch ID generation logic here
 #    return hashlib.sha256(os.urandom(64)).hexdigest()[:15]  # Generate a 15-character batch ID
-
-
-def generate_file_link(unique_link):
-    """
-    Generate a unique link for each file based on its unique_link.
-    
-    Args:
-        unique_link (str): The unique link identifier for the file.
-
-    Returns:
-        str: A unique file link.
-    """
-    # Simply return the unique link or use it to construct a new link
-    file_link = f"https://t.me/{temp.U_NAME}?start=BATCH-{unique_link}"
-    return file_link
