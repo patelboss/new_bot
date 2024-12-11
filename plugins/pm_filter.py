@@ -82,10 +82,8 @@ async def give_filter(client, message):
             await message.reply_text(
                 f"<b>Hey {message.from_user.mention}, {total_results} results found in my database for your query '{search}'.\n\n"
                 "This is a support group, so you can't get files here.\n\n"
-                "Search Group Link: https://t.me/Filmykeedha/306</b>",
-                disable_web_page_preview=True
+                "Search Group Link: https://t.me/Filmykeedha/306</b>"
             )
-            
         else:
             # If no files are found, create a request
             try:
@@ -153,7 +151,7 @@ async def next_page(bot, query):
         btn = [
             [
                 InlineKeyboardButton(
-                    text=f"☞{get_size(file['file_size'])} ◉ {' '.join(filter(lambda x: not any(x.startswith(prefix) for prefix in ['[', '@', 'www.', 'telegram', 'tg']), file['file_name'].split()))}", callback_data=f'{pre}#{file["file_id"]}'
+                    text=f"☞{get_size(file['file_size'])} ◉ {' '.join(filter(lambda x: not x.startswith('[') and not x.startswith('@') and not x.startswith('www.'), file['file_name'].split()))}", callback_data=f'{pre}#{file["file_id"]}'
                 ),
             ]
             for file in files
@@ -549,7 +547,7 @@ async def filter_episodes_cb_handler(client: Client, query: CallbackQuery):
         btn = [
             [
                 InlineKeyboardButton(
-                    text=f"☞{get_size(file['file_size'])} ◉ {' '.join(filter(lambda x: not any(x.startswith(prefix) for prefix in ['[', '@', 'www.', 'telegram', 'tg']), file['file_name'].split()))}", callback_data=f'{pre}#{file["file_id"]}'
+                    text=f"☞{get_size(file['file_size'])} ◉ {' '.join(filter(lambda x: not x.startswith('[') and not x.startswith('@') and not x.startswith('www.'), file['file_name'].split()))}", callback_data=f'{pre}#{file["file_id"]}'
                 ),
             ]
             for file in files
@@ -713,7 +711,7 @@ async def filter_languages_cb_handler(client: Client, query: CallbackQuery):
         btn = [
             [
                 InlineKeyboardButton(
-                    text=f"☞{get_size(file['file_size'])} ◉ {' '.join(filter(lambda x: not any(x.startswith(prefix) for prefix in ['[', '@', 'www.', 'telegram', 'tg']), file['file_name'].split()))}", callback_data=f'{pre}#{file["file_id"]}'
+                    text=f"☞{get_size(file['file_size'])} ◉ {' '.join(filter(lambda x: not x.startswith('[') and not x.startswith('@') and not x.startswith('www.'), file['file_name'].split()))}", callback_data=f'{pre}#{file["file_id"]}'
                 ),
             ]
             for file in files
@@ -897,7 +895,7 @@ async def filter_seasons_cb_handler(client: Client, query: CallbackQuery):
         files.extend(files2)
         
     if not files:
-        await query.answer("🚫 𝗡𝗼 𝗙𝗶𝗹𝗲 𝗪𝗲𝗿𝗲 𝗙𝗼𝘂𝗻𝗱 Try S01 Series 🚫", show_alert=1)
+        await query.answer("🚫 𝗡𝗼 𝗙𝗶𝗹𝗲 𝗪𝗲𝗿𝗲 𝗙𝗼𝘂𝗻𝗱 🚫", show_alert=1)
         return
     temp.GETALL[key] = files
     settings = await get_settings(message.chat.id)
@@ -906,7 +904,7 @@ async def filter_seasons_cb_handler(client: Client, query: CallbackQuery):
         btn = [
             [
                 InlineKeyboardButton(
-                    text=f"☞{get_size(file['file_size'])} ◉ {' '.join(filter(lambda x: not any(x.startswith(prefix) for prefix in ['[', '@', 'www.', 'telegram', 'tg']), file['file_name'].split()))}", callback_data=f'{pre}#{file["file_id"]}'
+                    text=f"☞{get_size(file['file_size'])} ◉ {' '.join(filter(lambda x: not x.startswith('[') and not x.startswith('@') and not x.startswith('www.'), file['file_name'].split()))}", callback_data=f'{pre}#{file["file_id"]}'
                 ),
             ]
             for file in files
@@ -1044,7 +1042,7 @@ async def filter_qualities_cb_handler(client: Client, query: CallbackQuery):
         btn = [
             [
                 InlineKeyboardButton(
-                    text=f"☞{get_size(file['file_size'])} ◉ {' '.join(filter(lambda x: not any(x.startswith(prefix) for prefix in ['[', '@', 'www.', 'telegram', 'tg']), file['file_name'].split()))}", callback_data=f'{pre}#{file["file_id"]}'
+                    text=f"☞{get_size(file['file_size'])} ◉ {' '.join(filter(lambda x: not x.startswith('[') and not x.startswith('@') and not x.startswith('www.'), file['file_name'].split()))}", callback_data=f'{pre}#{file["file_id"]}'
                 ),
             ]
             for file in files
@@ -1053,7 +1051,7 @@ async def filter_qualities_cb_handler(client: Client, query: CallbackQuery):
         btn = [
             [
                 InlineKeyboardButton(
-                    text=f"{' '.join(filter(lambda x: not any(x.startswith(prefix) for prefix in ['[', '@', 'www.', 'telegram', 'tg']), file['file_name'].split()))}",
+                    text=f"{' '.join(filter(lambda x: not x.startswith('[') and not x.startswith('@') and not x.startswith('www.'), file['file_name'].split()))}",
                     callback_data=f'{pre}#{file["file_id"]}',
                 ),
                 InlineKeyboardButton(
@@ -2945,7 +2943,7 @@ async def auto_filter(client, name, msg, reply_msg, ai_search, spoll=False):
         btn = [
             [
                 InlineKeyboardButton(
-                    text=f"[{get_size(file['file_size'])}] {' '.join(filter(lambda x: not any(x.startswith(prefix) for prefix in ['[', '@', 'www.', 'telegram', 'tg']), file['file_name'].split()))}", callback_data=f'{pre}#{file["file_id"]}'
+                    text=f"☞{get_size(file['file_size'])} ◉ {' '.join(filter(lambda x: not x.startswith('[') and not x.startswith('@') and not x.startswith('www.'), file['file_name'].split()))}", callback_data=f'{pre}#{file["file_id"]}'
                 ),
             ]
             for file in files
