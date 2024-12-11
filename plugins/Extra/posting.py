@@ -43,7 +43,7 @@ async def post_to_channel(client, channel_id, message, photo, buttons):
 @Client.on_message(filters.command("post") & filters.private)
 async def post_command(client, message):
     user_id = message.from_user.id
-    user_channel = await get_user_channel(user_id)
+    user_channel = get_user_channel(user_id)
 
     if not user_channel:
         # If no channel is connected, prompt for a channel ID
