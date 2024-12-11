@@ -27,14 +27,14 @@ async def post_to_channel(client, channel_id, message, photo, buttons):
             channel_id,
             photo=photo,
             caption=message,
-            parse_mode="html",
+            parse_mode=ParseMode.HTML,
             reply_markup=InlineKeyboardMarkup(buttons) if buttons else None
         )
     else:
         await client.send_message(
             channel_id,
             text=message,
-            parse_mode="html",
+            parse_mode=ParseMode.HTML,
             reply_markup=InlineKeyboardMarkup(buttons) if buttons else None
         )
 
