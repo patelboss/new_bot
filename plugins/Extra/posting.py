@@ -204,7 +204,7 @@ async def connect_post_channel(client, message):
             logger.error(f"Error deleting prompt message for User ID {user_id}: {str(e)}")
 
 from pyrogram import Client
-from pyrogram.enums import ChatType
+from pyrogram.enums import ChatType, ChatMemberStatus
 import logging
 
 # Set up logging configuration
@@ -236,14 +236,14 @@ async def connect_channel(client, message, channel_identifier):
             logger.warning(f"User ID {user_id} tried to connect to a non-channel: {channel_identifier} (Type: {chat.type})")
             return
 
-        # Verify if user is an admin or the creator (owner) of the channel
+        # Verify if user is an admin or the owner (creator) of the channel
         member = await client.get_chat_member(chat.id, user_id)
 
         # Log the user status in the channel
         logger.info(f"User ID {user_id} has status '{member.status}' in the channel: {chat.title} ({chat.id})")
 
-        # Check if the user is an admin or creator
-        if member.status not in ("administrator", "creator"):
+        # Check if the user is an admin or owner (creator)
+        if member.status not in (ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.OWNER):
             await message.reply("You must be an admin or creator in the channel to connect it.")
             logger.warning(f"User ID {user_id} is not an admin or creator in the channel: {chat.title} ({chat.id})")
             return
