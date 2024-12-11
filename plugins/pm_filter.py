@@ -83,7 +83,7 @@ async def give_filter(client, message):
                 f"<b>Hey {message.from_user.mention}, {total_results} results found in my database for your query '{search}'.\n\n"
                 "This is a support group, so you can't get files here.\n\n"
                 "Search Group Link: https://t.me/Filmykeedha/306</b>",
-                disable_web_page_preview=True:
+                disable_web_page_preview=True
             )
             
         else:
