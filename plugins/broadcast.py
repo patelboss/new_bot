@@ -12,8 +12,16 @@ logger = logging.getLogger("broadcast")
 @Client.on_message(filters.command("broadcast") & filters.user(ADMINS))
 async def pm_broadcast(bot, message):
     try:
-#        logger.info("PM Broadcast initiated by admin.")
-        b_msg = await bot.ask(chat_id=message.from_user.id, text="Send your broadcast message (type or forward).")
+        # Ask admin for broadcast message with a timeout
+        await message.reply_text("You have 60 seconds to send your broadcast message (type or forward).")
+        try:
+            b_msg = await asyncio.wait_for(
+                bot.ask(chat_id=message.from_user.id, text="Send your broadcast message (type or forward)."),
+                timeout=60
+            )
+        except asyncio.TimeoutError:
+            await message.reply_text("⏳ Time's up! Broadcast canceled.")
+            return
 
         forward_msg = b_msg.forward_from or b_msg.forward_from_chat
         users = await db.get_all_users()  # Cursor for users
@@ -56,8 +64,16 @@ async def pm_broadcast(bot, message):
 @Client.on_message(filters.command("grp_broadcast") & filters.user(ADMINS))
 async def broadcast_group(bot, message):
     try:
-#        logger.info("Group Broadcast initiated by admin.")
-        b_msg = await bot.ask(chat_id=message.from_user.id, text="Send your broadcast message (type or forward).")
+        # Ask admin for broadcast message with a timeout
+        await message.reply_text("You have 60 seconds to send your broadcast message (type or forward).")
+        try:
+            b_msg = await asyncio.wait_for(
+                bot.ask(chat_id=message.from_user.id, text="Send your broadcast message (type or forward)."),
+                timeout=60
+            )
+        except asyncio.TimeoutError:
+            await message.reply_text("⏳ Time's up! Broadcast canceled.")
+            return
 
         forward_msg = b_msg.forward_from or b_msg.forward_from_chat
         groups = await db.get_all_chats()  # Cursor for groups
