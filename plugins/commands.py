@@ -7,7 +7,7 @@ from database.ia_filterdb import col, sec_col, get_file_details, unpack_new_file
 from database.batch_filedb import fetch_file_by_link, get_batch_by_id
 from database.users_chats_db import db, delete_all_referal_users, get_referal_users_count, get_referal_all_users, referal_add_user
 from database.join_reqs import JoinReqs
-from info import CLONE_MODE, CHANNELS, REQUEST_TO_JOIN_MODE, TRY_AGAIN_BTN, ADMINS, SHORTLINK_MODE, PREMIUM_AND_REFERAL_MODE, STREAM_MODE, AUTH_CHANNEL, AUTH_CHANNELS, OWNER_USERNAME, REFERAL_PREMEIUM_TIME, REFERAL_COUNT, PAYMENT_TEXT, PAYMENT_QR, LOG_CHANNEL, PICS, BATCH_FILE_CAPTION, CUSTOM_FILE_CAPTION, PROTECT_CONTENT, CHNL_LNK, GRP_LNK, REQST_CHANNEL, SUPPORT_CHAT_ID, SUPPORT_CHAT, MAX_B_TN, VERIFY, SHORTLINK_API, SHORTLINK_URL, TUTORIAL, VERIFY_TUTORIAL, IS_TUTORIAL, URL, OFR_CNL, Share_msg, DLTTM
+from info import CLONE_MODE, CHANNELS, REQUEST_TO_JOIN_MODE, TRY_AGAIN_BTN, ADMINS, SHORTLINK_MODE, PREMIUM_AND_REFERAL_MODE, STREAM_MODE, AUTH_CHANNEL, OWNER_USERNAME, REFERAL_PREMEIUM_TIME, REFERAL_COUNT, PAYMENT_TEXT, PAYMENT_QR, LOG_CHANNEL, PICS, BATCH_FILE_CAPTION, CUSTOM_FILE_CAPTION, PROTECT_CONTENT, CHNL_LNK, GRP_LNK, REQST_CHANNEL, SUPPORT_CHAT_ID, SUPPORT_CHAT, MAX_B_TN, VERIFY, SHORTLINK_API, SHORTLINK_URL, TUTORIAL, VERIFY_TUTORIAL, IS_TUTORIAL, URL, OFR_CNL, Share_msg, DLTTM
 from utils import get_settings, pub_is_subscribed, get_size, is_subscribed, save_group_settings, temp, verify_user, check_token, check_verification, get_token, get_shortlink, get_tutorial, get_seconds
 from database.connections_mdb import active_connection
 from urllib.parse import quote_plus
@@ -90,84 +90,51 @@ async def start(client, message):
             parse_mode=enums.ParseMode.HTML
         )
         return
-
     if AUTH_CHANNEL and not await is_subscribed(client, message):
         try:
-            invite_link = None
-
-        # Handle channels
-            if isinstance(AUTH_CHANNELS, (str, int)):
-                channels = [int(AUTH_CHANNELS)]
-            elif isinstance(AUTH_CHANNELS, list):
-                channels = [int(x) for x in AUTH_CHANNELS if isinstance(x, (str, int))]
+            if REQUEST_TO_JOIN_MODE == True:
+                invite_link = await client.create_chat_invite_link(chat_id=(int(AUTH_CHANNELS)), creates_join_request=True)
             else:
-                channels = []
-
-            if not channels:
-                await message.reply_text("No valid channels configured for force subscribe.")
-                return
-
-        # Attempt to create an invite link for any valid channel
-            for channel_id in channels:
-                try:
-                    if REQUEST_TO_JOIN_MODE:
-                        invite_link = await client.create_chat_invite_link(chat_id=channel_id, creates_join_request=True)
-                    else:
-                        invite_link = await client.create_chat_invite_link(chat_id=channel_id)
-                    break  # Stop once an invite link is created successfully
-                except ChatAdminRequired:
-                    await message.reply_text(f"Make sure Bot is admin in Forcesub channel {channel_id}.")
-                    continue
-                except Exception as e:
-                    await message.reply_text(f"Error while creating invite link for channel {channel_id}: {e}")
-                    continue
-
-            if not invite_link:
-                await message.reply_text("Failed to create an invite link for all channels.")
-                return
-
-        # Prepare buttons for missing channels
-            btn = [[InlineKeyboardButton("❆ Join Update Channel ❆", url=invite_link.invite_link)]]
+                invite_link = await client.create_chat_invite_link(int(AUTH_CHANNELS))
+        except ChatAdminRequired:
+            await message.reply_text("Make sure Bot is admin in Forcesub channel")
+            return
+        try:
+            btn = [[
+                InlineKeyboardButton("❆ Jᴏɪɴ Uᴘᴅᴀᴛᴇ Cʜᴀɴɴᴇʟ ❆", url=invite_link.invite_link)
+            ]]
             if message.command[1] != "subscribe":
-                if REQUEST_TO_JOIN_MODE:
-                    if TRY_AGAIN_BTN:
+                if REQUEST_TO_JOIN_MODE == True:
+                    if TRY_AGAIN_BTN == True:
                         try:
                             kk, file_id = message.command[1].split("_", 1)
-                            btn.append([InlineKeyboardButton("↻ Try Again", callback_data=f"checksub#{kk}#{file_id}")])
+                            btn.append([InlineKeyboardButton("↻ Tʀʏ Aɢᴀɪɴ", callback_data=f"checksub#{kk}#{file_id}")])
                         except (IndexError, ValueError):
-                            btn.append([InlineKeyboardButton("↻ Try Again", url=f"https://t.me/{temp.U_NAME}?start={message.command[1]}")])
+                            btn.append([InlineKeyboardButton("↻ Tʀʏ Aɢᴀɪɴ", url=f"https://t.me/{temp.U_NAME}?start={message.command[1]}")])
                 else:
                     try:
                         kk, file_id = message.command[1].split("_", 1)
-                        btn.append([InlineKeyboardButton("↻ Try Again", callback_data=f"checksub#{kk}#{file_id}")])
+                        btn.append([InlineKeyboardButton("↻ Tʀʏ Aɢᴀɪɴ", callback_data=f"checksub#{kk}#{file_id}")])
                     except (IndexError, ValueError):
-                        btn.append([InlineKeyboardButton("↻ Try Again", url=f"https://t.me/{temp.U_NAME}?start={message.command[1]}")])
-
-        # Select appropriate text message
-            if REQUEST_TO_JOIN_MODE:
-                if TRY_AGAIN_BTN:
-                    text = "**🕵️ Join The Update Channel To Get Movie File\n\n👨‍💻 First Click On Join Update Channel Button, Then Click On Request To Join Button After Click On Try Again Button.**"
+                        btn.append([InlineKeyboardButton("↻ Tʀʏ Aɢᴀɪɴ", url=f"https://t.me/{temp.U_NAME}?start={message.command[1]}")])
+            if REQUEST_TO_JOIN_MODE == True:
+                if TRY_AGAIN_BTN == True:
+                    text = "**🕵️ Jᴏɪɴ Tʜᴇ Uᴘᴅᴀᴛᴇ Cʜᴀɴɴᴇʟ Tᴏ Gᴇᴛ Mᴏᴠɪᴇ Fɪʟᴇ\n\n👨‍💻 Fɪʀsᴛ Cʟɪᴄᴋ Oɴ Jᴏɪɴ Uᴘᴅᴀᴛᴇ Cʜᴀɴɴᴇʟ Bᴜᴛᴛᴏɴ, Tʜᴇɴ Cʟɪᴄᴋ Oɴ Rᴇǫᴜᴇsᴛ Tᴏ Jᴏɪɴ Bᴜᴛᴛᴏɴ Aғᴛᴇʀ Cʟɪᴄᴋ Oɴ Tʀʏ Aɢᴀɪɴ Bᴜᴛᴛᴏɴ.**"
                 else:
                     await db.set_msg_command(message.from_user.id, com=message.command[1])
-                    text = "**🕵️ Join The Update Channel To Get Movie File\n\n👨‍💻 First Click On Join Update Channel Button, Then Click On Request To Join Button.**"
+                    text = "**🕵️ Jᴏɪɴ Tʜᴇ Uᴘᴅᴀᴛᴇ Cʜᴀɴɴᴇʟ Tᴏ Gᴇᴛ Mᴏᴠɪᴇ Fɪʟᴇ\n\n👨‍💻 Fɪʀsᴛ Cʟɪᴄᴋ Oɴ Jᴏɪɴ Uᴘᴅᴀᴛᴇ Cʜᴀɴɴᴇʟ Bᴜᴛᴛᴏɴ, Tʜᴇɴ Cʟɪᴄᴋ Oɴ Rᴇǫᴜᴇsᴛ Tᴏ Jᴏɪɴ Bᴜᴛᴛᴏɴ.**"
             else:
-                text = "**🕵️ Join The Update Channel To Get Movie File\n\n👨‍💻 First Click On Join Update Channel Button, Then Join Channel After Click On Try Again Button.**"
-
-        # Send the message with buttons
+                text = "**🕵️ Jᴏɪɴ Tʜᴇ Uᴘᴅᴀᴛᴇ Cʜᴀɴɴᴇʟ Tᴏ Gᴇᴛ Mᴏᴠɪᴇ Fɪʟᴇ\n\n👨‍💻 Fɪʀsᴛ  Cʟɪᴄᴋ Oɴ Jᴏɪɴ Uᴘᴅᴀᴛᴇ Cʜᴀɴɴᴇʟ Bᴜᴛᴛᴏɴ, Tʜᴇɴ Jᴏɪɴ Cʜᴀɴɴᴇʟ Aғᴛᴇʀ Cʟɪᴄᴋ Oɴ Tʀʏ Aɢᴀɪɴ Bᴜᴛᴛᴏɴ**"
             await client.send_message(
                 chat_id=message.from_user.id,
                 text=text,
                 reply_markup=InlineKeyboardMarkup(btn),
                 parse_mode=enums.ParseMode.MARKDOWN
-            )
+                )
             return
-        except Exception as e:
-            await message.reply_text(f"Unexpected error: {e}")
-
-
-
-    
-        
+        except:
+            await message.reply_text("something wrong with force subscribe.")
+            
     if len(message.command) == 2 and message.command[1] in ["subscribe", "error", "okay", "help"]:
         if PREMIUM_AND_REFERAL_MODE == True:
             buttons = [[
