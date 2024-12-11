@@ -92,20 +92,46 @@ async def start(client, message):
         return
     if AUTH_CHANNEL and not await is_subscribed(client, message):
         try:
-            if REQUEST_TO_JOIN_MODE == True:
-                invite_link = await client.create_chat_invite_link(chat_id=(int(AUTH_CHANNELS)), creates_join_request=True)
+            invite_link = None
+
+        # Normalize AUTH_CHANNELS to a list
+            if isinstance(AUTH_CHANNELS, (str, int)):
+                channels = [int(AUTH_CHANNELS)]
+            elif isinstance(AUTH_CHANNELS, list):
+                channels = [int(x) for x in AUTH_CHANNELS if str(x).isdigit()]
             else:
-                invite_link = await client.create_chat_invite_link(int(AUTH_CHANNELS))
-        except ChatAdminRequired:
-            await message.reply_text("Make sure Bot is admin in Forcesub channel")
+                channels = []
+
+        # Attempt to create an invite link for each channel
+            for channel_id in channels:
+                try:
+                    if REQUEST_TO_JOIN_MODE:
+                        invite_link = await client.create_chat_invite_link(chat_id=channel_id, creates_join_request=True)
+                    else:
+                        invite_link = await client.create_chat_invite_link(chat_id=channel_id)
+                    break  # Stop after successfully creating one invite link
+                except ChatAdminRequired:
+                    await message.reply_text(f"Make sure Bot is admin in Forcesub channel {channel_id}.")
+                    continue
+                except Exception as e:
+                    await message.reply_text(f"Error while creating invite link for channel {channel_id}: {e}")
+                    continue
+
+            if not invite_link:
+                await message.reply_text("Failed to create an invite link for all channels.")
+                return
+
+        except Exception as e:
+            await message.reply_text(f"Unexpected error: {e}")
             return
+
         try:
             btn = [[
                 InlineKeyboardButton("❆ Jᴏɪɴ Uᴘᴅᴀᴛᴇ Cʜᴀɴɴᴇʟ ❆", url=invite_link.invite_link)
             ]]
             if message.command[1] != "subscribe":
-                if REQUEST_TO_JOIN_MODE == True:
-                    if TRY_AGAIN_BTN == True:
+                if REQUEST_TO_JOIN_MODE:
+                    if TRY_AGAIN_BTN:
                         try:
                             kk, file_id = message.command[1].split("_", 1)
                             btn.append([InlineKeyboardButton("↻ Tʀʏ Aɢᴀɪɴ", callback_data=f"checksub#{kk}#{file_id}")])
@@ -117,24 +143,23 @@ async def start(client, message):
                         btn.append([InlineKeyboardButton("↻ Tʀʏ Aɢᴀɪɴ", callback_data=f"checksub#{kk}#{file_id}")])
                     except (IndexError, ValueError):
                         btn.append([InlineKeyboardButton("↻ Tʀʏ Aɢᴀɪɴ", url=f"https://t.me/{temp.U_NAME}?start={message.command[1]}")])
-            if REQUEST_TO_JOIN_MODE == True:
-                if TRY_AGAIN_BTN == True:
+            if REQUEST_TO_JOIN_MODE:
+                if TRY_AGAIN_BTN:
                     text = "**🕵️ Jᴏɪɴ Tʜᴇ Uᴘᴅᴀᴛᴇ Cʜᴀɴɴᴇʟ Tᴏ Gᴇᴛ Mᴏᴠɪᴇ Fɪʟᴇ\n\n👨‍💻 Fɪʀsᴛ Cʟɪᴄᴋ Oɴ Jᴏɪɴ Uᴘᴅᴀᴛᴇ Cʜᴀɴɴᴇʟ Bᴜᴛᴛᴏɴ, Tʜᴇɴ Cʟɪᴄᴋ Oɴ Rᴇǫᴜᴇsᴛ Tᴏ Jᴏɪɴ Bᴜᴛᴛᴏɴ Aғᴛᴇʀ Cʟɪᴄᴋ Oɴ Tʀʏ Aɢᴀɪɴ Bᴜᴛᴛᴏɴ.**"
                 else:
                     await db.set_msg_command(message.from_user.id, com=message.command[1])
                     text = "**🕵️ Jᴏɪɴ Tʜᴇ Uᴘᴅᴀᴛᴇ Cʜᴀɴɴᴇʟ Tᴏ Gᴇᴛ Mᴏᴠɪᴇ Fɪʟᴇ\n\n👨‍💻 Fɪʀsᴛ Cʟɪᴄᴋ Oɴ Jᴏɪɴ Uᴘᴅᴀᴛᴇ Cʜᴀɴɴᴇʟ Bᴜᴛᴛᴏɴ, Tʜᴇɴ Cʟɪᴄᴋ Oɴ Rᴇǫᴜᴇsᴛ Tᴏ Jᴏɪɴ Bᴜᴛᴛᴏɴ.**"
             else:
-                text = "**🕵️ Jᴏɪɴ Tʜᴇ Uᴘᴅᴀᴛᴇ Cʜᴀɴɴᴇʟ Tᴏ Gᴇᴛ Mᴏᴠɪᴇ Fɪʟᴇ\n\n👨‍💻 Fɪʀsᴛ  Cʟɪᴄᴋ Oɴ Jᴏɪɴ Uᴘᴅᴀᴛᴇ Cʜᴀɴɴᴇʟ Bᴜᴛᴛᴏɴ, Tʜᴇɴ Jᴏɪɴ Cʜᴀɴɴᴇʟ Aғᴛᴇʀ Cʟɪᴄᴋ Oɴ Tʀʏ Aɢᴀɪɴ Bᴜᴛᴛᴏɴ**"
+                text = "**🕵️ Jᴏɪɴ Tʜᴇ Uᴘᴅᴀᴛᴇ Cʜᴀɴɴᴇʟ Tᴏ Gᴇᴛ Mᴏᴠɪᴇ Fɪʟᴇ\n\n👨‍💻 Fɪʀsᴛ Cʟɪᴄᴋ Oɴ Jᴏɪɴ Uᴘᴅᴀᴛᴇ Cʜᴀɴɴᴇʟ Bᴜᴛᴛᴏɴ, Tʜᴇɴ Jᴏɪɴ Cʜᴀɴɴᴇʟ Aғᴛᴇʀ Cʟɪᴄᴋ Oɴ Tʀʏ Aɢᴀɪɴ Bᴜᴛᴛᴏɴ**"
             await client.send_message(
                 chat_id=message.from_user.id,
                 text=text,
                 reply_markup=InlineKeyboardMarkup(btn),
                 parse_mode=enums.ParseMode.MARKDOWN
-                )
+            )
             return
-        except:
-            await message.reply_text("something wrong with force subscribe.")
-            
+        except Exception as e:
+            await message.reply_text(f"Something went wrong with force subscribe: {e}")        
     if len(message.command) == 2 and message.command[1] in ["subscribe", "error", "okay", "help"]:
         if PREMIUM_AND_REFERAL_MODE == True:
             buttons = [[
