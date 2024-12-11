@@ -206,6 +206,7 @@ async def connect_post_channel(client, message):
 from pyrogram import Client
 from pyrogram.enums import ChatType
 import logging
+from your_database_module import save_user_channel  # Import the save_user_channel function
 
 # Set up logging configuration
 logging.basicConfig(level=logging.INFO)
@@ -236,11 +237,16 @@ async def connect_channel(client, message, channel_identifier):
             logger.warning(f"User ID {user_id} tried to connect to a non-channel: {channel_identifier} (Type: {chat.type})")
             return
 
-        # Verify if user is an admin in the channel
+        # Verify if user is an admin or the creator (owner) of the channel
         member = await client.get_chat_member(chat.id, user_id)
+
+        # Log the user status in the channel
+        logger.info(f"User ID {user_id} has status '{member.status}' in the channel: {chat.title} ({chat.id})")
+
+        # Check if the user is an admin or creator
         if member.status not in ("administrator", "creator"):
-            await message.reply("You must be an admin in the channel to connect it.")
-            logger.warning(f"User ID {user_id} is not an admin in the channel: {chat.title} ({chat.id})")
+            await message.reply("You must be an admin or creator in the channel to connect it.")
+            logger.warning(f"User ID {user_id} is not an admin or creator in the channel: {chat.title} ({chat.id})")
             return
 
         # Save the channel to the database
