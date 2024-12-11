@@ -228,7 +228,7 @@ async def connect_channel(client, message, channel_identifier):
         logger.info(f"User ID {user_id} fetched channel details for {channel_identifier}, Chat Type: {chat.type}")
 
         # Ensure it's a valid channel (not a group or private chat)
-        if chat.type != "channel":
+        if chat.type != "CHANNEL":
             logger.warning(f"User ID {user_id} tried to connect to a non-channel: {chat.id} (Type: {chat.type})")
             await message.reply("This is not a valid channel. Please send a valid channel ID.")
             return
