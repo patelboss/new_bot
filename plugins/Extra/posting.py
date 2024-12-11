@@ -206,7 +206,6 @@ async def connect_post_channel(client, message):
 from pyrogram import Client
 from pyrogram.enums import ChatType
 import logging
-from your_database_module import save_user_channel  # Import the save_user_channel function
 
 # Set up logging configuration
 logging.basicConfig(level=logging.INFO)
