@@ -74,8 +74,9 @@ async def showid(client, message):
             )
             await message.reply_text(_id, quote=True)        
 
+
 from pyrogram import Client, filters, enums
-from pyrogram.errors import UserNotParticipant
+from pyrogram.errors import UserNotParticipant, RPCError
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from datetime import datetime
 import os
@@ -88,7 +89,9 @@ async def who_is(client, message):
 
     # Extract user ID
     from_user = None
-    from_user_id = message.reply_to_message.from_user.id if message.reply_to_message else message.from_user.id
+    from_user_id = (
+        message.reply_to_message.from_user.id if message.reply_to_message else message.from_user.id
+    )
     try:
         from_user = await client.get_users(from_user_id)
     except Exception as error:
@@ -125,21 +128,26 @@ async def who_is(client, message):
         except UserNotParticipant:
             pass
 
-    # Add First Meet (First interaction date)
+    # Add First Meet (First interaction date) - Safe handling
     try:
-        first_meet_date = None
-        async for history_message in client.get_chat_history(message.chat.id, limit=10000):
-            if history_message.from_user and history_message.from_user.id == from_user.id:
-                first_meet_date = history_message.date
-                break
-
-        if first_meet_date:
-            first_meet_date_str = first_meet_date.strftime("%Y.%m.%d %H:%M:%S")
-            message_out_str += f"<b>➲ First Meet:</b> <code>{first_meet_date_str}</code>\n"
+        if message.chat.type == enums.ChatType.PRIVATE:
+            message_out_str += "<b>➲ First Meet:</b> <i>Not applicable for private chats</i>\n"
         else:
-            message_out_str += "<b>➲ First Meet:</b> <i>Unknown</i>\n"
-    except Exception as e:
-        message_out_str += f"<b>➲ First Meet:</b> <i>Could not retrieve ({str(e)})</i>\n"
+            first_meet_date = None
+            async for history_message in client.get_chat_history(message.chat.id, limit=1000):
+                if history_message.from_user and history_message.from_user.id == from_user.id:
+                    first_meet_date = history_message.date
+                    break
+
+            if first_meet_date:
+                first_meet_date_str = first_meet_date.strftime("%Y.%m.%d %H:%M:%S")
+                message_out_str += f"<b>➲ First Meet:</b> <code>{first_meet_date_str}</code>\n"
+            else:
+                message_out_str += "<b>➲ First Meet:</b> <i>Unknown</i>\n"
+    except RPCError:
+        message_out_str += (
+            "<b>➲ First Meet:</b> <i>Could not retrieve due to Telegram restrictions</i>\n"
+        )
 
     # Handle user photo
     chat_photo = from_user.photo
@@ -168,8 +176,7 @@ async def who_is(client, message):
             disable_notification=True
         )
     await status_message.delete()
-
-
+    
 @Client.on_message(filters.command(["imdb", 'search']))
 async def imdb_search(client, message):
     if ' ' in message.text:
