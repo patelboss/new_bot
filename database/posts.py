@@ -1,7 +1,7 @@
 from pymongo import MongoClient
 from bson import ObjectId
-from info import DATABASE_URI, DATABASE_NAME
 from datetime import datetime
+from info import DATABASE_URI, DATABASE_NAME
 
 # Initialize MongoDB connection
 client = MongoClient(DATABASE_URI)
@@ -13,27 +13,32 @@ posts_col = db['scheduled_posts']
 channels_col.create_index('user_id', unique=True)
 posts_col.create_index('schedule_time')
 
-
 # Save user's channel connection
 def save_user_channel(user_id, channel_id, channel_name):
     try:
-        channels_col.update_one(
-            {'user_id': user_id},
-            {'$set': {'channel_id': channel_id, 'channel_name': channel_name}},
-            upsert=True
-        )
+        # Check if user already has a channel connected
+        user_data = channels_col.find_one({'user_id': user_id})
+        if user_data:
+            # Append new channel if not already present
+            if not any(c['channel_id'] == channel_id for c in user_data.get('channels', [])):
+                channels_col.update_one(
+                    {'user_id': user_id},
+                    {'$push': {'channels': {'channel_id': channel_id, 'channel_name': channel_name}}},
+                    upsert=True
+                )
+        else:
+            channels_col.insert_one({'user_id': user_id, 'channels': [{'channel_id': channel_id, 'channel_name': channel_name}]})
     except Exception as e:
         print(f"Error saving user channel: {e}")
 
-
-# Fetch user's connected channel
-def get_user_channel(user_id):
+# Fetch user's connected channels
+def get_user_channels(user_id):
     try:
-        return channels_col.find_one({'user_id': user_id})
+        user_data = channels_col.find_one({'user_id': user_id})
+        return user_data['channels'] if user_data else []
     except Exception as e:
-        print(f"Error fetching user channel: {e}")
-        return None
-
+        print(f"Error fetching user channels: {e}")
+        return []
 
 # Save post details
 def save_post(user_id, channel_id, message, photo, buttons, schedule_time=None):
@@ -53,8 +58,7 @@ def save_post(user_id, channel_id, message, photo, buttons, schedule_time=None):
         print(f"Error saving post: {e}")
         return None
 
-
-# Fetch posts to send
+# Fetch scheduled posts to send
 def get_scheduled_posts():
     try:
         now = datetime.now()
@@ -62,7 +66,6 @@ def get_scheduled_posts():
     except Exception as e:
         print(f"Error fetching scheduled posts: {e}")
         return []
-
 
 # Delete post after sending
 def delete_post(post_id):
