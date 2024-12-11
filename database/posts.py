@@ -73,3 +73,47 @@ def delete_post(post_id):
         posts_col.delete_one({'_id': ObjectId(post_id)})
     except Exception as e:
         print(f"Error deleting post: {e}")
+from umongo import Instance, Document, fields
+from pymongo import MongoClient
+
+# Initialize the database client and instance
+client = MongoClient(DATABASE_URI)
+db = client[DATABASE_NAME]
+
+# Register the instance with the database
+instance = Instance(db)
+
+# Define the UserSession model
+@instance.register
+class UserSession(Document):
+    user_id = fields.IntField(required=True, unique=True)  # Unique user ID
+    channel_ids = fields.ListField(fields.IntField())  # List of user's connected channel IDs
+    channel_names = fields.ListField(fields.StrField())  # List of user's connected channel names
+    parse_mode = fields.StrField()  # Store parse mode (HTML/Markdown/None)
+    message = fields.StrField()  # Store message content
+    buttons = fields.StrField()  # Store buttons or 'None'
+    photo = fields.StrField()  # Store photo file ID
+    schedule_time = fields.DateTimeField()  # Store schedule time if set
+    step = fields.StrField()  # Track the current step in the process
+
+    class Meta:
+        collection_name = "user_sessions"  # This collection stores the session data for each user
+
+# Method to fetch user session from the database
+def get_user_session(user_id):
+    session = db.user_sessions.find_one({'user_id': user_id})
+    return session
+
+# Method to save or update user session
+def save_user_session(user_id, session_data):
+    # Try to find an existing session for the user
+    user_session = get_user_session(user_id)
+    
+    if user_session:
+        # Update the existing session data
+        db.user_sessions.update_one({'user_id': user_id}, {'$set': session_data})
+    else:
+        # Create new session data if the user doesn't exist
+        session_data['user_id'] = user_id
+        # Insert the new session document
+        db.user_sessions.insert_one(session_data)
