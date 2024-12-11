@@ -1,6 +1,6 @@
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-from posts import save_user_channel, get_user_channel, save_post, get_scheduled_posts, delete_post
+from database.posts import save_user_channel, get_user_channel, save_post, get_scheduled_posts, delete_post
 import asyncio
 from datetime import datetime, timedelta
 
