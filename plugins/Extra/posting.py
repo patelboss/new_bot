@@ -1,53 +1,78 @@
 from pyrogram import Client, filters
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from datetime import datetime
-from database.posts import save_post, get_user_channels  # Importing necessary DB functions
-from utils import send_preview  # Assuming a helper function for previewing posts
+import asyncio
+from database.posts import save_user_channel, get_user_channels, save_post
 
-# Dictionary to store session states per user
+# Store temporary data during the posting workflow
 user_sessions = {}
 
-@Client.on_message(filters.command("connect_postchannel") & filters.private)
-async def connect_postchannel(client, message):
-    user_id = message.from_user.id
-    channel_identifier = message.text.split(" ", 1)[1].strip()  # Extract channel identifier from message
+async def send_preview(client, user_id, channel_name, message, photo, buttons, schedule_time):
+    preview_text = (
+        f"<b>Preview:</b>\n"
+        f"Message: {message}\n"
+        f"Buttons: {buttons}\n"
+        f"Scheduled for: {schedule_time if schedule_time else 'Now'}\n"
+        f"Channel: {channel_name}"
+    )
+    if photo:
+        await client.send_photo(user_id, photo, caption=preview_text, parse_mode="html")
+    else:
+        await client.send_message(user_id, preview_text, parse_mode="html")
 
-    try:
-        # Fetch channel information
-        chat = await client.get_chat(channel_identifier)
 
-        # Verify that the chat is a channel
-        if chat.type != "channel":
-            await message.reply("This is not a valid channel. Please send a valid channel username or ID.")
-            return
-
-        # Verify user is an admin in the channel
-        member = await client.get_chat_member(chat.id, user_id)
-        if member.status not in ("administrator", "creator"):
-            await message.reply("You must be an admin in the channel to connect it.")
-            return
-
-        # Save the channel
-        await save_user_channel(user_id, chat.id, chat.title)
-        await message.reply(f"Channel '{chat.title}' connected successfully! You can now post to this channel using /post.")
-
-    except Exception as e:
-        await message.reply(f"Failed to connect the channel. Error: {str(e)}")
+async def post_to_channel(client, channel_id, message, photo, buttons):
+    if photo:
+        await client.send_photo(
+            channel_id,
+            photo=photo,
+            caption=message,
+            parse_mode="html",
+            reply_markup=InlineKeyboardMarkup(buttons) if buttons else None
+        )
+    else:
+        await client.send_message(
+            channel_id,
+            text=message,
+            parse_mode="html",
+            reply_markup=InlineKeyboardMarkup(buttons) if buttons else None
+        )
 
 
 @Client.on_message(filters.command("post") & filters.private)
 async def post_command(client, message):
     user_id = message.from_user.id
-    user_channels = get_user_channels(user_id)  # Get all connected channels
+    user_channels = get_user_channels(user_id)
 
     if not user_channels:
-        await message.reply("You are not connected to any channel. Please connect a channel first using /connect_postchannel.")
+        # If no channel is connected, prompt for a channel ID
+        prompt_message = await message.reply(
+            "You are not connected to any channel.\n"
+            "Please send me your **channel ID**.\n\n"
+            "If you don't know your channel ID, **forward any message** from your channel here and reply with `/id` to get it.\n\n"
+            "You have 60 seconds to provide the channel ID. If no input is received, this process will be aborted."
+        )
+
+        try:
+            # Wait for user input
+            user_response = await client.listen(message.chat.id, timeout=60)
+            channel_identifier = user_response.text.strip()
+
+            # Validate and connect the channel
+            await connect_channel(client, message, channel_identifier)
+        except asyncio.TimeoutError:
+            await message.reply("No response received within 60 seconds. The process has been aborted.")
+        finally:
+            await prompt_message.delete()  # Clean up the prompt message
         return
 
-    # List all connected channels
-    channel_list = "\n".join([f"{channel['channel_name']} (ID: {channel['channel_id']})" for channel in user_channels])
-    await message.reply(f"You have the following channels connected:\n{channel_list}\n\nPlease send the channel name to post to.")
+    # If the user is connected, proceed with the post creation process
+    channel_names = [channel['channel_name'] for channel in user_channels]
+    channel_ids = [channel['channel_id'] for channel in user_channels]
+    user_sessions[user_id] = {'channel_ids': channel_ids, 'channel_names': channel_names}
 
-    user_sessions[user_id] = {'step': 'select_channel'}
+    await message.reply("What is the parse mode? (HTML/Markdown/None)")
+    user_sessions[user_id]['step'] = 'parse_mode'
 
 
 @Client.on_message(filters.private & ~filters.command("cancel_post"))
@@ -60,38 +85,19 @@ async def post_workflow(client, message):
 
     step = session.get('step')
 
-    if step == 'select_channel':
-        user_channels = get_user_channels(user_id)
-        selected_channel_name = message.text.strip()
-
-        # Find the channel by name
-        selected_channel = next((channel for channel in user_channels if channel['channel_name'].lower() == selected_channel_name.lower()), None)
-        if not selected_channel:
-            await message.reply(f"Channel '{selected_channel_name}' not found in your connected channels. Please send a valid channel name.")
-            return
-
-        session['channel_id'] = selected_channel['channel_id']
-        session['channel_name'] = selected_channel['channel_name']
-        session['step'] = 'parse_mode'
-
-        await message.reply(f"You are about to post to the channel: {session['channel_name']}\nWhat is the parse mode? (HTML/Markdown/None)")
-
-    elif step == 'parse_mode':
+    if step == 'parse_mode':
         session['parse_mode'] = message.text.upper()
         session['step'] = 'message'
         await message.reply("Send me the message content.")
-
     elif step == 'message':
         session['message'] = message.text
         session['step'] = 'buttons'
         await message.reply("Send me button/link in HTML format or type 'None' to skip.")
-
     elif step == 'buttons':
         buttons = message.text
         session['buttons'] = buttons if buttons.lower() != 'none' else None
         session['step'] = 'photo'
         await message.reply("Send me a photo or type 'None' to skip.")
-
     elif step == 'photo':
         if message.photo:
             session['photo'] = message.photo.file_id
@@ -100,20 +106,19 @@ async def post_workflow(client, message):
 
         session['step'] = 'schedule'
         await message.reply("Do you want to post now or schedule? (Send 'Now' or a date like DD/MM/YYYY)")
-
     elif step == 'schedule':
         if message.text.lower() == 'now':
             session['schedule_time'] = None
             session['step'] = None
             await send_preview(
-                client, user_id, session['channel_name'], session['message'],
+                client, user_id, session['channel_names'][0], session['message'], 
                 session['photo'], session['buttons'], session['schedule_time']
             )
             await post_to_channel(
-                client, session['channel_id'], session['message'],
+                client, session['channel_ids'][0], session['message'], 
                 session['photo'], session['buttons']
             )
-            await save_post(user_id, session['channel_id'], session['message'], session['photo'], session['buttons'])
+            await save_post(user_id, session['channel_ids'][0], session['message'], session['photo'], session['buttons'])
             await message.reply("Post sent successfully!")
             user_sessions.pop(user_id, None)
         else:
@@ -124,7 +129,6 @@ async def post_workflow(client, message):
                 await message.reply("Send me the time in HH:MM format (24-hour).")
             except ValueError:
                 await message.reply("Invalid date format. Please send a valid date like DD/MM/YYYY.")
-
     elif step == 'time':
         try:
             schedule_time = datetime.strptime(message.text, '%H:%M').time()
@@ -132,10 +136,10 @@ async def post_workflow(client, message):
             session['step'] = None
 
             await send_preview(
-                client, user_id, session['channel_name'], session['message'],
+                client, user_id, session['channel_names'][0], session['message'], 
                 session['photo'], session['buttons'], session['schedule_time']
             )
-            await save_post(user_id, session['channel_id'], session['message'], session['photo'], session['buttons'], session['schedule_time'])
+            await save_post(user_id, session['channel_ids'][0], session['message'], session['photo'], session['buttons'], session['schedule_time'])
             await message.reply("Post scheduled successfully!")
             user_sessions.pop(user_id, None)
         except ValueError:
@@ -150,3 +154,55 @@ async def cancel_post(client, message):
         await message.reply("Post creation process has been canceled.")
     else:
         await message.reply("No active post process to cancel.")
+
+
+@Client.on_message(filters.command("connect_postchannel") & filters.private)
+async def connect_post_channel(client, message):
+    """
+    Command to connect a new channel for the user to post.
+    """
+    user_id = message.from_user.id
+
+    # Prompt user for channel information
+    prompt_message = await message.reply(
+        "Please send me your channel ID or username.\n"
+        "You must be an admin in the channel to connect it."
+    )
+
+    try:
+        # Wait for user response to get channel identifier (ID or username)
+        user_response = await client.listen(message.chat.id, timeout=60)
+        channel_identifier = user_response.text.strip()
+
+        # Connect channel
+        await connect_channel(client, message, channel_identifier)
+    except asyncio.TimeoutError:
+        await message.reply("No response received within 60 seconds. The process has been aborted.")
+    finally:
+        await prompt_message.delete()
+
+
+async def connect_channel(client, message, channel_identifier):
+    """
+    Handle connecting a channel for a user.
+    """
+    user_id = message.from_user.id
+
+    try:
+        # Fetch channel information
+        chat = await client.get_chat(channel_identifier)
+        if chat.type != "channel":
+            await message.reply("This is not a valid channel. Please send a channel username, ID, or invite link.")
+            return
+
+        # Verify user is an admin in the channel
+        member = await client.get_chat_member(chat.id, user_id)
+        if member.status not in ("administrator", "creator"):
+            await message.reply("You must be an admin in the channel to connect it.")
+            return
+
+        # Save the channel to the database
+        await save_user_channel(user_id, chat.id, chat.title)
+        await message.reply(f"Channel '{chat.title}' connected successfully! You can now use /post to manage posts.")
+    except Exception as e:
+        await message.reply(f"Failed to connect the channel. Error: {str(e)}")
