@@ -16,9 +16,9 @@ async def send_preview(client, user_id, channel_name, message, photo, buttons, s
         f"Channel: {channel_name}"
     )
     if photo:
-        await client.send_photo(user_id, photo, caption=preview_text, parse_mode="html")
+        await client.send_photo(user_id, photo, caption=preview_text, parse_mode=ParseMode.HTML)
     else:
-        await client.send_message(user_id, preview_text, parse_mode="html")
+        await client.send_message(user_id, preview_text, parse_mode=ParseMode.HTML)
 
 
 async def post_to_channel(client, channel_id, message, photo, buttons):
