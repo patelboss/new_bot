@@ -249,7 +249,7 @@ async def connect_channel(client, message, channel_identifier):
             return
 
         # Save the channel to the database
-        await save_user_channel(user_id, chat.id, chat.title)
+        save_user_channel(user_id, chat.id, chat.title)
         await message.reply(f"Channel '{chat.title}' connected successfully! You can now use /post to manage posts.")
         logger.info(f"User ID {user_id} successfully connected to channel: {chat.title} ({chat.id})")
 
