@@ -96,6 +96,9 @@ async def start(client, message):
                 invite_link = await client.create_chat_invite_link(chat_id=(int(AUTH_CHANNELS)), creates_join_request=True)
             else:
                 invite_link = await client.create_chat_invite_link(int(AUTH_CHANNELS))
+
+        except (TypeError, ValueError): # Ignore the error and proceed without crashing
+            return
         except ChatAdminRequired:
             await message.reply_text("Make sure Bot is admin in Forcesub channel")
             return
