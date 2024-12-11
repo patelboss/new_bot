@@ -203,6 +203,8 @@ async def connect_post_channel(client, message):
         except Exception as e:
             logger.error(f"Error deleting prompt message for User ID {user_id}: {str(e)}")
 
+from pyrogram import Client
+from pyrogram.enums import ChatType
 import logging
 
 # Set up logging configuration
@@ -214,41 +216,38 @@ async def connect_channel(client, message, channel_identifier):
     Handle connecting a channel for a user.
     """
     user_id = message.from_user.id
-    logger.info(f"User ID {user_id} attempting to connect channel: {channel_identifier}")
 
     try:
-        # Check if the provided channel ID starts with '-100' (valid channel ID format)
+        # Check if the channel identifier starts with -100 (valid channel ID)
         if not channel_identifier.startswith("-100"):
-            logger.warning(f"User ID {user_id} attempted to connect with invalid channel ID: {channel_identifier}")
-            await message.reply("Invalid channel ID. The ID must start with '-100'. Please try again with a valid channel ID.")
+            await message.reply("Invalid channel ID. Please provide a valid channel ID that starts with '-100'.")
+            logger.warning(f"User ID {user_id} provided an invalid channel ID: {channel_identifier}")
             return
-
+        
         # Fetch channel information
         chat = await client.get_chat(channel_identifier)
+
+        # Log the fetched chat details
         logger.info(f"User ID {user_id} fetched channel details for {channel_identifier}, Chat Type: {chat.type}")
 
-        # Ensure it's a valid channel (not a group or private chat)
-        if chat.type != "CHANNEL":
-            logger.warning(f"User ID {user_id} tried to connect to a non-channel: {chat.id} (Type: {chat.type})")
-            await message.reply("This is not a valid channel. Please send a valid channel ID.")
+        # Verify that the chat type is a channel
+        if chat.type != ChatType.CHANNEL:
+            await message.reply("This is not a valid channel. Please provide a valid channel ID or username.")
+            logger.warning(f"User ID {user_id} tried to connect to a non-channel: {channel_identifier} (Type: {chat.type})")
             return
 
-        # Verify user is an admin in the channel
+        # Verify if user is an admin in the channel
         member = await client.get_chat_member(chat.id, user_id)
-        logger.info(f"User ID {user_id} is checking admin status for channel {chat.title} ({chat.id})")
-
         if member.status not in ("administrator", "creator"):
-            logger.warning(f"User ID {user_id} is not an admin in the channel: {chat.id}")
             await message.reply("You must be an admin in the channel to connect it.")
+            logger.warning(f"User ID {user_id} is not an admin in the channel: {chat.title} ({chat.id})")
             return
 
         # Save the channel to the database
         await save_user_channel(user_id, chat.id, chat.title)
-        logger.info(f"User ID {user_id} successfully connected channel: {chat.title} ({chat.id})")
-
         await message.reply(f"Channel '{chat.title}' connected successfully! You can now use /post to manage posts.")
+        logger.info(f"User ID {user_id} successfully connected to channel: {chat.title} ({chat.id})")
 
     except Exception as e:
-        # Log the error
-        logger.error(f"Error connecting user ID {user_id} to channel {channel_identifier}: {str(e)}")
         await message.reply(f"Failed to connect the channel. Error: {str(e)}")
+        logger.error(f"User ID {user_id} failed to connect to channel {channel_identifier}. Error: {str(e)}")
