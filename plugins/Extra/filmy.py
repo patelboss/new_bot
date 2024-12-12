@@ -103,6 +103,6 @@ def remove_button_links(caption: str):
     """
     Removes button links in the format: {BUTTON_TEXT}-{URL} from the caption
     """
-    pattern = r"\{(.*?)\}\-(https?:\/\/[^\s]+)"
+    pattern = r"\{(.*?)\}\-{(https?:\/\/[^\s]+)}"
     cleaned_caption = re.sub(pattern, "", caption).strip()
     return cleaned_caption
