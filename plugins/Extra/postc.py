@@ -1,42 +1,40 @@
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
-import re
 from pyrogram.enums import ParseMode
+import re
+import logging
+
+# Initialize the logger
+#logger = logging.getLogger(__name__)
+#logging.basicConfig(level=logging.INFO)
 
 @Client.on_message(filters.command("cpost"))
 async def post_reply(client, message):
-    # Ensure the user provided a channel ID and replied to a message
     command_parts = message.text.split()
     if len(command_parts) < 2 or not message.reply_to_message:
-        await message.reply("Please provide a valid channel ID and reply to a message using /cpost <channel_id>.\nFor Formatting Use /chelp ")
+#        logger.warning("Command is missing required parts or no reply message found.")
+        await message.reply("Please provide a valid channel ID and reply to a message using /cpost <channel_id>.\nUse /chelp to know about formatting")
         return
 
-    channel_id = command_parts[1]  # Extract the channel ID from the command
+    channel_id = command_parts[1]
+#    logger.info(f"Extracted channel_id: {channel_id}")
 
-    # Ensure channel_id is valid (e.g., it starts with '-100' for Telegram channels)
     if not channel_id.startswith("-100"):
+#        logger.error(f"Invalid channel ID: {channel_id}")
         await message.reply("Invalid channel ID. Please provide a valid channel ID starting with '-100'.")
         return
 
-    # Get the original message's media or text
     replied_message = message.reply_to_message
-    caption = replied_message.text if replied_message.text else "No caption provided."
+    caption = replied_message.caption or replied_message.text or ""
+ #   logger.info(f"Replied message caption: {caption}")
 
-    # Parse the caption and extract inline buttons in the correct format
-    inline_buttons = parse_buttons_from_caption(caption)
-
-    # Remove button links from the caption to avoid display errors
+    inline_buttons = extract_buttons_from_caption(caption)
     caption_without_buttons = remove_button_links(caption)
+    reply_markup = InlineKeyboardMarkup(inline_buttons) if inline_buttons else None
 
-    # Prepare inline buttons only if there are any
-    reply_markup = None
-    if inline_buttons:
-        reply_markup = InlineKeyboardMarkup(inline_buttons)  # Properly formatted InlineKeyboardMarkup
-
-    # Send message with inline buttons at the bottom
     try:
         if replied_message.photo:
-            # If the replied message is a photo
+#            logger.info("Replied message is a photo. Sending to the channel...")
             await client.send_photo(
                 chat_id=channel_id,
                 photo=replied_message.photo.file_id,
@@ -44,8 +42,26 @@ async def post_reply(client, message):
                 parse_mode=ParseMode.MARKDOWN,
                 reply_markup=reply_markup
             )
+        elif replied_message.video:
+#            logger.info("Replied message is a video. Sending to the channel...")
+            await client.send_video(
+                chat_id=channel_id,
+                video=replied_message.video.file_id,
+                caption=caption_without_buttons,
+                parse_mode=ParseMode.MARKDOWN,
+                reply_markup=reply_markup
+            )
+        elif replied_message.document:
+#            logger.info("Replied message is a document. Sending to the channel...")
+            await client.send_document(
+                chat_id=channel_id,
+                document=replied_message.document.file_id,
+                caption=caption_without_buttons,
+                parse_mode=ParseMode.MARKDOWN,
+                reply_markup=reply_markup
+            )
         elif replied_message.text:
-            # If the replied message is text
+#            logger.info("Replied message is text. Sending to the channel...")
             await client.send_message(
                 chat_id=channel_id,
                 text=caption_without_buttons,
@@ -53,53 +69,43 @@ async def post_reply(client, message):
                 reply_markup=reply_markup
             )
         else:
-            # Handle unsupported media types
+#            logger.error("Unsupported media type in the replied message.")
             await client.send_message(
                 chat_id=channel_id,
-                text="Unsupported media type to forward",
-                parse_mode=ParseMode.MARKDOWN,
-                reply_markup=reply_markup
+                text="Unsupported media type to forward.",
             )
+
         await message.reply(f"Message posted to channel {channel_id} successfully!")
+#        logger.info(f"Message posted to channel {channel_id} successfully.")
     except Exception as e:
+#        logger.exception(f"Failed to post the message. Error: {str(e)}")
         await message.reply(f"Failed to post the message. Error: {str(e)}")
-
-
-def parse_buttons_from_caption(caption: str):
+def extract_buttons_from_caption(caption: str):
     """
-    Parse custom button format `[Button Text](URL)` from the caption and convert them into inline buttons.
-
-    Args:
-        caption (str): The caption containing the button format.
-
-    Returns:
-        List[List[InlineKeyboardButton]]: Inline buttons structured for Telegram.
+    Extracts buttons in the format: {BUTTON_TEXT}-{URL}
     """
     button_links = []
-    pattern = r"([^]+)(https?://[^]+)"  # Correct regex pattern for inline buttons
-
-    # Find all matches for the custom button format
+    pattern = r"\{(.*?)\}\-{(https?:\/\/[^\s]+)}"  # Correct pattern to match button text and URL
+#    logger.info(f"Button extraction pattern: {pattern}")
+    
+    # Using re.findall() to find all matches
     matches = re.findall(pattern, caption)
+#    logger.info(f"Matches found: {matches}")
+    
     for text, url in matches:
-        button_links.append([InlineKeyboardButton(text, url=url)])  # Each button in a separate row
-
+ #       logger.info(f"Creating button: {text} - {url}")
+        button_links.append([InlineKeyboardButton(text=text, url=url)])
+    
+  #  logger.info(f"Extracted inline buttons: {button_links}")
     return button_links
-
 
 def remove_button_links(caption: str):
     """
-    Remove the custom button format `[Button Text](URL)` from the caption text.
-
-    Args:
-        caption (str): The caption containing the button format.
-
-    Returns:
-        str: Caption text without the button links.
+    Removes button links in the format: {BUTTON_TEXT}-{URL} from the caption
     """
-    return re.sub(r"([^]+)(https?://[^]+)", "", caption).strip()
-    
-from pyrogram import Client, filters
-from pyrogram.enums import ParseMode
+    pattern = r"\{(.*?)\}\-{(https?:\/\/[^\s]+)}"
+    cleaned_caption = re.sub(pattern, "", caption).strip()
+    return cleaned_caption    
 
 @Client.on_message(filters.command("chelp"))
 async def chelp(client, message):
@@ -144,9 +150,9 @@ Simply type <code>&gt;</code> at the beginning of a line:
 ```</code> → Displays a block of code.
 
 <b>11. Inline Buttons:</b>
-Used programmatically by bots to create interactive messages.
+<code>{BUTTON TEXT}-{URL}</code>
+<i>Note:</i> Don't Use <b>Wrong URL</b> &amp; Don't Add <b>Extra Spaces</b> 
 
-<i>Note:</i>
-Ensure you use the correct <b>ParseMode</b> (Markdown or HTML) when sending messages. Some formats like **Spoiler** only work in MarkdownV2.
+Join @Filmykeedha For More Updates.
 """
     await message.reply(help_text, parse_mode=ParseMode.HTML)
