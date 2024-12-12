@@ -87,7 +87,7 @@ def extract_buttons_from_caption(caption: str):
     Extracts buttons in the format: [button text](buttonurl://url)
     """
     button_links = []
-    pattern = r"([^]+)buttonurl://(https?://[^\s]+)"
+    pattern = r"([^]+)buttonurl:(https?:\/\/[^\s]+)"
     matches = re.findall(pattern, caption)
     logger.info(f"Button extraction pattern: {pattern}")
     logger.info(f"Matches found: {matches}")
@@ -102,7 +102,7 @@ def remove_button_links(caption: str):
     """
     Removes button links in the format: [button text](buttonurl://url) from the caption.
     """
-    pattern = r"([^]+)buttonurl://(https?://[^\s]+)"
+    pattern = r"([^]+)buttonurl:(https?:\/\/[^\s]+)"
     cleaned_caption = re.sub(pattern, "", caption).strip()
     logger.info(f"Cleaned caption: {cleaned_caption}")
     return cleaned_caption
