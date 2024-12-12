@@ -68,8 +68,7 @@ async def post_reply(client, message):
                 caption=caption_without_buttons,
                 parse_mode=ParseMode.MARKDOWN,
                 reply_markup=reply_markup,
-                disable_web_page_preview=True,
-                protect_content=True
+                disable_web_page_preview=True
             )
         elif replied_message.video:
 #            logger.info("Replied message is a video. Sending to the channel...")
@@ -79,8 +78,7 @@ async def post_reply(client, message):
                 caption=caption_without_buttons,
                 parse_mode=ParseMode.MARKDOWN,
                 reply_markup=reply_markup,
-                disable_web_page_preview=True,
-                protect_content=True
+                disable_web_page_preview=True
             )
         elif replied_message.document:
 #            logger.info("Replied message is a document. Sending to the channel...")
@@ -90,8 +88,7 @@ async def post_reply(client, message):
                 caption=caption_without_buttons,
                 parse_mode=ParseMode.MARKDOWN,
                 reply_markup=reply_markup,
-                disable_web_page_preview=True,
-                protect_content=True
+                disable_web_page_preview=True
             )
         elif replied_message.text:
 #            logger.info("Replied message is text. Sending to the channel...")
@@ -100,8 +97,7 @@ async def post_reply(client, message):
                 text=caption_without_buttons,
                 parse_mode=ParseMode.MARKDOWN,
                 reply_markup=reply_markup,
-                disable_web_page_preview=True,
-                protect_content=True
+                disable_web_page_preview=True
             )
         else:
 #            logger.error("Unsupported media type in the replied message.")
