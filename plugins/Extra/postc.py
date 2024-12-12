@@ -42,10 +42,10 @@ async def post_reply(client, message):
     caption_without_buttons = remove_button_links(caption)
     reply_markup = InlineKeyboardMarkup(inline_buttons) if inline_buttons else None
 
-    sticker_id = random.choice(sticker_ids)
-    await message.reply_sticker(sticker_id)
+    random_sticker = random.choice(sticker_ids)
+    m = await message.reply_sticker(random_sticker)
     await asyncio.sleep(3)
-
+    await m.delete()
     try:
         if replied_message.photo:
 #            logger.info("Replied message is a photo. Sending to the channel...")
