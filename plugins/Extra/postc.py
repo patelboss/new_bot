@@ -16,15 +16,15 @@ sticker_ids = [
     "CAACAgQAAxkBAAIs-mdbY96brNo0bbqiAT0h9aHmGjfZAAISDgACQln9BFRvgD6jmKybHgQ"
 ]
 
-def get_random_sticker():
-    return random.choice(sticker_ids)
+#def get_random_sticker():
+#    return random.choice(sticker_ids)
 
 @Client.on_message(filters.command("cpost"))
 async def post_reply(client, message):
-    random_sticker = get_random_sticker()
-    m = await message.reply_sticker(random_sticker)
-    await asyncio.sleep(1)
-    await m.delete()
+#    random_sticker = get_random_sticker()
+#    m = await message.reply_sticker(random_sticker)
+#    await asyncio.sleep(1)
+#    await m.delete()
     command_parts = message.text.split()
     if len(command_parts) < 2 or not message.reply_to_message:
 #        logger.warning("Command is missing required parts or no reply message found.")
@@ -53,8 +53,8 @@ async def post_reply(client, message):
     caption_without_buttons = remove_button_links(caption)
     reply_markup = InlineKeyboardMarkup(inline_buttons) if inline_buttons else None
 
-    random_sticker = get_random_sticker()
-    m = await message.reply_sticker(random_sticker)
+#    random_sticker = get_random_sticker()
+    m = await message.reply_sticker("CAACAgQAAxkBAAIs_mdbY-Zk1JR7yRLoWsi8NbJEMFerAALVGAACOqGIUIer-Up9iv5aHgQ")
     await asyncio.sleep(5)
     await m.delete()
         #continue 
@@ -116,10 +116,10 @@ async def post_reply(client, message):
 
 @Client.on_message(filters.command("ppost"))
 async def post_reply(client, message):
-    random_sticker = get_random_sticker()
-    m = await message.reply_sticker(random_sticker)
-    await asyncio.sleep(1)
-    await m.delete()
+#    random_sticker = get_random_sticker()
+#    m = await message.reply_sticker(random_sticker)
+#    await asyncio.sleep(1)
+#    await m.delete()
     command_parts = message.text.split()
     if len(command_parts) < 2 or not message.reply_to_message:
 #        logger.warning("Command is missing required parts or no reply message found.")
@@ -148,8 +148,8 @@ async def post_reply(client, message):
     caption_without_buttons = remove_button_links(caption)
     reply_markup = InlineKeyboardMarkup(inline_buttons) if inline_buttons else None
 
-    random_sticker = get_random_sticker()
-    m = await message.reply_sticker(random_sticker)
+#    random_sticker = get_random_sticker()
+    m = await message.reply_sticker("CAACAgQAAxkBAAIs_mdbY-Zk1JR7yRLoWsi8NbJEMFerAALVGAACOqGIUIer-Up9iv5aHgQ")
     await asyncio.sleep(5)
     await m.delete()
         #continue 
@@ -309,8 +309,8 @@ Simply type <code>&gt;</code> at the beginning of a line:
 <b> /ppost to post private post (that can't be forwarded) </b>
 <b> Join @Filmykeedha For More Updates.</b>
 """
-    random_sticker = get_random_sticker()
-    m = await message.reply_sticker(random_sticker)
+#    random_sticker = get_random_sticker()
+    m = await message.reply_sticker("CAACAgIAAxkBAAIMU2dBzBWjzGCg_x2tFumZ76z5l5JiAAJiAANOXNIpTqLDGEjEK3EeBA")
     await asyncio.sleep(3)
     await m.delete()
     await message.reply(help_text, parse_mode=ParseMode.HTML)
