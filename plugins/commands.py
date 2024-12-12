@@ -17,7 +17,10 @@ BATCH_FILES = {}
 join_db = JoinReqs
 
 import logging
-
+sticker_ids = [
+    "CAACAgUAAxkBAAEBgq9hJ6PmdQ9HRgmxkj_vu8R6DbD8FQACwQoAAlv_dlxK3_P-cMy4el_9MwE",  # Example sticker 1
+    "CAACAgUAAxkBAAEBgqVhJ6PmbWqI_hggjjz5qx3JmtDiHEwACwwoAAlv_dllzEkeX44X7UeyOMeQ",
+     "CAACAgIAAxkBAAIMU2dBzBWjzGCg_x2tFumZ76z5l5JiAAJiAANOXNIpTqLDGEjEK3EeBA" ] 
 # Set up basic logging configuration
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -25,7 +28,8 @@ logger = logging.getLogger(__name__)
 @Client.on_message(filters.command("start") & filters.incoming) #start
 async def start(client, message):
     await message.react(emoji="🤩")
-    m=await message.reply_sticker("CAACAgIAAxkBAAIMU2dBzBWjzGCg_x2tFumZ76z5l5JiAAJiAANOXNIpTqLDGEjEK3EeBA") 
+    random_sticker = random.choice(sticker_ids)
+    m = await message.reply_sticker(random_sticker)
     await asyncio.sleep(3)
     await m.delete()
     if message.chat.type in [enums.ChatType.GROUP, enums.ChatType.SUPERGROUP]:
