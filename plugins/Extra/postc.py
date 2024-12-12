@@ -81,7 +81,7 @@ async def post_reply(client, message):
         else:
 #            logger.error("Unsupported media type in the replied message.")
             await client.send_message(
-                chat_id=channel_id,
+                chat_id=message.chat.id,
                 text="Unsupported media type to forward.",
             )
 
