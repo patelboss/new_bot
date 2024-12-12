@@ -93,7 +93,7 @@ from pyrogram.enums import ParseMode
 from datetime import datetime
 import asyncio
 from database.posts import save_post, get_user_channels
-from post_session_manager import PostSessionManager
+#from post_session_manager import PostSessionManager
 
 @Client.on_message(filters.command("post") & filters.private)
 async def post_command(client, message):
