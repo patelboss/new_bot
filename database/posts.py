@@ -15,22 +15,24 @@ posts_col.create_index('schedule_time')
 
 # Save user's channel connection
 def save_user_channel(user_id, channel_id, channel_name):
-    try:
-        # Check if user already has a channel connected
-        user_data = channels_col.find_one({'user_id': user_id})
-        if user_data:
-            # Append new channel if not already present
-            if not any(c['channel_id'] == channel_id for c in user_data.get('channels', [])):
-                channels_col.update_one(
-                    {'user_id': user_id},
-                    {'$push': {'channels': {'channel_id': channel_id, 'channel_name': channel_name}}},
-                    upsert=True
-                )
-        else:
-            channels_col.insert_one({'user_id': user_id, 'channels': [{'channel_id': channel_id, 'channel_name': channel_name}]})
-    except Exception as e:
-        print(f"Error saving user channel: {e}")
+    """
+    Save the user's connected channel to the database.
 
+    Args:
+        user_id (int): The Telegram user ID.
+        channel_id (int): The Telegram channel ID.
+        channel_name (str): The name of the channel.
+    """
+    try:
+        db.user_channels.update_one(
+            {"user_id": user_id, "channel_id": channel_id},
+            {"$set": {"channel_name": channel_name}},
+            upsert=True  # Insert if not exists
+        )
+        logger.info(f"Channel '{channel_name}' ({channel_id}) saved for user ID {user_id}.")
+    except Exception as e:
+        logger.error(f"Error saving channel for user ID {user_id}: {e}")
+        
 # Fetch user's connected channels
 def get_user_channels(user_id):
     try:
