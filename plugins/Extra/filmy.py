@@ -97,3 +97,55 @@ def remove_markdown_links(caption: str):
         str: Caption text without markdown links.
     """
     return re.sub(r"(.*?)(https?://.*?)", "", caption).strip()
+from pyrogram import Client, filters
+from pyrogram.enums import ParseMode
+
+@Client.on_message(filters.command("chelp"))
+async def chelp(client, message):
+    help_text = """
+<b>Telegram Markdown & Formatting Guide:</b>
+
+<i>You can use these formatting methods in your messages:</i>
+
+<b>1. Bold:</b>
+<code>*Your Text*</code> → <b>Your Text</b>
+
+<b>2. Italic:</b>
+<code>_Your Text_</code> → <i>Your Text</i>
+
+<b>3. Underline:</b>
+<code>__Your Text__</code> → <u>Your Text</u>
+
+<b>4. Strikethrough:</b>
+<code>~Your Text~</code> → <s>Your Text</s>
+
+<b>5. Monospace:</b>
+<code>`Your Text`</code> → <code>Your Text</code>
+
+<b>6. Preformatted Block:</b>
+<code>```Your Text```</code> → 
+<pre>Your Text</pre>
+
+<b>7. Spoiler:</b>
+<code>||Your Text||</code> → <tg-spoiler>Your Text</tg-spoiler>
+
+<b>8. Quote:</b>
+Simply type <code>&gt;</code> at the beginning of a line:
+<code>&gt; Your Text</code> → 
+<blockquote>Your Text</blockquote>
+
+<b>9. Inline Link:</b>
+<code>[Text](https://example.com)</code> → [Text](https://example.com)
+
+<b>10. Custom Inline Code:</b>
+<code>```
+<code>Custom text or programming code</code>
+```</code> → Displays a block of code.
+
+<b>11. Inline Buttons:</b>
+Used programmatically by bots to create interactive messages.
+
+<i>Note:</i>
+Ensure you use the correct <b>ParseMode</b> (Markdown or HTML) when sending messages. Some formats like **Spoiler** only work in MarkdownV2.
+"""
+    await message.reply(help_text, parse_mode=ParseMode.HTML)
