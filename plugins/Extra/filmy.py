@@ -22,10 +22,10 @@ async def post_reply(client, message):
     replied_message = message.reply_to_message
     caption = replied_message.text if replied_message.text else "No caption provided."
 
-    # Parse the caption and extract inline buttons in custom format
+    # Parse the caption and extract inline buttons in the correct format
     inline_buttons = parse_buttons_from_caption(caption)
 
-    # Replace markdown links in the caption with placeholders
+    # Remove button links from the caption to avoid display errors
     caption_without_buttons = remove_button_links(caption)
 
     # Prepare inline buttons only if there are any
@@ -67,16 +67,16 @@ async def post_reply(client, message):
 
 def parse_buttons_from_caption(caption: str):
     """
-    Parse custom button format `[button text]:(button url)` from the caption and convert them into inline buttons.
+    Parse custom button format `[Button Text](URL)` from the caption and convert them into inline buttons.
 
     Args:
-        caption (str): The caption containing the custom button format.
+        caption (str): The caption containing the button format.
 
     Returns:
         List[List[InlineKeyboardButton]]: Inline buttons structured for Telegram.
     """
     button_links = []
-    pattern = r"([^]+)(https?://[^]+)"  # Custom regex pattern for buttons
+    pattern = r"([^]+)(https?://[^]+)"  # Correct regex pattern for inline buttons
 
     # Find all matches for the custom button format
     matches = re.findall(pattern, caption)
@@ -88,16 +88,15 @@ def parse_buttons_from_caption(caption: str):
 
 def remove_button_links(caption: str):
     """
-    Remove the custom button format `[button text]:(button url)` from the caption text.
+    Remove the custom button format `[Button Text](URL)` from the caption text.
 
     Args:
-        caption (str): The caption containing the custom button format.
+        caption (str): The caption containing the button format.
 
     Returns:
         str: Caption text without the button links.
     """
     return re.sub(r"([^]+)(https?://[^]+)", "", caption).strip()
-    
     
 from pyrogram import Client, filters
 from pyrogram.enums import ParseMode
