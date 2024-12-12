@@ -5,38 +5,48 @@ import asyncio
 from database.posts import save_user_channel, get_user_channels, save_post
 from pyrogram.enums import ParseMode
 # Store temporary data during the posting workflow
-user_sessions = {}
-
-async def send_preview(client, user_id, channel_name, message, photo, buttons, schedule_time):
-    preview_text = (
-        f"<b>Preview:</b>\n"
-        f"Message: {message}\n"
-        f"Buttons: {buttons}\n"
-        f"Scheduled for: {schedule_time if schedule_time else 'Now'}\n"
-        f"Channel: {channel_name}"
-    )
-    if photo:
-        await client.send_photo(user_id, photo, caption=preview_text, parse_mode=ParseMode.HTML)
-    else:
-        await client.send_message(user_id, preview_text, parse_mode=ParseMode.HTML)
-
-
-async def post_to_channel(client, channel_id, message, photo, buttons):
-    if photo:
-        await client.send_photo(
-            channel_id,
-            photo=photo,
-            caption=message,
-            parse_mode=ParseMode.HTML,
-            reply_markup=InlineKeyboardMarkup(buttons) if buttons else None
+class PostSession:
+    def __init__(self, user_id):
+        self.user_id = user_id
+        self.channel_ids = []
+        self.channel_names = []
+        self.parse_mode = None
+        self.message = None
+        self.buttons = None
+        self.photo = None
+        self.schedule_time = None
+        self.step = None
+ 
+    async def send_preview(client, user_id, channel_name, message, photo, buttons, schedule_time):
+        preview_text = (
+            f"<b>Preview:</b>\n"
+            f"Message: {message}\n"
+            f"Buttons: {buttons}\n"
+            f"Scheduled for: {schedule_time if schedule_time else 'Now'}\n"
+            f"Channel: {channel_name}"
         )
-    else:
-        await client.send_message(
-            channel_id,
-            text=message,
-            parse_mode=ParseMode.HTML,
-            reply_markup=InlineKeyboardMarkup(buttons) if buttons else None
-        )
+        if photo:
+            await client.send_photo(user_id, photo, caption=preview_text, parse_mode=ParseMode.HTML)
+        else:
+            await client.send_message(user_id, preview_text, parse_mode=ParseMode.HTML)
+
+
+    async def post_to_channel(client, channel_id, message, photo, buttons):
+        if photo:
+            await client.send_photo(
+                channel_id,
+                photo=photo,
+                caption=message,
+                parse_mode=ParseMode.HTML,
+                reply_markup=InlineKeyboardMarkup(buttons) if buttons else None
+            )
+        else:
+            await client.send_message(
+                channel_id,
+                text=message,
+                parse_mode=ParseMode.HTML,
+                reply_markup=InlineKeyboardMarkup(buttons) if buttons else None
+            )
 
 
 @Client.on_message(filters.command("post") & filters.private)
