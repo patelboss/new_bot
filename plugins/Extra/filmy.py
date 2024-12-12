@@ -8,7 +8,7 @@ import logging
 #logger = logging.getLogger(__name__)
 #logging.basicConfig(level=logging.INFO)
 
-@Client.on_message(filters.command("ppost"))
+@Client.on_message(filters.command("fpost"))
 async def post_reply(client, message):
     command_parts = message.text.split()
     if len(command_parts) < 2 or not message.reply_to_message:
