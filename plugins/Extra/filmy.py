@@ -5,38 +5,25 @@ from pyrogram.enums import ParseMode
 
 @Client.on_message(filters.command("ppost"))
 async def post_reply(client, message):
-    # Ensure the user provided a channel ID and replied to a message
     command_parts = message.text.split()
     if len(command_parts) < 2 or not message.reply_to_message:
         await message.reply("Please provide a valid channel ID and reply to a message using /ppost <channel_id>.")
         return
 
-    channel_id = command_parts[1]  # Extract the channel ID from the command
+    channel_id = command_parts[1]
 
-    # Ensure channel_id is valid (e.g., it starts with '-100' for Telegram channels)
     if not channel_id.startswith("-100"):
         await message.reply("Invalid channel ID. Please provide a valid channel ID starting with '-100'.")
         return
 
-    # Get the original message's media or text
     replied_message = message.reply_to_message
     caption = replied_message.text if replied_message.text else "No caption provided."
-
-    # Parse the caption and extract markdown-style links
     button_links = parse_buttons_from_caption(caption)
-
-    # Replace markdown links in the caption with placeholders
     caption_without_buttons = remove_markdown_links(caption)
+    inline_buttons = InlineKeyboardMarkup(button_links) if button_links else None
 
-    # Prepare inline buttons only if there are any
-    inline_buttons = None
-    if button_links:
-        inline_buttons = InlineKeyboardMarkup(button_links)  # Properly formatted InlineKeyboardMarkup
-
-    # Send message with inline buttons
     try:
         if replied_message.photo:
-            # If the replied message is a photo
             await client.send_photo(
                 chat_id=channel_id,
                 photo=replied_message.photo.file_id,
@@ -45,7 +32,6 @@ async def post_reply(client, message):
                 reply_markup=inline_buttons
             )
         elif replied_message.text:
-            # If the replied message is text
             await client.send_message(
                 chat_id=channel_id,
                 text=caption_without_buttons,
@@ -53,17 +39,14 @@ async def post_reply(client, message):
                 reply_markup=inline_buttons
             )
         else:
-            # Handle unsupported media types
             await client.send_message(
                 chat_id=channel_id,
-                text="Unsupported media type to forward",
-                parse_mode=ParseMode.MARKDOWN,
+                text="Unsupported media type to forward.",
                 reply_markup=inline_buttons
             )
         await message.reply(f"Message posted to channel {channel_id} successfully!")
     except Exception as e:
-        await message.reply(f"Failed to post the message. Error: {str(e)}")
-
+        await message.reply(f"Failed to post the message. Error: {e}")
 
 def parse_buttons_from_caption(caption: str):
     """
