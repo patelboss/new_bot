@@ -144,10 +144,10 @@ async def post_reply(client, message):
     caption_without_buttons = remove_button_links(caption)
     reply_markup = InlineKeyboardMarkup(inline_buttons) if inline_buttons else None
 
-#    random_sticker = random.choice(sticker_ids)
-#    m = await message.reply_sticker(random_sticker)
-#    await asyncio.sleep(5)
-#    await m.delete()
+    random_sticker = random.choice(sticker_ids)
+    m = await message.reply_sticker(random_sticker)
+    await asyncio.sleep(5)
+    await m.delete()
         #continue 
 
     try:
