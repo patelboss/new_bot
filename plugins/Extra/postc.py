@@ -8,12 +8,12 @@ import logging
 #logger = logging.getLogger(__name__)
 #logging.basicConfig(level=logging.INFO)
 
-@Client.on_message(filters.command("ppost"))
+@Client.on_message(filters.command("cpost"))
 async def post_reply(client, message):
     command_parts = message.text.split()
     if len(command_parts) < 2 or not message.reply_to_message:
 #        logger.warning("Command is missing required parts or no reply message found.")
-        await message.reply("Please provide a valid channel ID and reply to a message using /cpost <channel_id>.\nUse /chelp to know about formatting")
+        await message.reply("Please provide a valid channel ID and reply to a message using /cpost <channel_id>.\nUse /chelp to know about formatting\nIf you Dont Know Your Channel Id\nJust Forward Me Any Message From Your Channel And Reply That Message /id .")
         return
 
     channel_id = command_parts[1]
