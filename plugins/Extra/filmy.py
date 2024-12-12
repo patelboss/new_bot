@@ -101,9 +101,9 @@ def extract_buttons_from_caption(caption: str):
     
 def remove_button_links(caption: str):
     """
-    Removes button links in the format: [button text](buttonurl://url) from the caption.
+    Removes button links in the format: [button_text]-(url) from the caption.
     """
-    pattern = r"([^]+)buttonurl://(https?:\/\/[^\s]+)"
+    pattern = r'\[[^\]]+\]–\([^\)]+\)'
     cleaned_caption = re.sub(pattern, "", caption).strip()
     logger.info(f"Cleaned caption: {cleaned_caption}")
     return cleaned_caption
