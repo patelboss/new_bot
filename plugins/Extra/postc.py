@@ -19,12 +19,12 @@ sticker_ids = [
 def get_random_sticker():
     return random.choice(sticker_ids)
 
-@Client.on_message(filters.command("cpost"))
+@Client.on_message(filters.command("ppost"))
 async def post_reply(client, message):
-#    random_sticker = get_random_sticker()
-#    m = await message.reply_sticker(random_sticker)
-#    await asyncio.sleep(3)
-#    await m.delete()
+    random_sticker = get_random_sticker()
+    m = await message.reply_sticker(random_sticker)
+    await asyncio.sleep(1)
+    await m.delete()
     command_parts = message.text.split()
     if len(command_parts) < 2 or not message.reply_to_message:
 #        logger.warning("Command is missing required parts or no reply message found.")
@@ -53,10 +53,12 @@ async def post_reply(client, message):
     caption_without_buttons = remove_button_links(caption)
     reply_markup = InlineKeyboardMarkup(inline_buttons) if inline_buttons else None
 
-#    random_sticker = get_random_sticker()
-#    m = await message.reply_sticker(random_sticker)
-#    await asyncio.sleep(5)
-#    await m.delete()
+    random_sticker = get_random_sticker()
+    m = await message.reply_sticker(random_sticker)
+    await asyncio.sleep(5)
+    await m.delete()
+        #continue 
+
     try:
         if replied_message.photo:
 #            logger.info("Replied message is a photo. Sending to the channel...")
@@ -66,7 +68,8 @@ async def post_reply(client, message):
                 caption=caption_without_buttons,
                 parse_mode=ParseMode.MARKDOWN,
                 reply_markup=reply_markup,
-                disable_web_page_preview=True
+                disable_web_page_preview=True,
+                protect_content=True
             )
         elif replied_message.video:
 #            logger.info("Replied message is a video. Sending to the channel...")
@@ -76,7 +79,8 @@ async def post_reply(client, message):
                 caption=caption_without_buttons,
                 parse_mode=ParseMode.MARKDOWN,
                 reply_markup=reply_markup,
-                disable_web_page_preview=True
+                disable_web_page_preview=True,
+                protect_content=True
             )
         elif replied_message.document:
 #            logger.info("Replied message is a document. Sending to the channel...")
@@ -86,7 +90,8 @@ async def post_reply(client, message):
                 caption=caption_without_buttons,
                 parse_mode=ParseMode.MARKDOWN,
                 reply_markup=reply_markup,
-                disable_web_page_preview=True
+                disable_web_page_preview=True,
+                protect_content=True
             )
         elif replied_message.text:
 #            logger.info("Replied message is text. Sending to the channel...")
@@ -95,7 +100,8 @@ async def post_reply(client, message):
                 text=caption_without_buttons,
                 parse_mode=ParseMode.MARKDOWN,
                 reply_markup=reply_markup,
-                disable_web_page_preview=True
+                disable_web_page_preview=True,
+                protect_content=True
             )
         else:
 #            logger.error("Unsupported media type in the replied message.")
@@ -104,18 +110,20 @@ async def post_reply(client, message):
                 text="Unsupported media type to forward.",
             )
 
-        await message.reply(f"<b>Message posted to channel {channel_id} successfully!</b>", parse_mode=ParseMode.HTML)
+        await message.reply(f"Message posted to channel {channel_id} successfully!")
 #        logger.info(f"Message posted to channel {channel_id} successfully.")
     except Exception as e:
 #        logger.exception(f"Failed to post the message. Error: {str(e)}")
-        await message.reply(f"Failed to post the message. Error: {str(e)}", parse_mode=ParseMode.HTML)
+        await message.reply(f"Failed to post the message. Error: {str(e)}")
+
+
 
 @Client.on_message(filters.command("ppost"))
 async def post_reply(client, message):
-#    random_sticker = random.choice(sticker_ids)
-#    m = await message.reply_sticker(random_sticker)
-#    await asyncio.sleep(3)
-#    await m.delete()
+    random_sticker = get_random_sticker()
+    m = await message.reply_sticker(random_sticker)
+    await asyncio.sleep(1)
+    await m.delete()
     command_parts = message.text.split()
     if len(command_parts) < 2 or not message.reply_to_message:
 #        logger.warning("Command is missing required parts or no reply message found.")
@@ -144,7 +152,7 @@ async def post_reply(client, message):
     caption_without_buttons = remove_button_links(caption)
     reply_markup = InlineKeyboardMarkup(inline_buttons) if inline_buttons else None
 
-    random_sticker = random.choice(sticker_ids)
+    random_sticker = get_random_sticker()
     m = await message.reply_sticker(random_sticker)
     await asyncio.sleep(5)
     await m.delete()
