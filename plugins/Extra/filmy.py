@@ -28,7 +28,7 @@ async def post_reply(client, message):
 
     # Get the original message's media or text
     replied_message = message.reply_to_message
-    caption = replied_message.text if replied_message.text else "No caption provided."
+    caption = replied_message.caption if replied_message.caption else (replied_message.text or "No caption provided.")
     logger.info(f"Replied message caption: {caption}")
 
     # Extract inline buttons separately
@@ -51,12 +51,13 @@ async def post_reply(client, message):
                 parse_mode=ParseMode.MARKDOWN,
                 reply_markup=reply_markup
             )
-        elif replied_message.text:
-            # If the replied message is text
-            logger.info("Replied message is text. Sending to the channel...")
-            await client.send_message(
+        elif replied_message.video:
+            # If the replied message is a video
+            logger.info("Replied message is a video. Sending to the channel...")
+            await client.send_video(
                 chat_id=channel_id,
-                text=caption_without_buttons,
+                video=replied_message.video.file_id,
+                caption=caption_without_buttons,
                 parse_mode=ParseMode.MARKDOWN,
                 reply_markup=reply_markup
             )
@@ -70,14 +71,22 @@ async def post_reply(client, message):
                 parse_mode=ParseMode.MARKDOWN,
                 reply_markup=reply_markup
             )
+        elif replied_message.text:
+            # If the replied message is text
+            logger.info("Replied message is text. Sending to the channel...")
+            await client.send_message(
+                chat_id=channel_id,
+                text=caption_without_buttons,
+                parse_mode=ParseMode.MARKDOWN,
+                reply_markup=reply_markup
+            )
         else:
             # Handle unsupported media types
             logger.error("Unsupported media type in the replied message.")
             await client.send_message(
                 chat_id=channel_id,
                 text="Unsupported media type to forward",
-                parse_mode=ParseMode.MARKDOWN,
-                reply_markup=reply_markup
+                parse_mode=ParseMode.MARKDOWN
             )
         await message.reply(f"Message posted to channel {channel_id} successfully!")
         logger.info(f"Message posted to channel {channel_id} successfully.")
@@ -88,7 +97,7 @@ async def post_reply(client, message):
 
 def extract_buttons_from_caption(caption: str):
     """
-    Extracts buttons in the Markdown format: [button text](button url)
+    Extracts buttons in the Markdown format: [button text](buttonurl://button_url)
     and returns them as InlineKeyboardButton objects.
 
     Args:
@@ -98,8 +107,8 @@ def extract_buttons_from_caption(caption: str):
         List[List[InlineKeyboardButton]]: A list of inline buttons.
     """
     button_links = []
-    # Adjust the pattern to match Markdown-style buttons: [button text](button url)
-    pattern = r"([^]+)(https?://[^]+)"
+    # Adjust the pattern to match Markdown-style buttons: [button text](buttonurl://button_url)
+    pattern = r"([^]+)buttonurl://([^]+)"
     
     # Find all matches for button text and URL in the Markdown format
     matches = re.findall(pattern, caption)
@@ -116,7 +125,7 @@ def extract_buttons_from_caption(caption: str):
 
 def remove_button_links(caption: str):
     """
-    Removes button-related text (e.g., [button text](button url)) from the caption.
+    Removes button-related text (e.g., [button text](buttonurl://button_url)) from the caption.
 
     Args:
         caption (str): The caption to remove button links from.
@@ -125,6 +134,6 @@ def remove_button_links(caption: str):
         str: The caption with button information removed.
     """
     # Remove all Markdown-style links from the caption
-    cleaned_caption = re.sub(r"([^]+)(https?://[^]+)", "", caption).strip()
+    cleaned_caption = re.sub(r"([^]+)buttonurl://([^]+)", "", caption).strip()
     logger.info(f"Cleaned caption: {cleaned_caption}")
     return cleaned_caption
