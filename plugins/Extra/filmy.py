@@ -1,75 +1,92 @@
 from pyrogram import Client, filters
-from pyrogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup
-from pyrogram.enums import ParseMode, ChatMemberStatus
-import logging
-
-# Set up logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-# Assuming 'client' is your existing bot client instance
-# Replace 'client' with your existing instance of pyrogram.Client in your bot
+from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+import re
+from pyrogram.enums import ParseMode
 
 @Client.on_message(filters.command("ppost"))
-async def post_reply(client, message: Message):
+async def post_reply(client, message):
     user_id = message.from_user.id
-    
+
     # Ensure the user provided a channel ID and replied to a message
     command_parts = message.text.split()
-
-    # Check if the user has provided a channel ID and is replying to a message
     if len(command_parts) < 2 or not message.reply_to_message:
         await message.reply("Please provide a valid channel ID and reply to a message using /ppost <channel_id>.")
         return
-    
+
     channel_id = command_parts[1]  # Extract the channel ID from the command
-    
+
     # Ensure channel_id is valid (e.g., it starts with '-100' for Telegram channels)
     if not channel_id.startswith("-100"):
         await message.reply("Invalid channel ID. Please provide a valid channel ID starting with '-100'.")
         return
-    
-    # Check if the user is an admin or owner in the specified channel
-    try:
-        chat_member = await client.get_chat_member(channel_id, user_id)
-        if chat_member.status not in [ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.OWNER]:
-            await message.reply("You must be an admin or owner in the channel to post.")
-            logger.warning(f"User {user_id} is not an admin or owner in channel {channel_id}.")
-            return
-    except Exception as e:
-        await message.reply(f"Failed to verify your role in the channel. Error: {str(e)}")
-        logger.error(f"Error checking user role for {user_id} in channel {channel_id}: {e}")
-        return
 
-    # Get the original message's text
+    # Get the original message's media or text
     replied_message = message.reply_to_message
-    if not replied_message:
-        await message.reply("Please reply to a message to rewrite and post.")
-        return
+    caption = replied_message.text if replied_message.text else "No caption provided."
 
-    original_text = replied_message.text or ""
-    if replied_message.caption:
-        original_text = replied_message.caption
+    # Parse the caption and extract markdown-style links
+    button_links = parse_buttons_from_caption(caption)
 
-    # Rewrite text without watermark (no extra text or prefix)
-    rewritten_text = original_text
+    # Replace markdown links in the caption with placeholders
+    caption_without_buttons = remove_markdown_links(caption)
 
-    # Check if the original post has inline buttons
-    buttons = []
-    if replied_message.reply_markup:
-        for row in replied_message.reply_markup.inline_keyboard:
-            buttons.append([InlineKeyboardButton(text=btn.text, url=btn.url) for btn in row])
+    # Prepare inline buttons
+    inline_buttons = InlineKeyboardMarkup(
+        [[InlineKeyboardButton(text=link["text"], url=link["url"]) for link in button_links]]
+    )
 
-    # Send the rewritten message with inline buttons if any
+    # Send message with inline buttons
     try:
-        await client.send_message(
-            channel_id,  # Send the message to the specified channel
-            rewritten_text,  # Use the original text (no watermark or prefix)
-            parse_mode=ParseMode.MARKDOWN,  # Markdown parsing mode
-            reply_markup=InlineKeyboardMarkup(buttons) if buttons else None  # Add buttons if present
-        )
+        if replied_message.photo:
+            # If the replied message is a photo
+            await client.send_photo(
+                channel_id,  # Send to the channel
+                replied_message.photo.file_id,  # Media file ID (photo, video, document, etc.)
+                caption=caption_without_buttons,  # Caption without buttons
+                parse_mode=ParseMode.MARKDOWN,  # Use markdown formatting for the caption
+                reply_markup=inline_buttons  # Attach inline buttons
+            )
+        else:
+            # If the replied message is text or another type
+            await client.send_message(
+                channel_id,  # Send the message to the specified channel
+                caption_without_buttons,  # Text content (if no media)
+                parse_mode=ParseMode.MARKDOWN,  # Markdown parse mode
+                reply_markup=inline_buttons  # Inline buttons
+            )
         await message.reply(f"Message posted to channel {channel_id} successfully!")
-        logger.info(f"User {user_id} successfully posted the rewritten message to channel {channel_id}.")
     except Exception as e:
         await message.reply(f"Failed to post the message. Error: {str(e)}")
-        logger.error(f"Error posting message for user {user_id} to channel {channel_id}: {e}")
+
+
+def parse_buttons_from_caption(caption: str):
+    """
+    Parse markdown-style links from the caption and convert them into buttons.
+    
+    Args:
+        caption (str): The caption containing markdown-style links.
+    
+    Returns:
+        List of dictionaries with 'text' and 'url' for each link.
+    """
+    button_links = []
+    pattern = r"([^]+)(https?://[^]+)"  # Regex pattern for markdown links
+
+    matches = re.findall(pattern, caption)
+    for text, url in matches:
+        button_links.append({"text": text, "url": url})
+
+    return button_links
+
+
+def remove_markdown_links(caption: str):
+    """
+    Remove markdown-style links from the caption text.
+    
+    Args:
+        caption (str): The caption containing markdown-style links.
+    
+    Returns:
+        The caption without markdown links.
+    """
+    return re.sub(r"([^]+)(https?://[^]+)", "", caption)
