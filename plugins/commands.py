@@ -18,11 +18,15 @@ join_db = JoinReqs
 
 import logging
 sticker_ids = [
-    "CAACAgUAAxkBAAEBgq9hJ6PmdQ9HRgmxkj_vu8R6DbD8FQACwQoAAlv_dlxK3_P-cMy4el_9MwE",  # Example sticker 1
-    "CAACAgUAAxkBAAEBgqVhJ6PmbWqI_hggjjz5qx3JmtDiHEwACwwoAAlv_dllzEkeX44X7UeyOMeQ",
-    "CAACAgIAAxkBAAIMU2dBzBWjzGCg_x2tFumZ76z5l5JiAAJiAANOXNIpTqLDGEjEK3EeBA",
+    "CAACAgIAAxkBAAItAmdbY-9IY20HNfLFeeboOOex74M0AAL9AQACFkJrCqSvYaKm6vLJHgQ",
+    "CAACAgIAAxkBAAIs1GdbWBhGfsD2U3Z2pGiR-d64z08mAAJvAAPb234AAZlbUKh7k4B0HgQ",
     "CAACAgIAAxkBAAIsz2dbV_286mg26Vx67MOWmyG-WvK7AAJtAAPb234AAXUe7IXy-0SlHgQ",
-    "CAACAgIAAxkBAAIs1GdbWBhGfsD2U3Z2pGiR-d64z08mAAJvAAPb234AAZlbUKh7k4B0HgQ"] 
+    "CAACAgQAAxkBAAIs_mdbY-Zk1JR7yRLoWsi8NbJEMFerAALVGAACOqGIUIer-Up9iv5aHgQ",
+    "CAACAgQAAxkBAAIs-mdbY96brNo0bbqiAT0h9aHmGjfZAAISDgACQln9BFRvgD6jmKybHgQ"
+]
+
+def get_random_sticker():
+    return random.choice(sticker_ids)
 # Set up basic logging configuration
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -30,7 +34,7 @@ logger = logging.getLogger(__name__)
 @Client.on_message(filters.command("start") & filters.incoming) #start
 async def start(client, message):
     await message.react(emoji="🤩")
-    random_sticker = random.choice(sticker_ids)
+    random_sticker = get_random_sticker()
     m = await message.reply_sticker(random_sticker)
     await asyncio.sleep(3)
     await m.delete()
@@ -89,7 +93,9 @@ async def start(client, message):
         if CLONE_MODE == True:
             buttons.append([InlineKeyboardButton('🤖 Cʀᴇᴀᴛᴇ Yᴏᴜʀ Oᴡɴ Cʟᴏɴᴇ Bᴏᴛ 🤖', callback_data='clone')])
         reply_markup = InlineKeyboardMarkup(buttons)
-        m=await message.reply_sticker("CAACAgIAAxkBAAIMU2dBzBWjzGCg_x2tFumZ76z5l5JiAAJiAANOXNIpTqLDGEjEK3EeBA") 
+        random_sticker = get_random_sticker()
+        m = await message.reply_sticker(random_sticker)
+        
         await asyncio.sleep(3)
         await m.delete()
         await message.reply_photo(
