@@ -11,10 +11,11 @@ logging.basicConfig(level=logging.INFO)
 
 # Sticker IDs
 sticker_ids = [
-    "CAACAgUAAxkBAAEBgq9hJ6PmdQ9HRgmxkj_vu8R6DbD8FQACwQoAAlv_dlxK3_P-cMy4el_9MwE",
-    "CAACAgUAAxkBAAEBgqVhJ6PmbWqI_hggjjz5qx3JmtDiHEwACwwoAAlv_dllzEkeX44X7UeyOMeQ",
+    "CAACAgIAAxkBAAItAmdbY-9IY20HNfLFeeboOOex74M0AAL9AQACFkJrCqSvYaKm6vLJHgQ",
     "CAACAgIAAxkBAAIs1GdbWBhGfsD2U3Z2pGiR-d64z08mAAJvAAPb234AAZlbUKh7k4B0HgQ",
-    "CAACAgIAAxkBAAIsz2dbV_286mg26Vx67MOWmyG-WvK7AAJtAAPb234AAXUe7IXy-0SlHgQ"
+    "CAACAgIAAxkBAAIsz2dbV_286mg26Vx67MOWmyG-WvK7AAJtAAPb234AAXUe7IXy-0SlHgQ",
+    "CAACAgQAAxkBAAIs_mdbY-Zk1JR7yRLoWsi8NbJEMFerAALVGAACOqGIUIer-Up9iv5aHgQ",
+    "CAACAgQAAxkBAAIs-mdbY96brNo0bbqiAT0h9aHmGjfZAAISDgACQln9BFRvgD6jmKybHgQ"
 ]
 
 def get_random_sticker():
