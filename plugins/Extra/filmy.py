@@ -81,13 +81,10 @@ async def post_reply(client, message):
         logger.exception(f"Failed to post the message. Error: {str(e)}")
         await message.reply(f"Failed to post the message. Error: {str(e)}")
 def extract_buttons_from_caption(caption: str):
-    """
-    Extracts buttons in the format: {BUTTON_TEXT}-{URL}
-    """
     button_links = []
-    pattern = r"\{(.*?)\}\-(https?:\/\/[^\s]+)"
-    logger.info(f"Button extraction pattern: {pattern}")
+    pattern = r"\{([^\}]+)\}-\s*(https?:\/\/[^\s]+)"  # Updated pattern
     matches = re.findall(pattern, caption)
+    logger.info(f"Button extraction pattern: {pattern}")
     logger.info(f"Matches found: {matches}")
 
     for text, url in matches:
