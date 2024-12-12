@@ -4,22 +4,11 @@ from datetime import datetime
 import asyncio
 from database.posts import save_user_channel, get_user_channels, save_post
 from pyrogram.enums import ParseMode
-# Store temporary data during the posting workflow
-class PostSessionManager:
-    _sessions = {}
+import logging
 
-    @classmethod
-    def create_session(cls, user_id):
-        cls._sessions[user_id] = PostSession(user_id)
-
-    @classmethod
-    def get_session(cls, user_id):
-        return cls._sessions.get(user_id)
-
-    @classmethod
-    def remove_session(cls, user_id):
-        if user_id in cls._sessions:
-            del cls._sessions[user_id]
+# Set up logging configuration
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 class PostSession:
     def __init__(self, user_id):
@@ -64,8 +53,12 @@ class PostSession:
                     reply_markup=InlineKeyboardMarkup(self.buttons) if self.buttons else None
                 )
         except Exception as e:
-            logging.error(f"Failed to post to channel {channel_id}: {e}")
+            logger.error(f"Failed to post to channel {channel_id}: {e}")
             raise e
+
+
+# Use a dictionary to isolate sessions for each user
+user_sessions = {}
 
 @Client.on_message(filters.command("post") & filters.private)
 async def post_command(client, message):
@@ -82,18 +75,20 @@ async def post_command(client, message):
     channel_names = [channel['channel_name'] for channel in user_channels]
     channel_ids = [channel['channel_id'] for channel in user_channels]
 
-    PostSessionManager.create_session(user_id)
-    session = PostSessionManager.get_session(user_id)
+    # Create a new session for the user
+    user_sessions[user_id] = PostSession(user_id)
+    session = user_sessions[user_id]
     session.channel_ids = channel_ids
     session.channel_names = channel_names
     session.step = "parse_mode"
 
     await message.reply("What is the parse mode? (HTML/Markdown/None) [Default: HTML]")
 
+
 @Client.on_message(filters.private & ~filters.command("cancel_post"))
 async def post_workflow(client, message):
     user_id = message.from_user.id
-    session = PostSessionManager.get_session(user_id)
+    session = user_sessions.get(user_id)
 
     if not session:
         return
@@ -123,7 +118,7 @@ async def post_workflow(client, message):
             await session.post_to_channel(client, session.channel_ids[0])
             await save_post(user_id, session.channel_ids[0], session.message, session.photo, session.buttons)
             await message.reply("Post sent successfully!")
-            PostSessionManager.remove_session(user_id)
+            del user_sessions[user_id]
         else:
             try:
                 session.schedule_time = datetime.strptime(message.text, '%d/%m/%Y')
@@ -141,19 +136,19 @@ async def post_workflow(client, message):
                 session.buttons, session.schedule_time
             )
             await message.reply("Post scheduled successfully!")
-            PostSessionManager.remove_session(user_id)
+            del user_sessions[user_id]
         except ValueError:
             await message.reply("Invalid time format. Please send a valid time like HH:MM.")
+
 
 @Client.on_message(filters.command("cancel_post") & filters.private)
 async def cancel_post(client, message):
     user_id = message.from_user.id
-    if PostSessionManager.get_session(user_id):
-        PostSessionManager.remove_session(user_id)
+    if user_sessions.get(user_id):
+        del user_sessions[user_id]
         await message.reply("Post creation process has been canceled.")
     else:
         await message.reply("No active post process to cancel.")
-
 import logging
 import asyncio
 from pyrogram import Client, filters
