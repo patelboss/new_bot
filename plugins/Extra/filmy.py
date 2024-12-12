@@ -1,6 +1,6 @@
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
-from pyrogram.enums import ParseMode
+from pyrogram.enums import ParseMode, ChatMemberStatus
 import re
 import logging
 
@@ -8,12 +8,12 @@ import logging
 #logger = logging.getLogger(__name__)
 #logging.basicConfig(level=logging.INFO)
 
-@Client.on_message(filters.command("ppost"))
+@Client.on_message(filters.command("cpost"))
 async def post_reply(client, message):
     command_parts = message.text.split()
     if len(command_parts) < 2 or not message.reply_to_message:
 #        logger.warning("Command is missing required parts or no reply message found.")
-        await message.reply("Please provide a valid channel ID and reply to a message using /ppost <channel_id>.")
+        await message.reply("Please provide a valid channel ID and reply to a message using /cpost <channel_id>.\nUse /chelp to know about formatting")
         return
 
     channel_id = command_parts[1]
@@ -22,6 +22,12 @@ async def post_reply(client, message):
     if not channel_id.startswith("-100"):
 #        logger.error(f"Invalid channel ID: {channel_id}")
         await message.reply("Invalid channel ID. Please provide a valid channel ID starting with '-100'.")
+        return
+
+    # Check if the user is admin or owner of the target channel
+    user_id = message.from_user.id  # Get the user ID of the person issuing the command
+    if not await is_user_admin_or_owner(client, channel_id, user_id):
+        await message.reply("You don't have permission to post in this channel.")
         return
 
     replied_message = message.reply_to_message
@@ -80,6 +86,27 @@ async def post_reply(client, message):
     except Exception as e:
 #        logger.exception(f"Failed to post the message. Error: {str(e)}")
         await message.reply(f"Failed to post the message. Error: {str(e)}")
+
+
+async def is_user_admin_or_owner(client, channel_id, user_id):
+    """
+    Check if the user is an admin or the owner of the channel.
+    Returns True if the user is an admin or owner, False otherwise.
+    """
+    try:
+        # Get the chat member information
+        member = await client.get_chat_member(channel_id, user_id)
+        
+        # Check if the member is an admin or the owner
+        if member.status in [ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.OWNER]:
+            return True
+        return False
+    except Exception as e:
+        # Handle any errors (e.g., user is not a member of the channel)
+        #logger.error(f"Error checking user permissions: {str(e)}")
+        return False
+
+
 def extract_buttons_from_caption(caption: str):
     """
     Extracts buttons in the format: {BUTTON_TEXT}-{URL}
