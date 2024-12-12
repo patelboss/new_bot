@@ -85,7 +85,7 @@ def extract_buttons_from_caption(caption: str):
     Extracts buttons in the format: {BUTTON_TEXT}-{URL}
     """
     button_links = []
-    pattern = r"\{(.*?)\}\-(https?:\/\/[^\s]+)"  # Correct pattern to match button text and URL
+    pattern = r"\{(.*?)\}\-{(https?:\/\/[^\s]+)}"  # Correct pattern to match button text and URL
     logger.info(f"Button extraction pattern: {pattern}")
     
     # Using re.findall() to find all matches
