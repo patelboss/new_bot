@@ -9,14 +9,19 @@ import asyncio
 #logger = logging.getLogger(__name__)
 #logging.basicConfig(level=logging.INFO)
 sticker_ids = [
-    "CAACAgUAAxkBAAEBgq9hJ6PmdQ9HRgmxkj_vu8R6DbD8FQACwQoAAlv_dlxK3_P-cMy4el_9MwE",  # Example sticker 1
-    "CAACAgUAAxkBAAEBgqVhJ6PmbWqI_hggjjz5qx3JmtDiHEwACwwoAAlv_dllzEkeX44X7UeyOMeQ",
+    "CAACAgIAAxkBAAItAmdbY-9IY20HNfLFeeboOOex74M0AAL9AQACFkJrCqSvYaKm6vLJHgQ",
+    "CAACAgIAAxkBAAIs1GdbWBhGfsD2U3Z2pGiR-d64z08mAAJvAAPb234AAZlbUKh7k4B0HgQ",
     "CAACAgIAAxkBAAIsz2dbV_286mg26Vx67MOWmyG-WvK7AAJtAAPb234AAXUe7IXy-0SlHgQ",
-    "CAACAgIAAxkBAAIs1GdbWBhGfsD2U3Z2pGiR-d64z08mAAJvAAPb234AAZlbUKh7k4B0HgQ"]
+    "CAACAgQAAxkBAAIs_mdbY-Zk1JR7yRLoWsi8NbJEMFerAALVGAACOqGIUIer-Up9iv5aHgQ",
+    "CAACAgQAAxkBAAIs-mdbY96brNo0bbqiAT0h9aHmGjfZAAISDgACQln9BFRvgD6jmKybHgQ"
+]
+
+def get_random_sticker():
+    return random.choice(sticker_ids)
 
 @Client.on_message(filters.command("cpost"))
 async def post_reply(client, message):
-    random_sticker = random.choice(sticker_ids)
+    random_sticker = get_random_sticker()
     m = await message.reply_sticker(random_sticker)
     await asyncio.sleep(3)
     await m.delete()
@@ -48,7 +53,7 @@ async def post_reply(client, message):
     caption_without_buttons = remove_button_links(caption)
     reply_markup = InlineKeyboardMarkup(inline_buttons) if inline_buttons else None
 
-    random_sticker = random.choice(sticker_ids)
+    random_sticker = get_random_sticker()
     m = await message.reply_sticker(random_sticker)
     await asyncio.sleep(5)
     await m.delete()
@@ -143,6 +148,7 @@ async def post_reply(client, message):
     m = await message.reply_sticker(random_sticker)
     await asyncio.sleep(5)
     await m.delete()
+        #continue 
 
     try:
         if replied_message.photo:
@@ -250,10 +256,7 @@ def remove_button_links(caption: str):
 
 @Client.on_message(filters.command("chelp"))
 async def chelp(client, message):
-    random_sticker = random.choice(sticker_ids)
-    m = await message.reply_sticker(random_sticker)
-    await asyncio.sleep(3)
-    await m.delete()
+    
     help_text = """
 <b>Telegram Markdown & Formatting Guide:</b>
 
@@ -302,4 +305,8 @@ Simply type <code>&gt;</code> at the beginning of a line:
 <b> /ppost to post private post (that can't be forwarded) </b>
 <b> Join @Filmykeedha For More Updates.</b>
 """
+    random_sticker = get_random_sticker()
+    m = await message.reply_sticker(random_sticker)
+    await asyncio.sleep(3)
+    await m.delete()
     await message.reply(help_text, parse_mode=ParseMode.HTML)
