@@ -79,16 +79,16 @@ async def post_command(client, message):
     # If the user is connected, proceed with the post creation process
     channel_names = [channel['channel_name'] for channel in user_channels]
     channel_ids = [channel['channel_id'] for channel in user_channels]
-    user_sessions[user_id] = {'channel_ids': channel_ids, 'channel_names': channel_names}
+    PostSession[user_id] = {'channel_ids': channel_ids, 'channel_names': channel_names}
 
     await message.reply("What is the parse mode? (HTML/Markdown/None)")
-    user_sessions[user_id]['step'] = 'parse_mode'
+    PostSession[user_id]['step'] = 'parse_mode'
 
 
 @Client.on_message(filters.private & ~filters.command("cancel_post"))
 async def post_workflow(client, message):
     user_id = message.from_user.id
-    session = user_sessions.get(user_id)
+    session = PostSession.get(user_id)
 
     if not session:
         return  # No active session
@@ -130,7 +130,7 @@ async def post_workflow(client, message):
             )
             await save_post(user_id, session['channel_ids'][0], session['message'], session['photo'], session['buttons'])
             await message.reply("Post sent successfully!")
-            user_sessions.pop(user_id, None)
+            PostSession.pop(user_id, None)
         else:
             try:
                 schedule_date = datetime.strptime(message.text, '%d/%m/%Y')
@@ -151,7 +151,7 @@ async def post_workflow(client, message):
             )
             await save_post(user_id, session['channel_ids'][0], session['message'], session['photo'], session['buttons'], session['schedule_time'])
             await message.reply("Post scheduled successfully!")
-            user_sessions.pop(user_id, None)
+            PostSession.pop(user_id, None)
         except ValueError:
             await message.reply("Invalid time format. Please send a valid time like HH:MM.")
 
@@ -159,8 +159,8 @@ async def post_workflow(client, message):
 @Client.on_message(filters.command("cancel_post") & filters.private)
 async def cancel_post(client, message):
     user_id = message.from_user.id
-    if user_id in user_sessions:
-        user_sessions.pop(user_id, None)
+    if user_id in PostSession:
+        PostSession.pop(user_id, None)
         await message.reply("Post creation process has been canceled.")
     else:
         await message.reply("No active post process to cancel.")
