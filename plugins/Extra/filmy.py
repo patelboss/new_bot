@@ -5,63 +5,80 @@ from pyrogram.enums import ParseMode
 
 @Client.on_message(filters.command("ppost"))
 async def post_reply(client, message):
+    # Ensure the user provided a channel ID and replied to a message
     command_parts = message.text.split()
     if len(command_parts) < 2 or not message.reply_to_message:
         await message.reply("Please provide a valid channel ID and reply to a message using /ppost <channel_id>.")
         return
 
-    channel_id = command_parts[1]
+    channel_id = command_parts[1]  # Extract the channel ID from the command
 
+    # Ensure channel_id is valid (e.g., it starts with '-100' for Telegram channels)
     if not channel_id.startswith("-100"):
         await message.reply("Invalid channel ID. Please provide a valid channel ID starting with '-100'.")
         return
 
+    # Get the original message's media or text
     replied_message = message.reply_to_message
     caption = replied_message.text if replied_message.text else "No caption provided."
-    button_links = parse_buttons_from_caption(caption)
-    caption_without_buttons = remove_markdown_links(caption)
-    inline_buttons = InlineKeyboardMarkup(button_links) if button_links else None
 
+    # Parse the caption and extract inline buttons in custom format
+    inline_buttons = parse_buttons_from_caption(caption)
+
+    # Replace markdown links in the caption with placeholders
+    caption_without_buttons = remove_button_links(caption)
+
+    # Prepare inline buttons only if there are any
+    reply_markup = None
+    if inline_buttons:
+        reply_markup = InlineKeyboardMarkup(inline_buttons)  # Properly formatted InlineKeyboardMarkup
+
+    # Send message with inline buttons at the bottom
     try:
         if replied_message.photo:
+            # If the replied message is a photo
             await client.send_photo(
                 chat_id=channel_id,
                 photo=replied_message.photo.file_id,
                 caption=caption_without_buttons,
                 parse_mode=ParseMode.MARKDOWN,
-                reply_markup=inline_buttons
+                reply_markup=reply_markup
             )
         elif replied_message.text:
+            # If the replied message is text
             await client.send_message(
                 chat_id=channel_id,
                 text=caption_without_buttons,
                 parse_mode=ParseMode.MARKDOWN,
-                reply_markup=inline_buttons
+                reply_markup=reply_markup
             )
         else:
+            # Handle unsupported media types
             await client.send_message(
                 chat_id=channel_id,
-                text="Unsupported media type to forward.",
-                reply_markup=inline_buttons
+                text="Unsupported media type to forward",
+                parse_mode=ParseMode.MARKDOWN,
+                reply_markup=reply_markup
             )
         await message.reply(f"Message posted to channel {channel_id} successfully!")
     except Exception as e:
-        await message.reply(f"Failed to post the message. Error: {e}")
+        await message.reply(f"Failed to post the message. Error: {str(e)}")
+
 
 def parse_buttons_from_caption(caption: str):
     """
-    Parse markdown-style links from the caption and convert them into buttons.
+    Parse custom button format `[button text]:(button url)` from the caption and convert them into inline buttons.
 
     Args:
-        caption (str): The caption containing markdown-style links.
+        caption (str): The caption containing the custom button format.
 
     Returns:
         List[List[InlineKeyboardButton]]: Inline buttons structured for Telegram.
     """
     button_links = []
-    pattern = r"(.*?)(https?://.*?)"  # Regex pattern for markdown links
+    pattern = r"([^]+)(https?://[^]+)"  # Custom regex pattern for buttons
 
-    # Find all matches for the markdown links
+    # Find all matches for the custom button format
     matches = re.findall(pattern, caption)
     for text, url in matches:
         button_links.append([InlineKeyboardButton(text=text, url=url)])  # Each button in a separate row
@@ -69,17 +86,19 @@ def parse_buttons_from_caption(caption: str):
     return button_links
 
 
-def remove_markdown_links(caption: str):
+def remove_button_links(caption: str):
     """
-    Remove markdown-style links from the caption text.
+    Remove the custom button format `[button text]:(button url)` from the caption text.
 
     Args:
-        caption (str): The caption containing markdown-style links.
+        caption (str): The caption containing the custom button format.
 
     Returns:
-        str: Caption text without markdown links.
+        str: Caption text without the button links.
     """
-    return re.sub(r"(.*?)(https?://.*?)", "", caption).strip()
+    return re.sub(r"([^]+)(https?://[^]+)", "", caption).strip()
+    
+    
 from pyrogram import Client, filters
 from pyrogram.enums import ParseMode
 
