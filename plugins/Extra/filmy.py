@@ -83,11 +83,11 @@ async def post_reply(client, message):
 
 def extract_buttons_from_caption(caption: str):
     """
-    Extracts buttons in the format: [button text](buttonurl://url)
+    Extracts buttons in the format: [button_text]-(url)
     """
     button_links = []
     # Corrected regex pattern
-    pattern = r"\[(.*?)\]\(buttonurl://(.*?)\)"
+    pattern = r'\[(.*?)\]–\((.*?)\)'
     matches = re.findall(pattern, caption)
     logger.info(f"Button extraction pattern: {pattern}")
     logger.info(f"Matches found: {matches}")
