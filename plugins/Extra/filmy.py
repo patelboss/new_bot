@@ -31,7 +31,7 @@ async def channel_post(client, message):
         await m.delete()
     except Exception as e:
         await message.reply(f"Failed to send sticker: {e}")
-       # return
+        return
 
     command_parts = message.text.split()
     if len(command_parts) < 2 or not message.reply_to_message:
