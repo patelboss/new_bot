@@ -10,39 +10,30 @@ logging.basicConfig(level=logging.INFO)
 
 @Client.on_message(filters.command("ppost"))
 async def post_reply(client, message):
-    # Ensure the user provided a channel ID and replied to a message
     command_parts = message.text.split()
     if len(command_parts) < 2 or not message.reply_to_message:
         logger.warning("Command is missing required parts or no reply message found.")
         await message.reply("Please provide a valid channel ID and reply to a message using /ppost <channel_id>.")
         return
 
-    channel_id = command_parts[1]  # Extract the channel ID from the command
+    channel_id = command_parts[1]
     logger.info(f"Extracted channel_id: {channel_id}")
 
-    # Ensure channel_id is valid (e.g., it starts with '-100' for Telegram channels)
     if not channel_id.startswith("-100"):
         logger.error(f"Invalid channel ID: {channel_id}")
         await message.reply("Invalid channel ID. Please provide a valid channel ID starting with '-100'.")
         return
 
-    # Get the original message's media or text
     replied_message = message.reply_to_message
-    caption = replied_message.caption if replied_message.caption else (replied_message.text or "No caption provided.")
+    caption = replied_message.caption or replied_message.text or ""
     logger.info(f"Replied message caption: {caption}")
 
-    # Extract inline buttons separately
     inline_buttons = extract_buttons_from_caption(caption)
-
-    # Remove button-related parts from the caption
     caption_without_buttons = remove_button_links(caption)
-
-    # Prepare the inline keyboard for buttons
     reply_markup = InlineKeyboardMarkup(inline_buttons) if inline_buttons else None
 
     try:
         if replied_message.photo:
-            # If the replied message is a photo
             logger.info("Replied message is a photo. Sending to the channel...")
             await client.send_photo(
                 chat_id=channel_id,
@@ -52,7 +43,6 @@ async def post_reply(client, message):
                 reply_markup=reply_markup
             )
         elif replied_message.video:
-            # If the replied message is a video
             logger.info("Replied message is a video. Sending to the channel...")
             await client.send_video(
                 chat_id=channel_id,
@@ -62,7 +52,6 @@ async def post_reply(client, message):
                 reply_markup=reply_markup
             )
         elif replied_message.document:
-            # If the replied message is a document
             logger.info("Replied message is a document. Sending to the channel...")
             await client.send_document(
                 chat_id=channel_id,
@@ -72,7 +61,6 @@ async def post_reply(client, message):
                 reply_markup=reply_markup
             )
         elif replied_message.text:
-            # If the replied message is text
             logger.info("Replied message is text. Sending to the channel...")
             await client.send_message(
                 chat_id=channel_id,
@@ -81,13 +69,12 @@ async def post_reply(client, message):
                 reply_markup=reply_markup
             )
         else:
-            # Handle unsupported media types
             logger.error("Unsupported media type in the replied message.")
             await client.send_message(
                 chat_id=channel_id,
-                text="Unsupported media type to forward",
-                parse_mode=ParseMode.MARKDOWN
+                text="Unsupported media type to forward.",
             )
+
         await message.reply(f"Message posted to channel {channel_id} successfully!")
         logger.info(f"Message posted to channel {channel_id} successfully.")
     except Exception as e:
@@ -97,27 +84,17 @@ async def post_reply(client, message):
 
 def extract_buttons_from_caption(caption: str):
     """
-    Extracts buttons in the Markdown format: [button text](buttonurl://button_url)
-    and returns them as InlineKeyboardButton objects.
-
-    Args:
-        caption (str): The caption containing button information.
-
-    Returns:
-        List[List[InlineKeyboardButton]]: A list of inline buttons.
+    Extracts buttons in the format: [button text](buttonurl://url)
     """
     button_links = []
-    # Adjust the pattern to match Markdown-style buttons: [button text](buttonurl://button_url)
-    pattern = r"([^]+)buttonurl://([^]+)"
-    
-    # Find all matches for button text and URL in the Markdown format
+    pattern = r"([^]+)buttonurl://(https?://[^\s]+)"
     matches = re.findall(pattern, caption)
     logger.info(f"Button extraction pattern: {pattern}")
     logger.info(f"Matches found: {matches}")
 
     for text, url in matches:
         logger.info(f"Creating button: {text} - {url}")
-        button_links.append([InlineKeyboardButton(text=text, url=url)])  # Create a button for each match
+        button_links.append([InlineKeyboardButton(text=text, url=url)])
 
     logger.info(f"Extracted inline buttons: {button_links}")
     return button_links
@@ -125,15 +102,8 @@ def extract_buttons_from_caption(caption: str):
 
 def remove_button_links(caption: str):
     """
-    Removes button-related text (e.g., [button text](buttonurl://button_url)) from the caption.
-
-    Args:
-        caption (str): The caption to remove button links from.
-
-    Returns:
-        str: The caption with button information removed.
+    Removes button links in the format: [button text](buttonurl://url) from the caption.
     """
-    # Remove all Markdown-style links from the caption
-    cleaned_caption = re.sub(r"([^]+)buttonurl://([^]+)", "", caption).strip()
+    cleaned_caption = re.sub(r"([^]+)buttonurl://(https?://[^\s]+)", "", caption).strip()
     logger.info(f"Cleaned caption: {cleaned_caption}")
     return cleaned_caption
