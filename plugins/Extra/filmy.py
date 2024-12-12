@@ -82,10 +82,10 @@ async def post_reply(client, message):
         await message.reply(f"Failed to post the message. Error: {str(e)}")
 def extract_buttons_from_caption(caption: str):
     """
-    Extracts buttons in the format: [BUTTON_TEXT]-(URL)
+    Extracts buttons in the format: {BUTTON_TEXT}-{URL}
     """
     button_links = []
-    pattern = r"(.*?)-(.*?)"
+    pattern = r"\{(.*?)\}\-(https?:\/\/[^\s]+)"
     logger.info(f"Button extraction pattern: {pattern}")
     matches = re.findall(pattern, caption)
     logger.info(f"Matches found: {matches}")
@@ -99,9 +99,9 @@ def extract_buttons_from_caption(caption: str):
     
 def remove_button_links(caption: str):
     """
-    Removes button links in the format: [BUTTON_TEXT]-(URL) from the caption.
+    Removes button links in the format: {BUTTON_TEXT}-{URL} from the caption.
     """
-    pattern = r"(.*?)-(.*?)"
+    pattern = r"\{(.*?)\}\-(https?:\/\/[^\s]+)"
     cleaned_caption = re.sub(pattern, "", caption).strip()
     logger.info(f"Cleaned caption: {cleaned_caption}")
     return cleaned_caption
