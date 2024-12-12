@@ -3,7 +3,7 @@ from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 import re
 from pyrogram.enums import ParseMode
 
-@Client.on_message(filters.command("ppost"))
+@client.on_message(filters.command("ppost"))
 async def post_reply(client, message):
     user_id = message.from_user.id
 
@@ -30,10 +30,12 @@ async def post_reply(client, message):
     # Replace markdown links in the caption with placeholders
     caption_without_buttons = remove_markdown_links(caption)
 
-    # Prepare inline buttons
-    inline_buttons = InlineKeyboardMarkup(
-        [[InlineKeyboardButton(text=link["text"], url=link["url"]) for link in button_links]]
-    )
+    # Prepare inline buttons only if there are any
+    inline_buttons = None
+    if button_links:
+        inline_buttons = InlineKeyboardMarkup(
+            [[InlineKeyboardButton(text=link["text"], url=link["url"]) for link in button_links]]
+        )
 
     # Send message with inline buttons
     try:
@@ -44,15 +46,23 @@ async def post_reply(client, message):
                 replied_message.photo.file_id,  # Media file ID (photo, video, document, etc.)
                 caption=caption_without_buttons,  # Caption without buttons
                 parse_mode=ParseMode.MARKDOWN,  # Use markdown formatting for the caption
-                reply_markup=inline_buttons  # Attach inline buttons
+                reply_markup=inline_buttons  # Attach inline buttons (can be None)
             )
-        else:
-            # If the replied message is text or another type
+        elif replied_message.text:
+            # If the replied message is text
             await client.send_message(
                 channel_id,  # Send the message to the specified channel
                 caption_without_buttons,  # Text content (if no media)
                 parse_mode=ParseMode.MARKDOWN,  # Markdown parse mode
-                reply_markup=inline_buttons  # Inline buttons
+                reply_markup=inline_buttons  # Inline buttons (can be None)
+            )
+        else:
+            # Handle other media types (audio, video, etc.) if needed
+            await client.send_message(
+                channel_id, 
+                "Unsupported media type to forward", 
+                parse_mode=ParseMode.MARKDOWN, 
+                reply_markup=inline_buttons
             )
         await message.reply(f"Message posted to channel {channel_id} successfully!")
     except Exception as e:
