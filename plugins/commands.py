@@ -25,6 +25,9 @@ logger = logging.getLogger(__name__)
 @Client.on_message(filters.command("start") & filters.incoming) #start
 async def start(client, message):
     await message.react(emoji="🤩")
+    m=await message.reply_sticker("CAACAgIAAxkBAAIMU2dBzBWjzGCg_x2tFumZ76z5l5JiAAJiAANOXNIpTqLDGEjEK3EeBA") 
+    await asyncio.sleep(3)
+    await m.delete()
     if message.chat.type in [enums.ChatType.GROUP, enums.ChatType.SUPERGROUP]:
         # Inline Keyboard Buttons for Private Chat
         buttons = [[
@@ -81,7 +84,7 @@ async def start(client, message):
             buttons.append([InlineKeyboardButton('🤖 Cʀᴇᴀᴛᴇ Yᴏᴜʀ Oᴡɴ Cʟᴏɴᴇ Bᴏᴛ 🤖', callback_data='clone')])
         reply_markup = InlineKeyboardMarkup(buttons)
         m=await message.reply_sticker("CAACAgIAAxkBAAIMU2dBzBWjzGCg_x2tFumZ76z5l5JiAAJiAANOXNIpTqLDGEjEK3EeBA") 
-        await asyncio.sleep(1)
+        await asyncio.sleep(3)
         await m.delete()
         await message.reply_photo(
             photo=random.choice(PICS),
