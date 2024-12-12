@@ -7,6 +7,10 @@ import logging
 # Initialize the logger
 #logger = logging.getLogger(__name__)
 #logging.basicConfig(level=logging.INFO)
+sticker_ids = [
+    "CAACAgUAAxkBAAEBgq9hJ6PmdQ9HRgmxkj_vu8R6DbD8FQACwQoAAlv_dlxK3_P-cMy4el_9MwE",  # Example sticker 1
+    "CAACAgUAAxkBAAEBgqVhJ6PmbWqI_hggjjz5qx3JmtDiHEwACwwoAAlv_dllzEkeX44X7UeyOMeQ", ] # Example sticker 2
+    # Add more sticker file IDs as needed
 
 @Client.on_message(filters.command("cpost"))
 async def post_reply(client, message):
@@ -37,6 +41,10 @@ async def post_reply(client, message):
     inline_buttons = extract_buttons_from_caption(caption)
     caption_without_buttons = remove_button_links(caption)
     reply_markup = InlineKeyboardMarkup(inline_buttons) if inline_buttons else None
+
+    sticker_id = random.choice(sticker_ids)
+    await message.reply_sticker(sticker_id)
+    await asyncio.sleep(3)
 
     try:
         if replied_message.photo:
