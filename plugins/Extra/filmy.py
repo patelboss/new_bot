@@ -3,7 +3,7 @@ from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 import re
 from pyrogram.enums import ParseMode
 
-@client.on_message(filters.command("ppost"))
+@Client.on_message(filters.command("ppost"))
 async def post_reply(client, message):
     user_id = message.from_user.id
 
