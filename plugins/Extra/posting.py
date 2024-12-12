@@ -9,56 +9,91 @@ import logging
 # Set up logging configuration
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+from pymongo import MongoClient
+from bson import ObjectId
+from datetime import datetime
+from info import DATABASE_URI, DATABASE_NAME
+import logging
 
-class PostSession:
-    def __init__(self, user_id):
-        self.user_id = user_id
-        self.channel_ids = []
-        self.channel_names = []
-        self.parse_mode = "HTML"  # Default parse mode
-        self.message = None
-        self.buttons = None
-        self.photo = None
-        self.schedule_time = None
-        self.step = None
+# Initialize MongoDB connection
+client = MongoClient(DATABASE_URI)
+db = client[DATABASE_NAME]
+sessions_col = db['post_sessions']
 
-    async def send_preview(self, client, channel_name):
-        preview_text = (
-            f"<b>Preview:</b>\n"
-            f"Message: {self.message}\n"
-            f"Buttons: {self.buttons}\n"
-            f"Scheduled for: {self.schedule_time if self.schedule_time else 'Now'}\n"
-            f"Channel: {channel_name}"
-        )
-        if self.photo:
-            await client.send_photo(self.user_id, self.photo, caption=preview_text, parse_mode=ParseMode.HTML)
-        else:
-            await client.send_message(self.user_id, preview_text, parse_mode=ParseMode.HTML)
+# Ensure indexes for performance
+sessions_col.create_index('user_id', unique=True)
 
-    async def post_to_channel(self, client, channel_id):
+logger = logging.getLogger(__name__)
+
+class PostSessionManager:
+    @staticmethod
+    def create_session(user_id):
+        """
+        Create a session for a user and store it in the database.
+        """
         try:
-            if self.photo:
-                await client.send_photo(
-                    channel_id,
-                    photo=self.photo,
-                    caption=self.message,
-                    parse_mode=ParseMode.HTML,
-                    reply_markup=InlineKeyboardMarkup(self.buttons) if self.buttons else None
-                )
-            else:
-                await client.send_message(
-                    channel_id,
-                    text=self.message,
-                    parse_mode=ParseMode.HTML,
-                    reply_markup=InlineKeyboardMarkup(self.buttons) if self.buttons else None
-                )
+            session = {
+                "user_id": user_id,
+                "channel_ids": [],
+                "channel_names": [],
+                "parse_mode": "HTML",
+                "message": None,
+                "buttons": None,
+                "photo": None,
+                "schedule_time": None,
+                "step": None,
+                "created_at": datetime.now(),
+            }
+            sessions_col.update_one(
+                {"user_id": user_id},
+                {"$set": session},
+                upsert=True  # Insert if not exists
+            )
+            logger.info(f"Session created for user ID {user_id}.")
         except Exception as e:
-            logger.error(f"Failed to post to channel {channel_id}: {e}")
-            raise e
+            logger.error(f"Error creating session for user ID {user_id}: {e}")
 
+    @staticmethod
+    def get_session(user_id):
+        """
+        Retrieve the session for a user from the database.
+        """
+        try:
+            return sessions_col.find_one({"user_id": user_id})
+        except Exception as e:
+            logger.error(f"Error fetching session for user ID {user_id}: {e}")
+            return None
 
-# Use a dictionary to isolate sessions for each user
-user_sessions = {}
+    @staticmethod
+    def update_session(user_id, updates):
+        """
+        Update the session for a user in the database.
+        """
+        try:
+            sessions_col.update_one(
+                {"user_id": user_id},
+                {"$set": updates}
+            )
+            logger.info(f"Session updated for user ID {user_id}. Updates: {updates}")
+        except Exception as e:
+            logger.error(f"Error updating session for user ID {user_id}: {e}")
+
+    @staticmethod
+    def remove_session(user_id):
+        """
+        Remove a user's session from the database.
+        """
+        try:
+            sessions_col.delete_one({"user_id": user_id})
+            logger.info(f"Session removed for user ID {user_id}.")
+        except Exception as e:
+            logger.error(f"Error removing session for user ID {user_id}: {e}")
+from pyrogram import Client, filters
+from pyrogram.enums import ParseMode
+from datetime import datetime
+import asyncio
+from database.posts import save_post, get_user_channels
+from post_session_manager import PostSessionManager
 
 @Client.on_message(filters.command("post") & filters.private)
 async def post_command(client, message):
@@ -75,84 +110,82 @@ async def post_command(client, message):
     channel_names = [channel['channel_name'] for channel in user_channels]
     channel_ids = [channel['channel_id'] for channel in user_channels]
 
-    # Create a new session for the user
-    user_sessions[user_id] = PostSession(user_id)
-    session = user_sessions[user_id]
-    session.channel_ids = channel_ids
-    session.channel_names = channel_names
-    session.step = "parse_mode"
+    PostSessionManager.create_session(user_id)
+    PostSessionManager.update_session(user_id, {
+        "channel_ids": channel_ids,
+        "channel_names": channel_names,
+        "step": "parse_mode"
+    })
 
     await message.reply("What is the parse mode? (HTML/Markdown/None) [Default: HTML]")
-
 
 @Client.on_message(filters.private & ~filters.command("cancel_post"))
 async def post_workflow(client, message):
     user_id = message.from_user.id
-    session = user_sessions.get(user_id)
+    session = PostSessionManager.get_session(user_id)
 
     if not session:
         return
 
-    step = session.step
-
+    step = session.get("step")
     if step == "parse_mode":
-        session.parse_mode = message.text.upper() if message.text.upper() in ["HTML", "MARKDOWN", "NONE"] else "HTML"
-        session.step = "message"
+        parse_mode = message.text.upper() if message.text.upper() in ["HTML", "MARKDOWN", "NONE"] else "HTML"
+        PostSessionManager.update_session(user_id, {"parse_mode": parse_mode, "step": "message"})
         await message.reply("Send me the message content.")
     elif step == "message":
-        session.message = message.text
-        session.step = "buttons"
+        PostSessionManager.update_session(user_id, {"message": message.text, "step": "buttons"})
         await message.reply("Send me button/link in HTML format or type 'None' to skip.")
     elif step == "buttons":
-        session.buttons = message.text if message.text.lower() != "none" else None
-        session.step = "photo"
+        buttons = message.text if message.text.lower() != "none" else None
+        PostSessionManager.update_session(user_id, {"buttons": buttons, "step": "photo"})
         await message.reply("Send me a photo or type 'None' to skip.")
     elif step == "photo":
-        session.photo = message.photo.file_id if message.photo else None
-        session.step = "schedule"
+        photo = message.photo.file_id if message.photo else None
+        PostSessionManager.update_session(user_id, {"photo": photo, "step": "schedule"})
         await message.reply("Do you want to post now or schedule? (Send 'Now' or a date like DD/MM/YYYY)")
     elif step == "schedule":
         if message.text.lower() == "now":
-            session.schedule_time = None
-            await session.send_preview(client, session.channel_names[0])
-            await session.post_to_channel(client, session.channel_ids[0])
-            await save_post(user_id, session.channel_ids[0], session.message, session.photo, session.buttons)
+            PostSessionManager.update_session(user_id, {"schedule_time": None})
             await message.reply("Post sent successfully!")
-            del user_sessions[user_id]
+            await finalize_post(client, user_id)
         else:
             try:
-                session.schedule_time = datetime.strptime(message.text, '%d/%m/%Y')
-                session.step = "time"
+                schedule_time = datetime.strptime(message.text, '%d/%m/%Y')
+                PostSessionManager.update_session(user_id, {"schedule_time": schedule_time, "step": "time"})
                 await message.reply("Send me the time in HH:MM format (24-hour).")
             except ValueError:
                 await message.reply("Invalid date format. Please send a valid date like DD/MM/YYYY.")
     elif step == "time":
         try:
-            schedule_time = datetime.strptime(message.text, '%H:%M').time()
-            session.schedule_time = datetime.combine(session.schedule_time, schedule_time)
-            await session.send_preview(client, session.channel_names[0])
-            await save_post(
-                user_id, session.channel_ids[0], session.message, session.photo,
-                session.buttons, session.schedule_time
-            )
+            time = datetime.strptime(message.text, '%H:%M').time()
+            schedule_time = datetime.combine(session["schedule_time"], time)
+            PostSessionManager.update_session(user_id, {"schedule_time": schedule_time})
             await message.reply("Post scheduled successfully!")
-            del user_sessions[user_id]
+            await finalize_post(client, user_id)
         except ValueError:
             await message.reply("Invalid time format. Please send a valid time like HH:MM.")
-
 
 @Client.on_message(filters.command("cancel_post") & filters.private)
 async def cancel_post(client, message):
     user_id = message.from_user.id
-    if user_sessions.get(user_id):
-        del user_sessions[user_id]
+    if PostSessionManager.get_session(user_id):
+        PostSessionManager.remove_session(user_id)
         await message.reply("Post creation process has been canceled.")
     else:
         await message.reply("No active post process to cancel.")
-import logging
-import asyncio
-from pyrogram import Client, filters
 
+async def finalize_post(client, user_id):
+    session = PostSessionManager.get_session(user_id)
+    if session:
+        await save_post(
+            user_id=user_id,
+            channel_id=session["channel_ids"][0],
+            message=session["message"],
+            photo=session["photo"],
+            buttons=session["buttons"],
+            schedule_time=session.get("schedule_time")
+        )
+        PostSessionManager.remove_session(user_id)
 # Set up logging configuration
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -223,3 +256,4 @@ async def connect_channel(client, message, channel_identifier):
         # Handle any unexpected errors
         await message.reply(f"Failed to connect the channel. Error: {str(e)}")
         logger.error(f"User ID {user_id} failed to connect channel {channel_identifier}. Error: {str(e)}")
+        
