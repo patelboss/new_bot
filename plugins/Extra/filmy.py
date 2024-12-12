@@ -80,8 +80,6 @@ async def post_reply(client, message):
     except Exception as e:
         logger.exception(f"Failed to post the message. Error: {str(e)}")
         await message.reply(f"Failed to post the message. Error: {str(e)}")
-
-
 def extract_buttons_from_caption(caption: str):
     """
     Extracts buttons in the format: [button text](buttonurl://url)
@@ -98,6 +96,7 @@ def extract_buttons_from_caption(caption: str):
 
     logger.info(f"Extracted inline buttons: {button_links}")
     return button_links
+
 def remove_button_links(caption: str):
     """
     Removes button links in the format: [button text](buttonurl://url) from the caption.
