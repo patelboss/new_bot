@@ -14,6 +14,10 @@ sticker_ids = [
 
 @Client.on_message(filters.command("cpost"))
 async def post_reply(client, message):
+    random_sticker = random.choice(sticker_ids)
+    m = await message.reply_sticker(random_sticker)
+    await asyncio.sleep(3)
+    await m.delete()
     command_parts = message.text.split()
     if len(command_parts) < 2 or not message.reply_to_message:
 #        logger.warning("Command is missing required parts or no reply message found.")
@@ -44,7 +48,7 @@ async def post_reply(client, message):
 
     random_sticker = random.choice(sticker_ids)
     m = await message.reply_sticker(random_sticker)
-    await asyncio.sleep(3)
+    await asyncio.sleep(5)
     await m.delete()
     try:
         if replied_message.photo:
@@ -101,6 +105,10 @@ async def post_reply(client, message):
 
 @Client.on_message(filters.command("ppost"))
 async def post_reply(client, message):
+    random_sticker = random.choice(sticker_ids)
+    m = await message.reply_sticker(random_sticker)
+    await asyncio.sleep(3)
+    await m.delete()
     command_parts = message.text.split()
     if len(command_parts) < 2 or not message.reply_to_message:
 #        logger.warning("Command is missing required parts or no reply message found.")
@@ -128,6 +136,11 @@ async def post_reply(client, message):
     inline_buttons = extract_buttons_from_caption(caption)
     caption_without_buttons = remove_button_links(caption)
     reply_markup = InlineKeyboardMarkup(inline_buttons) if inline_buttons else None
+
+    random_sticker = random.choice(sticker_ids)
+    m = await message.reply_sticker(random_sticker)
+    await asyncio.sleep(5)
+    await m.delete()
 
     try:
         if replied_message.photo:
@@ -235,6 +248,10 @@ def remove_button_links(caption: str):
 
 @Client.on_message(filters.command("chelp"))
 async def chelp(client, message):
+    random_sticker = random.choice(sticker_ids)
+    m = await message.reply_sticker(random_sticker)
+    await asyncio.sleep(3)
+    await m.delete()
     help_text = """
 <b>Telegram Markdown & Formatting Guide:</b>
 
