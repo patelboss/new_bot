@@ -84,10 +84,16 @@ async def post_reply(client, message):
 
 def extract_buttons_from_caption(caption: str):
     """
-    Extracts buttons in the format: [button text](buttonurl://url)
+    Parse custom button format `[Button Text](URL)` from the caption and convert them into inline buttons.
+
+    Args:
+        caption (str): The caption containing the button format.
+
+    Returns:
+        List[List[InlineKeyboardButton]]: Inline buttons structured for Telegram.
     """
     button_links = []
-    pattern = r"([^]+)buttonurl://(https?://[^\s]+)"
+    pattern = r"([^]+)(https?://[^]+)"  # Correct regex pattern for inline buttons
     matches = re.findall(pattern, caption)
     logger.info(f"Button extraction pattern: {pattern}")
     logger.info(f"Matches found: {matches}")
