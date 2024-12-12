@@ -44,7 +44,7 @@ async def channel_post(client, message):
         return
 
     user_id = message.from_user.id
-    if not await is_user_admin_or_owner(client, channel_id, user_id):
+    if not await is_user_admin_or_ownar(client, channel_id, user_id):
         await message.reply("You don't have permission to post in this channel.")
         return
 
@@ -92,7 +92,7 @@ async def channel_post(client, message):
     except Exception as e:
         await message.reply(f"Failed to post the message: {e}")
 
-async def is_user_admin_or_owner(client, channel_id, user_id):
+async def is_user_admin_or_ownar(client, channel_id, user_id):
     """
     Check if the user is an admin or the owner of the channel.
     Returns True if the user is an admin or owner, False otherwise.
