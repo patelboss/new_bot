@@ -1,304 +1,168 @@
 from pyrogram import Client, filters
+from pyrogram.errors import ChatAdminRequired
+from pyrogram.enums import ChatMemberStatus
+from datetime import datetime
+from pytz import timezone
+from database import save_channel_stats, extract_common_words, save_template_data
+
+IST = timezone('Asia/Kolkata')
+
+@Client.on_message(filters.command("add_channel"))
+async def add_channel(client, message):
+    # Check if there are multiple channel IDs provided
+    if len(message.command) < 2:
+        await message.reply("Please provide the channel ID(s): `/add_channel <channel_id1> <channel_id2> ...`")
+        return
+
+    # Extract channel IDs from the message
+    channel_ids = message.command[1:]
+
+    # Loop through each channel ID provided
+    for channel_id in channel_ids:
+        try:
+            # Verify the bot's admin rights in the channel
+            channel_info = await client.get_chat(channel_id)
+            bot_permissions = await client.get_chat_member(channel_id, client.me.id)
+            if bot_permissions.status != ChatMemberStatus.ADMINISTRATOR:
+                await message.reply(f"The bot needs admin rights to fetch data for channel {channel_id}.")
+                return
+            
+            # Check if the user is either an admin or the owner of the channel
+            user_permissions = await client.get_chat_member(channel_id, message.from_user.id)
+            if user_permissions.status not in [ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.OWNER]:
+                await message.reply(f"You need admin or owner rights in the channel {channel_id} to add it.")
+                return
+
+            # Collect channel data
+            total_users = channel_info.members_count
+            channel_name = channel_info.title
+            link = await client.export_chat_invite_link(channel_id)
+            
+            # Perform posts analysis and extract common words
+            posts = await client.get_chat_history(channel_id, limit=100)  # Modify limit as needed
+            top_words = extract_common_words(posts)
+
+            # Get current IST time for first_added_date
+            first_added_date = datetime.now(IST)
+
+            # Save to the database
+            await save_channel_stats(channel_id, first_added_date, total_users, message.from_user.id, link, top_words)
+            
+            # After successful addition, send instructions for posting
+            await message.reply(f"Channel {channel_name} (ID: {channel_id}) added successfully!\n"
+                                 f"Link: {link}\n"
+                                 f"Total Users: {total_users}\n"
+                                 f"Top Keywords: {top_words}\n\n"
+                                 "You can now post to this channel. Use the `/post <channel_id> <message>` command to post.")
+            
+        except ChatAdminRequired:
+            await message.reply(f"The bot does not have admin rights in the channel {channel_id}.")
+        except Exception as e:
+            await message.reply(f"Error while adding channel {channel_id}: {str(e)}")
+
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
-from pyrogram.enums import ParseMode
-from plugins.Extra.Cscript import TEXTS
-from database.stats import save_user_post_data, save_channel_stats, get_channel_data, get_user_post_data
-from info import ADMINS
-from pyrogram import Client, filters
-from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
-from pyrogram.enums import ParseMode, ChatMemberStatus
-from pyrogram.errors import UserNotParticipant, PeerIdInvalid, ChatAdminRequired
-from plugins.Extra.Cscript import TEXTS
-import random
-import re
-# ------------------------ Command Handler ------------------------
 
-@Client.on_message(filters.command("ppost"))
-async def ppost(client, message):
-    command_parts = message.text.split()
+@Client.on_message(filters.command("set_template"))
+async def set_template(client, message):
+    if len(message.command) < 2:
+        await message.reply("Please provide template data in the format:\n"
+                             "`Parse mode=<HTML/Markdown>`\n"
+                             "`privacy_mode=<on/off>`\n"
+                             "`Link_preview=<on/off>`\n"
+                             "`Button 1=<link>` `Button 2=<link>`...")
+        return
     
-    if len(command_parts) < 2 or not message.reply_to_message:
-        await message.reply(TEXTS["no_message_to_post"], parse_mode=ParseMode.HTML)
-        return
+    # Extract template settings from the message
+    template_data = ' '.join(message.command[1:])
+    parse_mode = "Markdown"  # Default value
+    privacy_mode = "off"     # Default value
+    link_preview = "off"     # Default value
+    buttons = []
 
-    channel_id = command_parts[1]
+    # Parsing user input for settings
+    for part in template_data.split():
+        if part.lower().startswith("parse mode="):
+            parse_mode = part.split("=")[1].upper()
+        elif part.lower().startswith("privacy_mode="):
+            privacy_mode = part.split("=")[1].lower()
+        elif part.lower().startswith("link_preview="):
+            link_preview = part.split("=")[1].lower()
+        elif part.lower().startswith("button"):
+            button_data = part.split("=")
+            button_label = button_data[0].strip()
+            button_link = button_data[1].strip()
+            buttons.append((button_label, button_link))
 
-    if not channel_id.startswith("-100"):
-        await message.reply(TEXTS["invalid_channel_id"], parse_mode=ParseMode.HTML)
-        return
-
-    user_id = message.from_user.id
-    result = await is_user_admin_or_owner(client, channel_id, user_id)
-
-    if isinstance(result, bool):
-        if not result:
-            await message.reply(TEXTS["permission_denied"], parse_mode=ParseMode.HTML)
-            return
-    elif isinstance(result, dict) and "error" in result:
-        await message.reply(f"<b>{result['error']}</b>", parse_mode=ParseMode.HTML)
-        return
-
-    replied_message = message.reply_to_message
-    caption = replied_message.caption or replied_message.text or ""
+    # Save the template to the database
+    await save_template_data(message.from_user.id, parse_mode, privacy_mode, link_preview, buttons)
     
-    inline_buttons = extract_buttons_from_caption(caption)
-    caption_without_buttons = remove_button_links(caption)
-    reply_markup = InlineKeyboardMarkup(inline_buttons) if inline_buttons else None
+    await message.reply("Template updated successfully!")
 
-    try:
-        if replied_message.photo:
-            await client.send_photo(
-                chat_id=channel_id,
-                photo=replied_message.photo.file_id,
-                caption=caption_without_buttons,
-                parse_mode=ParseMode.MARKDOWN,
-                reply_markup=reply_markup,
-                disable_web_page_preview=True,
-                protect_content=True
-            )
-        elif replied_message.video:
-            await client.send_video(
-                chat_id=channel_id,
-                video=replied_message.video.file_id,
-                caption=caption_without_buttons,
-                parse_mode=ParseMode.MARKDOWN,
-                reply_markup=reply_markup,
-                disable_web_page_preview=True,
-                protect_content=True
-            )
-        elif replied_message.document:
-            await client.send_document(
-                chat_id=channel_id,
-                document=replied_message.document.file_id,
-                caption=caption_without_buttons,
-                parse_mode=ParseMode.MARKDOWN,
-                reply_markup=reply_markup,
-                disable_web_page_preview=True,
-                protect_content=True
-            )
-        elif replied_message.text:
-            await client.send_message(
-                chat_id=channel_id,
-                text=caption_without_buttons,
-                parse_mode=ParseMode.MARKDOWN,
-                reply_markup=reply_markup,
-                disable_web_page_preview=True,
-                protect_content=True
-                
-            )
-        else:
-            await message.reply(TEXTS["unsupported_media"], parse_mode=ParseMode.HTML)
-
-        # Save user post data and channel stats
-        channel_url = f"https://t.me/{channel_id}"  # Assuming the URL is derived from the channel ID
-        await save_user_post_data(message.from_user.id, channel_id)
-        await save_channel_stats(channel_id, message.from_user.id, url=channel_url)
-
-        await message.reply(TEXTS["post_success"].format(channel_id=channel_id), parse_mode=ParseMode.HTML)
-    except Exception as e:
-        await message.reply(TEXTS["failed_to_post"].format(error=str(e)), parse_mode=ParseMode.HTML)
-
-
-
-@Client.on_message(filters.command("cpost"))
-async def cpost(client, message):
-    command_parts = message.text.split()
+# Preview command to show the post before sending
+@Client.on_message(filters.command("preview"))
+async def preview_post(client, message):
+    if len(message.command) < 3:
+        await message.reply("Please provide the channel ID and message to preview: `/preview <channel_id> <message>`.")
+        return
     
-    if len(command_parts) < 2 or not message.reply_to_message:
-        await message.reply(TEXTS["no_message_to_post"], parse_mode=ParseMode.HTML)
-        return
-
-    channel_id = command_parts[1]
-
-    if not channel_id.startswith("-100"):
-        await message.reply(TEXTS["invalid_channel_id"], parse_mode=ParseMode.HTML)
-        return
-
-    user_id = message.from_user.id
-    result = await is_user_admin_or_owner(client, channel_id, user_id)
-
-    if isinstance(result, bool):
-        if not result:
-            await message.reply(TEXTS["permission_denied"], parse_mode=ParseMode.HTML)
-            return
-    elif isinstance(result, dict) and "error" in result:
-        await message.reply(f"<b>{result['error']}</b>", parse_mode=ParseMode.HTML)
-        return
-
-    replied_message = message.reply_to_message
-    caption = replied_message.caption or replied_message.text or ""
+    channel_id = message.command[1]
+    message_text = ' '.join(message.command[2:])  # The actual message to be previewed
     
-    inline_buttons = extract_buttons_from_caption(caption)
-    caption_without_buttons = remove_button_links(caption)
-    reply_markup = InlineKeyboardMarkup(inline_buttons) if inline_buttons else None
+    # Get template data from the database
+    template_data = await db.templates.find_one({'user_id': message.from_user.id})
+    if template_data:
+        parse_mode = template_data['parse_mode']
+        privacy_mode = template_data['privacy_mode']
+        link_preview = template_data['link_preview']
+        buttons = template_data['buttons']
+    else:
+        parse_mode = "Markdown"
+        privacy_mode = "off"
+        link_preview = "off"
+        buttons = []
 
-    try:
-        if replied_message.photo:
-            await client.send_photo(
-                chat_id=channel_id,
-                photo=replied_message.photo.file_id,
-                caption=caption_without_buttons,
-                parse_mode=ParseMode.MARKDOWN,
-                reply_markup=reply_markup,
-                disable_web_page_preview=True
-            )
-        elif replied_message.video:
-            await client.send_video(
-                chat_id=channel_id,
-                video=replied_message.video.file_id,
-                caption=caption_without_buttons,
-                parse_mode=ParseMode.MARKDOWN,
-                reply_markup=reply_markup,
-                disable_web_page_preview=True
-            )
-        elif replied_message.document:
-            await client.send_document(
-                chat_id=channel_id,
-                document=replied_message.document.file_id,
-                caption=caption_without_buttons,
-                parse_mode=ParseMode.MARKDOWN,
-                reply_markup=reply_markup,
-                disable_web_page_preview=True
-            )
-        elif replied_message.text:
-            await client.send_message(
-                chat_id=channel_id,
-                text=caption_without_buttons,
-                parse_mode=ParseMode.MARKDOWN,
-                reply_markup=reply_markup,
-                disable_web_page_preview=True
-            )
-        else:
-            await message.reply(TEXTS["unsupported_media"], parse_mode=ParseMode.HTML)
+    # Create the inline buttons if any
+    inline_buttons = []
+    for label, url in buttons:
+        inline_buttons.append([InlineKeyboardButton(label, url=url)])
 
-        # Save user post data and channel stats
-        channel_url = f"https://t.me/{channel_id}"  # Assuming the URL is derived from the channel ID
-        await save_user_post_data(message.from_user.id, channel_id)
-        await save_channel_stats(channel_id, message.from_user.id, url=channel_url)
+    # Prepare the message options
+    message_options = {
+        "parse_mode": parse_mode,
+        "disable_web_page_preview": link_preview == "off",
+        "reply_markup": InlineKeyboardMarkup(inline_buttons) if inline_buttons else None
+    }
 
-        await message.reply(TEXTS["post_success"].format(channel_id=channel_id), parse_mode=ParseMode.HTML)
-    except Exception as e:
-        await message.reply(TEXTS["failed_to_post"].format(error=str(e)), parse_mode=ParseMode.HTML)
-                
-# Command to fetch channel stats
-@Client.on_message(filters.command("cstats"))
-async def cstats(client, message):
-    if message.from_user.id not in ADMINS:
-        await message.reply(TEXTS["admin_only"], parse_mode=ParseMode.HTML)
-        return
+    # Send the preview back to the user
+    await message.reply(message_text, **message_options)
 
-    command_parts = message.text.split()
-    if len(command_parts) < 2:
-        await message.reply(TEXTS["channel_not_specified"], parse_mode=ParseMode.HTML)
-        return
+# Send the message with the template settings
+async def send_post_with_template(client, channel_id, message_text, user_id):
+    # Get template data from the database
+    template_data = await db.templates.find_one({'user_id': user_id})
+    if template_data:
+        parse_mode = template_data['parse_mode']
+        privacy_mode = template_data['privacy_mode']
+        link_preview = template_data['link_preview']
+        buttons = template_data['buttons']
+    else:
+        parse_mode = "Markdown"
+        privacy_mode = "off"
+        link_preview = "off"
+        buttons = []
 
-    channel_id = command_parts[1]
+    # Create the inline buttons if any
+    inline_buttons = []
+    for label, url in buttons:
+        inline_buttons.append([InlineKeyboardButton(label, url=url)])
 
-    # Fetch channel data
-    channel_data = await get_channel_data(channel_id)
-    if not channel_data:
-        await message.reply(TEXTS["channel_not_found"], parse_mode=ParseMode.HTML)
-        return
+    # Prepare the message options
+    message_options = {
+        "parse_mode": parse_mode,
+        "disable_web_page_preview": link_preview == "off",
+        "reply_markup": InlineKeyboardMarkup(inline_buttons) if inline_buttons else None
+    }
 
-    await message.reply(TEXTS["channel_stats"].format(
-        channel_id=channel_data['channel_id'],
-        first_added_date=channel_data['first_added_date'],
-        member_count=channel_data['member_count'],
-        average_posts_per_day=channel_data['average_posts_per_day']
-    ), parse_mode=ParseMode.HTML)
+    # Send the post to the channel
+    await client.send_message(channel_id, message_text, **message_options)
 
-# Command to fetch user post data
-@Client.on_message(filters.command("cuserinfo"))
-async def cuserinfo(client, message):
-    if message.from_user.id not in ADMINS:
-        await message.reply(TEXTS["admin_only"], parse_mode=ParseMode.HTML)
-        return
-
-    command_parts = message.text.split()
-    if len(command_parts) < 2:
-        await message.reply(TEXTS["user_not_specified"], parse_mode=ParseMode.HTML)
-        return
-
-    user_id = int(command_parts[1])
-
-    # Fetch user post data
-    user_data = await get_user_post_data(user_id)
-    if not user_data:
-        await message.reply(TEXTS["user_not_found"], parse_mode=ParseMode.HTML)
-        return
-
-    # Format the user post data
-    post_details = "\n".join([f"Channel: {data['channel_id']} - Posts: {data['post_count']}" for data in user_data])
-
-    await message.reply(TEXTS["user_post_data"].format(user_id=user_id, posts=post_details), parse_mode=ParseMode.HTML)
-
-from pyrogram import Client, filters
-from pyrogram.enums import ParseMode
-import asyncio
-from plugins.Extra.Cscript import TEXTS  # Import the TEXTS dictionary
-
-@Client.on_message(filters.command("chelp"))
-async def chelp(client, message):
-    # Use the imported texts directly from TEXTS dictionary
-    m = await message.reply_sticker(TEXTS["STICKER_ID"])  # Send the sticker
-    await asyncio.sleep(2)  # Wait for 2 seconds
-    await m.delete()  # Delete the sticker message
-    await message.reply(TEXTS["HELP_TEXT"], parse_mode=ParseMode.HTML)  # Send the help text
-
-async def is_user_admin_or_owner(client, chat_id, user_id):
-    """
-    Check if the given user is an admin or the owner of a chat (channel or group).
-
-    Args:
-        client (Client): The Pyrogram client instance.
-        chat_id (str): The ID of the chat to check.
-        user_id (int): The ID of the user to check.
-
-    Returns:
-        bool: True if the user is an admin or the owner, False otherwise.
-        dict: Error message if something goes wrong.
-    """
-    try:
-        # Get chat member information
-        member = await client.get_chat_member(chat_id, user_id)
-
-        # Check if the user is an admin or the owner
-        if member.status in {ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.OWNER}:
-            return True
-        return False
-    except UserNotParticipant:
-        return {"error": TEXTS["error_messages"]["UserNotParticipant"]}
-    except PeerIdInvalid:
-        return {"error": TEXTS["error_messages"]["PeerIdInvalid"]}
-    except ChatAdminRequired:
-        return {"error": TEXTS["error_messages"]["ChatAdminRequired"]}
-    except Exception as e:
-        return {"error": f"Unexpected error: {str(e)}"}
-
-
-def extract_buttons_from_caption(caption: str):
-    """
-    Extracts buttons in the format: {BUTTON_TEXT}-{URL}
-    """
-    button_links = []
-    pattern = r"\{(.*?)\}\-{(https?:\/\/[^\s]+)}"
-    
-    # Using re.findall() to find all matches
-    matches = re.findall(pattern, caption)
-    
-    for text, url in matches:
-        button_links.append([InlineKeyboardButton(text=text, url=url)])
-    
-    return button_links
-
-
-def remove_button_links(caption: str):
-    """
-    Removes button links in the format: {BUTTON_TEXT}-{URL} from the caption
-    """
-    pattern = r"\{(.*?)\}\-{(https?:\/\/[^\s]+)}"
-    cleaned_caption = re.sub(pattern, "", caption).strip()
-    return cleaned_caption
-
-def get_random_sticker():
-    return random.choice(TEXTS["random_sticker"])
