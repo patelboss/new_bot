@@ -20,7 +20,7 @@ sticker_ids = [
 #    return random.choice(sticker_ids)
 
 @Client.on_message(filters.command("cpost"))
-async def post_reply(client, message):
+async def cpost(client, message):
 #    random_sticker = get_random_sticker()
 #    m = await message.reply_sticker(random_sticker)
 #    await asyncio.sleep(1)
@@ -115,7 +115,7 @@ async def post_reply(client, message):
 
 
 @Client.on_message(filters.command("ppost"))
-async def post_reply(client, message):
+async def private_cpost(client, message):
 #    random_sticker = get_random_sticker()
 #    m = await message.reply_sticker(random_sticker)
 #    await asyncio.sleep(1)
