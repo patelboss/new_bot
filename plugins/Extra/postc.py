@@ -174,6 +174,7 @@ from database.stats import save_post_data, get_user_channels, delete_post_data, 
 
 IST = timezone('Asia/Kolkata')
 
+# Handle the post command - allow users to select a message they want to post
 @Client.on_message(filters.command('post'))
 async def post_command(client, message):
     user_id = message.from_user.id
@@ -188,9 +189,7 @@ async def post_command(client, message):
     # Ask user to reply to the message they want to post
     await message.reply("Please reply to the message you want to post in your channel(s).")
 
-#### **2. Handle Reply to Message for Posting**
-
-```python
+# Handle the reply to message for posting - user chooses channels
 @Client.on_message(filters.reply)
 async def handle_reply_for_post(client, message):
     user_id = message.from_user.id
@@ -202,56 +201,70 @@ async def handle_reply_for_post(client, message):
         await message.reply("You haven't connected any channels yet. Please add a channel using /add_channel.")
         return
 
-    # Create inline buttons to select a channel
-    inline_buttons = [
-        [InlineKeyboardButton("Post to All", callback_data="post_to_all")]
-    ]
-    
-    # Add buttons for each connected channel
+    # Create inline buttons for each connected channel
+    inline_buttons = []
     for channel in connected_channels:
-        inline_buttons.append([InlineKeyboardButton(f"Post to {channel['name']}", callback_data=f"post_{channel['id']}")])
-    
-    # Send the inline keyboard to select a channel
-    await message.reply("Choose a channel to post this message to:", reply_markup=InlineKeyboardMarkup(inline_buttons))
+        inline_buttons.append([InlineKeyboardButton(f"Post to {channel}", callback_data=f"post_to_{channel}")])
 
-#### **3. Handle Posting to Selected Channel**
+    inline_buttons.append([InlineKeyboardButton("Post to All", callback_data="post_to_all")])
 
-```python
-@Client.on_callback_query(filters.regex(r"^post_"))
+    # Create the inline keyboard markup
+    reply_markup = InlineKeyboardMarkup(inline_buttons)
+
+    # Send a message asking user to choose a channel to post
+    await message.reply("Please choose the channel(s) to post this message to:", reply_markup=reply_markup)
+
+# Handle user selecting a channel to post to
+@Client.on_callback_query(filters.regex("post_to_"))
 async def post_to_channel(client, callback_query):
     user_id = callback_query.from_user.id
-    message = callback_query.message.reply_to_message  # Get the original message to post
-    
-    channel_id = callback_query.data.split("_")[1]
-    
-    # Check if the user is allowed to post in the selected channel
-    if not await is_user_connected_to_channel(user_id, channel_id):  # Assuming this function checks the connection
-        await callback_query.answer("You are not connected to this channel. Please add it first.")
-        return
-    
-    # Send the post to the selected channel
-    sent_message = await client.send_message(channel_id, message.text, parse_mode="Markdown")
-    
-    # Save the post data to the database
-    post_data = {
-        "user_id": user_id,
-        "channel_id": channel_id,
-        "message_id": sent_message.message_id,
-        "original_message_id": message.message_id,
-        "timestamp": datetime.now(IST),
-        "edit_timestamp": datetime.now(IST) + timedelta(hours=6),  # Set to auto delete after 6 hours
-    }
-    await save_post_data(post_data)
-    
-    # Add buttons for editing and deleting, but disable them after 6 hours
-    inline_buttons = [
-        [InlineKeyboardButton("Edit", callback_data=f"edit_{sent_message.message_id}")],
-        [InlineKeyboardButton("Delete", callback_data=f"delete_{sent_message.message_id}")]
-    ]
-    
-    await callback_query.answer("Post sent!")
-    await callback_query.message.reply("Your message was posted!", reply_markup=InlineKeyboardMarkup(inline_buttons))
+    channel_id = callback_query.data.split("_")[2]  # Extract channel ID from callback data
 
+    # Get the message user is replying to
+    replied_message = callback_query.message.reply_to_message
+    if not replied_message:
+        await callback_query.answer("No message to post.")
+        return
+
+    message_text = replied_message.text or replied_message.caption
+
+    # Get template data
+    template_data = await db.templates.find_one({'user_id': user_id})
+    parse_mode = template_data['parse_mode'] if template_data else "Markdown"
+    privacy_mode = template_data['privacy_mode'] if template_data else "off"
+    link_preview = template_data['link_preview'] if template_data else "off"
+    buttons = template_data['buttons'] if template_data else []
+
+    # Create inline buttons if any
+    inline_buttons = [[InlineKeyboardButton(label, url=url) for label, url in buttons]]
+
+    # Prepare the message options
+    message_options = {
+        "parse_mode": parse_mode,
+        "disable_web_page_preview": link_preview == "off",
+        "reply_markup": InlineKeyboardMarkup(inline_buttons) if inline_buttons else None
+    }
+
+    # Send the post to the selected channel
+    try:
+        await client.send_message(channel_id, message_text, **message_options)
+        await callback_query.answer(f"Message posted to {channel_id} successfully!")
+    except Exception as e:
+        await callback_query.answer(f"Error posting to {channel_id}: {str(e)}")
+
+# Function to save post data to the database
+async def save_post_data(user_id, channel_id, message_id, message_text):
+    try:
+        post_data = {
+            "user_id": user_id,
+            "channel_id": channel_id,
+            "message_id": message_id,
+            "message_text": message_text,
+            "date": datetime.now(IST)
+        }
+        await db.posts.insert_one(post_data)
+    except Exception as e:
+        print(f"Error saving post data: {str(e)}")
 #### **4. Broadcast Functionality (Post to All Channels)**
 
 ```python
