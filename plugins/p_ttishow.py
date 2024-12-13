@@ -302,7 +302,7 @@ async def list_chats(bot, message):
     # Send the .txt file to the user
     await message.reply_document('chats.txt', caption="List Of Chats")
     
-@Client.on_message(filters.command("getfileid") & (filters.reply | filters.channel))
+@Client.on_message(filters.command("getfileid") & (filters.reply))
 async def get_file_id(bot, message):
     # Check if the message is a reply with media
     if message.reply_to_message:
