@@ -6,8 +6,8 @@ from database.stats import save_user_post_data, save_channel_stats, get_channel_
 from info import ADMINS
 # ------------------------ Command Handler ------------------------
 
-@Client.on_message(filters.command("cpost"))
-async def cpost(client, message):
+@Client.on_message(filters.command("ppost"))
+async def ppost(client, message):
     command_parts = message.text.split()
     
     if len(command_parts) < 2 or not message.reply_to_message:
@@ -46,7 +46,8 @@ async def cpost(client, message):
                 caption=caption_without_buttons,
                 parse_mode=ParseMode.MARKDOWN,
                 reply_markup=reply_markup,
-                disable_web_page_preview=True
+                disable_web_page_preview=True,
+                protect_content=True
             )
         elif replied_message.video:
             await client.send_video(
@@ -55,7 +56,8 @@ async def cpost(client, message):
                 caption=caption_without_buttons,
                 parse_mode=ParseMode.MARKDOWN,
                 reply_markup=reply_markup,
-                disable_web_page_preview=True
+                disable_web_page_preview=True,
+                protect_content=True
             )
         elif replied_message.document:
             await client.send_document(
@@ -64,7 +66,8 @@ async def cpost(client, message):
                 caption=caption_without_buttons,
                 parse_mode=ParseMode.MARKDOWN,
                 reply_markup=reply_markup,
-                disable_web_page_preview=True
+                disable_web_page_preview=True,
+                protect_content=True
             )
         elif replied_message.text:
             await client.send_message(
@@ -72,20 +75,25 @@ async def cpost(client, message):
                 text=caption_without_buttons,
                 parse_mode=ParseMode.MARKDOWN,
                 reply_markup=reply_markup,
-                disable_web_page_preview=True
+                disable_web_page_preview=True,
+                protect_content=True
+                
             )
         else:
             await message.reply(TEXTS["unsupported_media"], parse_mode=ParseMode.HTML)
 
         # Save user post data and channel stats
+        channel_url = f"https://t.me/{channel_id}"  # Assuming the URL is derived from the channel ID
         await save_user_post_data(message.from_user.id, channel_id)
-        await save_channel_stats(channel_id, message.from_user.id)
+        await save_channel_stats(channel_id, message.from_user.id, url=channel_url)
 
         await message.reply(TEXTS["post_success"].format(channel_id=channel_id), parse_mode=ParseMode.HTML)
     except Exception as e:
         await message.reply(TEXTS["failed_to_post"].format(error=str(e)), parse_mode=ParseMode.HTML)
 
-@Client.on_message(filters.command("ppost"))
+
+
+@Client.on_message(filters.command("cpost"))
 async def cpost(client, message):
     command_parts = message.text.split()
     
@@ -164,7 +172,7 @@ async def cpost(client, message):
         await message.reply(TEXTS["post_success"].format(channel_id=channel_id), parse_mode=ParseMode.HTML)
     except Exception as e:
         await message.reply(TEXTS["failed_to_post"].format(error=str(e)), parse_mode=ParseMode.HTML)
-
+                
 # Command to fetch channel stats
 @Client.on_message(filters.command("cstats"))
 async def cstats(client, message):
