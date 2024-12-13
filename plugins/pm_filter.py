@@ -3103,7 +3103,7 @@ async def auto_filter(client, name, msg, reply_msg, ai_search, spoll=False):
             await message.delete()
 
 import logging
-
+from rapidfuzz import fuzz, process
 # Configure logging
 logger = logging.getLogger("advantage_spell_chok")
 logger.setLevel(logging.DEBUG)
@@ -3130,7 +3130,7 @@ async def advantage_spell_chok(client, name, msg, reply_msg, vj_search):
     settings = await get_settings(msg.chat.id)
     logger.debug(f"Chat settings: {settings}")
 
-    # Process the query string
+    # Process the query string with enhanced logging
     query = re.sub(
         r"\b(pl(i|e)*?(s|z+|ease|se|ese|(e+)s(e)?)|((send|snd|giv(e)?|gib)(\sme)?)|movie(s)?|new|latest|br((o|u)h?)*|^h(e|a)?(l)*(o)*|mal(ayalam)?|t(h)?amil|file|that|find|und(o)*|kit(t(i|y)?)?o(w)?|thar(u)?(o)*w?|kittum(o)*|aya(k)*(um(o)*)?|full\smovie|any(one)|with\ssubtitle(s)?)",
         "", msg.text, flags=re.IGNORECASE
@@ -3140,6 +3140,7 @@ async def advantage_spell_chok(client, name, msg, reply_msg, vj_search):
     # Fetch movie data
     try:
         movies = await get_poster(mv_rqst, bulk=True)
+        logger.info(f"Fetched {len(movies)} movies for query: {mv_rqst}")
     except Exception as e:
         logger.error(f"Error fetching movies: {e}")
         reqst_gle = mv_rqst.replace(" ", "+")
@@ -3159,19 +3160,24 @@ async def advantage_spell_chok(client, name, msg, reply_msg, vj_search):
     SPELL_CHECK[mv_id] = movielist
     logger.info(f"Fetched movie list: {movielist}")
 
+    # Enhanced matching logic using fuzzy matching
     if AI_SPELL_CHECK and vj_search:
+        logger.debug("AI Spell Check enabled. Attempting to find the best match.")
         vj_search_new = False
-        vj_ai_msg = await safe_edit_text(reply_msg, "<b><i>Advance Ai Try To Find Your Movie With Your Wrong Spelling.</i></b>")
+        vj_ai_msg = await safe_edit_text(reply_msg, "<b><i>Advanced AI is trying to find the best match for your request.</i></b>")
+        matched_movie = None
         for techvj in movielist:
-            try:
-                mv_rqst = mv_rqst.capitalize()
-            except Exception as e:
-                logger.warning(f"Error capitalizing movie request: {e}")
-            if mv_rqst.startswith(techvj[0]):
-                logger.info(f"AI processing matched movie: {techvj}")
-                await auto_filter(client, techvj, msg, reply_msg, vj_search_new)
+            ratio = fuzz.ratio(mv_rqst.lower(), techvj.lower())
+            logger.debug(f"Comparing '{mv_rqst}' with '{techvj}', similarity ratio: {ratio}")
+            if ratio > 70:  # Define a threshold for a good match
+                matched_movie = techvj
+                logger.info(f"Best match found: {matched_movie} with ratio: {ratio}")
                 break
+
+        if matched_movie:
+            await auto_filter(client, matched_movie, msg, reply_msg, vj_search_new)
         else:
+            logger.warning(f"No suitable match found for '{mv_rqst}'. Redirecting to Google search.")
             reqst_gle = mv_rqst.replace(" ", "+")
             button = [
                 [InlineKeyboardButton("Gᴏᴏɢʟᴇ", url=f"https://www.google.com/search?q={reqst_gle}")],
