@@ -10,6 +10,8 @@ from database.ia_filterdb import save_file
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from utils import temp
 import re
+from pyrogram import InlineKeyboardButton, InlineKeyboardMarkup
+import time  # Importing the time module
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 lock = asyncio.Lock()
@@ -68,7 +70,7 @@ async def index_files(bot, query):
 async def index_command(bot, message):
     # Check if the command is a reply to a forwarded message
     if not message.reply_to_message:
-        return await message.reply("Please reply to a forwarded message or a valid link to use the /index command.")
+        return await message.reply("Please reply to a forwarded message to use the /index command.")
     
     # Process the replied message
     replied_msg = message.reply_to_message
@@ -80,7 +82,7 @@ async def index_command(bot, message):
             regex = re.compile("(https://)?(t\.me/|telegram\.me/|telegram\.dog/)(c/)?(\d+|[a-zA-Z_0-9]+)/(\d+)$")
             match = regex.match(replied_msg.text)
             if not match:
-                return await message.reply("Invalid link. Please ensure it's a valid Telegram link.")
+                return await message.reply(f"<b>This is link but i can't join by this.\n\nplease add me in channel and send me any media file then reply /index</b>", parse_mode=ParseMode.HTML)
 
             chat_id = match.group(4)
             last_msg_id = int(match.group(5))
@@ -91,13 +93,13 @@ async def index_command(bot, message):
             last_msg_id = replied_msg.forward_from_message_id
             chat_id = replied_msg.forward_from_chat.username or replied_msg.forward_from_chat.id
         else:
-            return await message.reply("Unsupported message type. Please reply to a valid forwarded message or link.")
+            return await message.reply(f"<b>Unsupported message type. Please reply to a valid forwarded message or link.</b>", parse_mode=ParseMode.HTML)
 
         # Check bot permissions and chat validity
         try:
             await bot.get_chat(chat_id)
         except ChannelInvalid:
-            return await message.reply("This may be a private channel/group. Make me an admin over there to index the files.")
+            return await message.reply(f"<b>This may be a private channel/group. Make me an admin over there to index the files.</b>", parse_mode=ParseMode.HTML)
         except (UsernameInvalid, UsernameNotModified):
             return await message.reply("Invalid Link specified.")
         except Exception as e:
@@ -108,10 +110,10 @@ async def index_command(bot, message):
         try:
             k = await bot.get_messages(chat_id, last_msg_id)
         except:
-            return await message.reply("Make sure I am an admin in the channel, if the channel is private.")
+            return await message.reply(f"<b>Make sure I am an admin in the channel, if the channel is private.</b>", parse_mode=ParseMode.HTML)
 
         if k.empty:
-            return await message.reply("This may be a group, and I am not an admin of the group.")
+            return await message.reply(f"<b> I am not an admin of the group.</b>", parse_mode=ParseMode.HTML)
 
         # Handle admin request or send to moderators
         if message.from_user.id in ADMINS:
@@ -121,7 +123,7 @@ async def index_command(bot, message):
             ]
             reply_markup = InlineKeyboardMarkup(buttons)
             return await message.reply(
-                f"Do you want to index this Channel/Group?\n\nChat ID/Username: <code>{chat_id}</code>\nLast Message ID: <code>{last_msg_id}</code>",
+                f"<b>Do you want to index this Channel/Group?\n\nChat ID/Username: <code>{chat_id}</code>\nLast Message ID: <code>{last_msg_id}</code></b>", parse_mode=ParseMode.HTML,
                 reply_markup=reply_markup
             )
 
@@ -129,7 +131,7 @@ async def index_command(bot, message):
             try:
                 link = (await bot.create_chat_invite_link(chat_id)).invite_link
             except ChatAdminRequired:
-                return await message.reply("Make sure I am an admin in the chat and have permission to invite users.")
+                return await message.reply(f"<b>Make sure I am an admin in the chat and have permission to invite users.</b>", parse_mode=ParseMode.HTML)
         else:
             link = f"@{replied_msg.forward_from_chat.username}"
 
@@ -143,9 +145,9 @@ async def index_command(bot, message):
             f"#IndexRequest\n\nBy: {message.from_user.mention} (<code>{message.from_user.id}</code>)\nChat ID/Username: <code>{chat_id}</code>\nLast Message ID: <code>{last_msg_id}</code>\nInviteLink: {link}",
             reply_markup=reply_markup
         )
-        return await message.reply("Thank you for the contribution. Wait for my moderators to verify the files.")
+        return await message.reply(f"<b>Thank you for the contribution. Wait for my moderators to verify the files.</b>", parse_mode=ParseMode.HTML)
     else:
-        return await message.reply("Please reply to a forwarded message or a valid link to use the /index command.")
+        return await message.reply(f"<b>Please reply to a forwarded message or a valid link to use the /index command.</b>", parse_mode=ParseMode.HTML)
 
 
 @Client.on_message(filters.command('setskip') & filters.user(ADMINS))
