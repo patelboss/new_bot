@@ -35,7 +35,7 @@ async def index_files(bot, query):
     if raju == 'reject':
         await query.message.delete()
         await bot.send_message(int(from_user),
-                               f'<b>Your Submission for indexing {chat} has been declined by our moderators.\nThis is may be because your channel not have media file\n\nIf you have anything to tell admin \ntype message and reply that message by /feedback<b>', parse_mode=ParseMode.HTML
+                               f'<b>Your Submission for indexing {chat} has been declined by our moderators.\nThis is may be because your channel not have media file\n\nIf you have anything to tell admin \ntype message and reply that message by /feedback<b>', parse_mode=ParseMode.HTML,
                                reply_to_message_id=int(lst_msg_id))
         return
 
