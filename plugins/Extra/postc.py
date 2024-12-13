@@ -166,3 +166,170 @@ async def send_post_with_template(client, channel_id, message_text, user_id):
     # Send the post to the channel
     await client.send_message(channel_id, message_text, **message_options)
 
+from pyrogram import Client, filters
+from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from datetime import datetime, timedelta
+from pytz import timezone
+from database import save_post_data, get_user_channels, delete_post_data, update_post_data
+
+IST = timezone('Asia/Kolkata')
+
+@Client.on_message(filters.command('post'))
+async def post_command(client, message):
+    user_id = message.from_user.id
+    
+    # Check if the user has any connected channels
+    connected_channels = await get_user_channels(user_id)  # Assuming this function returns the list of connected channels
+    
+    if not connected_channels:
+        await message.reply("You haven't connected any channels yet. Please add a channel using /add_channel.")
+        return
+
+    # Ask user to reply to the message they want to post
+    await message.reply("Please reply to the message you want to post in your channel(s).")
+
+#### **2. Handle Reply to Message for Posting**
+
+```python
+@Client.on_message(filters.reply)
+async def handle_reply_for_post(client, message):
+    user_id = message.from_user.id
+    
+    # Check if the user has any connected channels
+    connected_channels = await get_user_channels(user_id)
+    
+    if not connected_channels:
+        await message.reply("You haven't connected any channels yet. Please add a channel using /add_channel.")
+        return
+
+    # Create inline buttons to select a channel
+    inline_buttons = [
+        [InlineKeyboardButton("Post to All", callback_data="post_to_all")]
+    ]
+    
+    # Add buttons for each connected channel
+    for channel in connected_channels:
+        inline_buttons.append([InlineKeyboardButton(f"Post to {channel['name']}", callback_data=f"post_{channel['id']}")])
+    
+    # Send the inline keyboard to select a channel
+    await message.reply("Choose a channel to post this message to:", reply_markup=InlineKeyboardMarkup(inline_buttons))
+
+#### **3. Handle Posting to Selected Channel**
+
+```python
+@Client.on_callback_query(filters.regex(r"^post_"))
+async def post_to_channel(client, callback_query):
+    user_id = callback_query.from_user.id
+    message = callback_query.message.reply_to_message  # Get the original message to post
+    
+    channel_id = callback_query.data.split("_")[1]
+    
+    # Check if the user is allowed to post in the selected channel
+    if not await is_user_connected_to_channel(user_id, channel_id):  # Assuming this function checks the connection
+        await callback_query.answer("You are not connected to this channel. Please add it first.")
+        return
+    
+    # Send the post to the selected channel
+    sent_message = await client.send_message(channel_id, message.text, parse_mode="Markdown")
+    
+    # Save the post data to the database
+    post_data = {
+        "user_id": user_id,
+        "channel_id": channel_id,
+        "message_id": sent_message.message_id,
+        "original_message_id": message.message_id,
+        "timestamp": datetime.now(IST),
+        "edit_timestamp": datetime.now(IST) + timedelta(hours=6),  # Set to auto delete after 6 hours
+    }
+    await save_post_data(post_data)
+    
+    # Add buttons for editing and deleting, but disable them after 6 hours
+    inline_buttons = [
+        [InlineKeyboardButton("Edit", callback_data=f"edit_{sent_message.message_id}")],
+        [InlineKeyboardButton("Delete", callback_data=f"delete_{sent_message.message_id}")]
+    ]
+    
+    await callback_query.answer("Post sent!")
+    await callback_query.message.reply("Your message was posted!", reply_markup=InlineKeyboardMarkup(inline_buttons))
+
+#### **4. Broadcast Functionality (Post to All Channels)**
+
+```python
+@Client.on_callback_query(filters.regex(r"^post_to_all"))
+async def post_to_all_channels(client, callback_query):
+    user_id = callback_query.from_user.id
+    message = callback_query.message.reply_to_message  # Get the original message to post
+    
+    connected_channels = await get_user_channels(user_id)  # Get all connected channels
+    
+    if not connected_channels:
+        await callback_query.answer("You don't have any connected channels to post to.")
+        return
+
+    # Send the message to all channels
+    for channel in connected_channels:
+        sent_message = await client.send_message(channel['id'], message.text, parse_mode="Markdown")
+        
+        # Save the post data in the database
+        post_data = {
+            "user_id": user_id,
+            "channel_id": channel['id'],
+            "message_id": sent_message.message_id,
+            "original_message_id": message.message_id,
+            "timestamp": datetime.now(IST),
+            "edit_timestamp": datetime.now(IST) + timedelta(hours=6),  # Set to auto delete after 6 hours
+        }
+        await save_post_data(post_data)
+    
+    await callback_query.answer("Post sent to all channels!")
+
+@Client.on_callback_query(filters.regex(r"^edit_"))
+async def edit_post(client, callback_query):
+    message_id = int(callback_query.data.split("_")[1])
+    
+    # Fetch post data from DB
+    post_data = await get_post_data(message_id)  # Get post data from the database
+    
+    # Ensure the post is within 6 hours of posting time
+    if datetime.now(IST) > post_data["edit_timestamp"]:
+        await callback_query.answer("This post cannot be edited after 6 hours.")
+        return
+
+    # Proceed to edit the post (e.g., prompt the user to send the updated message)
+    await callback_query.answer("You can now edit your post.")
+    await callback_query.message.reply("Send the new text to update your post:")
+
+@Client.on_message(filters.reply)
+async def handle_edit_message(client, message):
+    if message.reply_to_message and message.reply_to_message.text.startswith("Send the new text"):
+        # Edit the post in the channel
+        original_message_id = message.reply_to_message.text.split(":")[1]
+        updated_text = message.text
+        
+        post_data = await get_post_data_by_original_message_id(original_message_id)  # Get the original post data from DB
+        sent_message = await client.edit_message_text(post_data['channel_id'], post_data['message_id'], updated_text, parse_mode="Markdown")
+        
+        # Update the database with the new content
+        await update_post_data(post_data['message_id'], updated_text)
+        await message.reply("Your post has been updated!")
+
+@Client.on_callback_query(filters.regex(r"^delete_"))
+async def delete_post(client, callback_query):
+    message_id = int(callback_query.data.split("_")[1])
+    
+    # Fetch post data from DB
+    post_data = await get_post_data(message_id)  # Get post data from the database
+    
+    # Ensure the post is within 6 hours of posting time
+    if datetime.now(IST) > post_data["edit_timestamp"]:
+        await callback_query.answer("This post cannot be deleted after 6 hours.")
+        return
+
+    # Delete the post from the channel
+    await client.delete_messages(post_data['channel_id'], post_data['message_id'])
+    
+    # Remove the post data from the database
+    await delete_post_data(post_data['message_id'])
+    
+    await callback_query.answer("Your post has been deleted.")
+    
