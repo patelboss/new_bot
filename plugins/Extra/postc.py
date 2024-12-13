@@ -4,6 +4,13 @@ from pyrogram.enums import ParseMode
 from plugins.Extra.Cscript import TEXTS
 from database.stats import save_user_post_data, save_channel_stats, get_channel_data, get_user_post_data
 from info import ADMINS
+from pyrogram import Client, filters
+from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from pyrogram.enums import ParseMode, ChatMemberStatus
+from pyrogram.errors import UserNotParticipant, PeerIdInvalid, ChatAdminRequired
+from plugins.Extra.Cscript import TEXTS
+import random
+import re
 # ------------------------ Command Handler ------------------------
 
 @Client.on_message(filters.command("ppost"))
