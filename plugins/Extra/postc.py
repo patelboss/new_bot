@@ -3,7 +3,7 @@ from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from pyrogram.enums import ParseMode
 from plugins.Extra.Cscript import TEXTS
 from database.stats import save_user_post_data, save_channel_stats, get_channel_data, get_user_post_data
-
+from info import ADMINS
 # ------------------------ Command Handler ------------------------
 
 @Client.on_message(filters.command("cpost"))
@@ -80,6 +80,86 @@ async def cpost(client, message):
         # Save user post data and channel stats
         await save_user_post_data(message.from_user.id, channel_id)
         await save_channel_stats(channel_id, message.from_user.id)
+
+        await message.reply(TEXTS["post_success"].format(channel_id=channel_id), parse_mode=ParseMode.HTML)
+    except Exception as e:
+        await message.reply(TEXTS["failed_to_post"].format(error=str(e)), parse_mode=ParseMode.HTML)
+
+@Client.on_message(filters.command("ppost"))
+async def cpost(client, message):
+    command_parts = message.text.split()
+    
+    if len(command_parts) < 2 or not message.reply_to_message:
+        await message.reply(TEXTS["no_message_to_post"], parse_mode=ParseMode.HTML)
+        return
+
+    channel_id = command_parts[1]
+
+    if not channel_id.startswith("-100"):
+        await message.reply(TEXTS["invalid_channel_id"], parse_mode=ParseMode.HTML)
+        return
+
+    user_id = message.from_user.id
+    result = await is_user_admin_or_owner(client, channel_id, user_id)
+
+    if isinstance(result, bool):
+        if not result:
+            await message.reply(TEXTS["permission_denied"], parse_mode=ParseMode.HTML)
+            return
+    elif isinstance(result, dict) and "error" in result:
+        await message.reply(f"<b>{result['error']}</b>", parse_mode=ParseMode.HTML)
+        return
+
+    replied_message = message.reply_to_message
+    caption = replied_message.caption or replied_message.text or ""
+    
+    inline_buttons = extract_buttons_from_caption(caption)
+    caption_without_buttons = remove_button_links(caption)
+    reply_markup = InlineKeyboardMarkup(inline_buttons) if inline_buttons else None
+
+    try:
+        if replied_message.photo:
+            await client.send_photo(
+                chat_id=channel_id,
+                photo=replied_message.photo.file_id,
+                caption=caption_without_buttons,
+                parse_mode=ParseMode.MARKDOWN,
+                reply_markup=reply_markup,
+                disable_web_page_preview=True
+            )
+        elif replied_message.video:
+            await client.send_video(
+                chat_id=channel_id,
+                video=replied_message.video.file_id,
+                caption=caption_without_buttons,
+                parse_mode=ParseMode.MARKDOWN,
+                reply_markup=reply_markup,
+                disable_web_page_preview=True
+            )
+        elif replied_message.document:
+            await client.send_document(
+                chat_id=channel_id,
+                document=replied_message.document.file_id,
+                caption=caption_without_buttons,
+                parse_mode=ParseMode.MARKDOWN,
+                reply_markup=reply_markup,
+                disable_web_page_preview=True
+            )
+        elif replied_message.text:
+            await client.send_message(
+                chat_id=channel_id,
+                text=caption_without_buttons,
+                parse_mode=ParseMode.MARKDOWN,
+                reply_markup=reply_markup,
+                disable_web_page_preview=True
+            )
+        else:
+            await message.reply(TEXTS["unsupported_media"], parse_mode=ParseMode.HTML)
+
+        # Save user post data and channel stats
+        channel_url = f"https://t.me/{channel_id}"  # Assuming the URL is derived from the channel ID
+        await save_user_post_data(message.from_user.id, channel_id)
+        await save_channel_stats(channel_id, message.from_user.id, url=channel_url)
 
         await message.reply(TEXTS["post_success"].format(channel_id=channel_id), parse_mode=ParseMode.HTML)
     except Exception as e:
