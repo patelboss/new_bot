@@ -266,7 +266,7 @@ async def save_post_data(user_id, channel_id, message_id, message_text):
         print(f"Error saving post data: {str(e)}")
 #### **4. Broadcast Functionality (Post to All Channels)**
 
-```python
+#```python
 @Client.on_callback_query(filters.regex(r"^post_to_all"))
 async def post_to_all_channels(client, callback_query):
     user_id = callback_query.from_user.id
