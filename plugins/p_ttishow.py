@@ -17,18 +17,22 @@ async def save_group(bot, message):
     r_j_check = [u.id for u in message.new_chat_members]
     if temp.ME in r_j_check:
         if not await db.get_chat(message.chat.id):
-            total=await bot.get_chat_members_count(message.chat.id)
-            r_j = message.from_user.mention if message.from_user else "Anonymous" 
-            await bot.send_message(LOG_CHANNEL, script.LOG_TEXT_G.format(message.chat.title, message.chat.id, total, r_j))       
+            total = await bot.get_chat_members_count(message.chat.id)
+            r_j = message.from_user.mention if message.from_user else "Anonymous"
+            await bot.send_message(
+                LOG_CHANNEL,
+                script.LOG_TEXT_G.format(message.chat.title, message.chat.id, total, r_j)
+            )
             await db.add_chat(message.chat.id, message.chat.title)
         if message.chat.id in temp.BANNED_CHATS:
-            # Inspired from a boat of a banana tree
+            # Handle banned chats
             buttons = [[
                 InlineKeyboardButton('Support', url=f'https://t.me/{SUPPORT_CHAT}')
             ]]
-            reply_markup=InlineKeyboardMarkup(buttons)
+            reply_markup = InlineKeyboardMarkup(buttons)
             k = await message.reply(
-                text='<b>CHAT NOT ALLOWED 🐞\n\nMy admins has restricted me from working here ! If you want to know more about it contact support..</b>',
+                text='<b>CHAT NOT ALLOWED 🐞\n\nMy admins have restricted me from working here! '
+                     'If you want to know more about it, contact support.</b>',
                 reply_markup=reply_markup,
             )
 
@@ -39,15 +43,16 @@ async def save_group(bot, message):
             await bot.leave_chat(message.chat.id)
             return
         buttons = [[
-                    InlineKeyboardButton('Sᴜᴘᴘᴏʀᴛ Gʀᴏᴜᴘ', url=GRP_LNK),
-                    InlineKeyboardButton('Uᴘᴅᴀᴛᴇs Cʜᴀɴɴᴇʟ', url=CHNL_LNK)
-                 ],[
-                    InlineKeyboardButton("Bᴏᴛ Oᴡɴᴇʀ", url="t.me/Pankaj_jii")
-                  ]]
-        reply_markup=InlineKeyboardMarkup(buttons)
+            InlineKeyboardButton('Sᴜᴘᴘᴏʀᴛ Gʀᴏᴜᴘ', url=GRP_LNK),
+            InlineKeyboardButton('Uᴘᴅᴀᴛᴇs Cʜᴀɴɴᴇʟ', url=CHNL_LNK)
+        ], [
+            InlineKeyboardButton("Bᴏᴛ Oᴡɴᴇʀ", url="t.me/Pankaj_jii")
+        ]]
+        reply_markup = InlineKeyboardMarkup(buttons)
         await message.reply_text(
-            text=f"<b>Thankyou For Adding Me In {message.chat.title} ❣️\n\nIf you have any questions & doubts about using me contact support.</b>",
-            reply_markup=reply_markup)
+            text=f"<b>Thank you for adding me to {message.chat.title} ❣️\n\nIf you have any questions or doubts about using me, contact support.</b>",
+            reply_markup=reply_markup
+        )
     else:
         settings = await get_settings(message.chat.id)
         if settings["welcome"]:
@@ -57,18 +62,19 @@ async def save_group(bot, message):
                         await (temp.MELCOW['welcome']).delete()
                     except:
                         pass
+                # Replace MELCOW_VID with the file ID stored in settings
                 temp.MELCOW['welcome'] = await message.reply_video(
-                                                 video=(MELCOW_VID),
-                                                 caption=(script.MELCOW_ENG.format(u.mention, message.chat.title)),
-                                                 reply_markup=InlineKeyboardMarkup(
-                                                                         [[
-                                                                           InlineKeyboardButton('Sᴜᴘᴘᴏʀᴛ Gʀᴏᴜᴘ', url=GRP_LNK),
-                                                                           InlineKeyboardButton('Uᴘᴅᴀᴛᴇs Cʜᴀɴɴᴇʟ', url=CHNL_LNK)
-                                                                        ],[
-                                                                           InlineKeyboardButton("Bᴏᴛ Oᴡɴᴇʀ", url="t.me/Pankaj_jii")
-                                                                         ]]
-                                                 ),
-                                                 parse_mode=enums.ParseMode.HTML
+                    video=settings["WELCOME_VIDEO_ID"],  # Use file ID here
+                    caption=(script.MELCOW_ENG.format(u.mention, message.chat.title)),
+                    reply_markup=InlineKeyboardMarkup(
+                        [[
+                            InlineKeyboardButton('Sᴜᴘᴘᴏʀᴛ Gʀᴏᴜᴘ', url=GRP_LNK),
+                            InlineKeyboardButton('Uᴘᴅᴀᴛᴇs Cʜᴀɴɴᴇʟ', url=CHNL_LNK)
+                        ], [
+                            InlineKeyboardButton("Bᴏᴛ Oᴡɴᴇʀ", url="t.me/Pankaj_jii")
+                        ]]
+                    ),
+                    parse_mode=enums.ParseMode.HTML
                 )
                 
         if settings["auto_delete"]:
@@ -295,3 +301,39 @@ async def list_chats(bot, message):
 
     # Send the .txt file to the user
     await message.reply_document('chats.txt', caption="List Of Chats")
+    
+@Client.on_message(filters.command("getfileid") & (filters.reply))
+async def get_file_id(bot, message):
+    # Check if the message is a reply with media
+    if message.reply_to_message:
+        media = message.reply_to_message.video or \
+                message.reply_to_message.photo or \
+                message.reply_to_message.document or \
+                message.reply_to_message.audio or \
+                message.reply_to_message.voice
+        
+        if media:
+            file_id = media.file_id
+            file_type = type(media).__name__.capitalize()
+            await message.reply(
+                f"**File ID:** `{file_id}`\n"
+                f"**File Type:** {file_type}\n"
+                f"**File Size:** {media.file_size} bytes",
+                quote=True
+            )
+        else:
+            await message.reply("Please reply to a media file (video, photo, document, etc.) to get its file ID.", quote=True)
+    
+    # Handle direct media messages (e.g., channels without replies)
+    elif message.video or message.photo or message.document or message.audio or message.voice:
+        media = message.video or message.photo or message.document or message.audio or message.voice
+        file_id = media.file_id
+        file_type = type(media).__name__.capitalize()
+        await message.reply(
+            f"**File ID:** `{file_id}`\n"
+            f"**File Type:** {file_type}\n"
+            f"**File Size:** {media.file_size} bytes",
+            quote=True
+        )
+    else:
+        await message.reply("Please reply to a media file or send a media message directly to get its file ID.", quote=True)
