@@ -54,7 +54,7 @@ async def add_channel(client, message):
             first_added_date = datetime.now(IST)
 
             # Save to the database
-            await save_channel_stats(channel_id, first_added_date, total_users, message.from_user.id, link, top_words)
+            save_channel_stats(channel_id, first_added_date, total_users, message.from_user.id, link, top_words)
             
             # After successful addition, send instructions for posting
             await message.reply(f"Channel {channel_name} (ID: {channel_id}) added successfully!\n"
@@ -100,7 +100,7 @@ async def set_template(client, message):
             buttons.append((button_label, button_link))
 
     # Save the template to the database
-    await save_template_data(message.from_user.id, parse_mode, privacy_mode, link_preview, buttons)
+    save_template_data(message.from_user.id, parse_mode, privacy_mode, link_preview, buttons)
     
     await message.reply("Template updated successfully!")
 
@@ -179,7 +179,7 @@ async def post_command(client, message):
     user_id = message.from_user.id
     
     # Check if the user has any connected channels
-    connected_channels = await get_user_channels(user_id)  # Assuming this function returns the list of connected channels
+    connected_channels = get_user_channels(user_id)  # Assuming this function returns the list of connected channels
     
     if not connected_channels:
         await message.reply("You haven't connected any channels yet. Please add a channel using /add_channel.")
@@ -194,7 +194,7 @@ async def handle_reply_for_post(client, message):
     user_id = message.from_user.id
     
     # Check if the user has any connected channels
-    connected_channels = await get_user_channels(user_id)
+    connected_channels = get_user_channels(user_id)
     
     if not connected_channels:
         await message.reply("You haven't connected any channels yet. Please add a channel using /add_channel.")
@@ -272,7 +272,7 @@ async def post_to_all_channels(client, callback_query):
     user_id = callback_query.from_user.id
     message = callback_query.message.reply_to_message  # Get the original message to post
     
-    connected_channels = await get_user_channels(user_id)  # Get all connected channels
+    connected_channels = get_user_channels(user_id)  # Get all connected channels
     
     if not connected_channels:
         await callback_query.answer("You don't have any connected channels to post to.")
@@ -291,7 +291,7 @@ async def post_to_all_channels(client, callback_query):
             "timestamp": datetime.now(IST),
             "edit_timestamp": datetime.now(IST) + timedelta(hours=6),  # Set to auto delete after 6 hours
         }
-        await save_post_data(post_data)
+        save_post_data(post_data)
     
     await callback_query.answer("Post sent to all channels!")
 
@@ -300,7 +300,7 @@ async def edit_post(client, callback_query):
     message_id = int(callback_query.data.split("_")[1])
     
     # Fetch post data from DB
-    post_data = await get_post_data(message_id)  # Get post data from the database
+    post_data = get_post_data(message_id)  # Get post data from the database
     
     # Ensure the post is within 6 hours of posting time
     if datetime.now(IST) > post_data["edit_timestamp"]:
@@ -318,7 +318,7 @@ async def handle_edit_message(client, message):
         original_message_id = message.reply_to_message.text.split(":")[1]
         updated_text = message.text
         
-        post_data = await get_post_data_by_original_message_id(original_message_id)  # Get the original post data from DB
+        post_data = get_post_data(message_id)  # Get the original post data from DB
         sent_message = await client.edit_message_text(post_data['channel_id'], post_data['message_id'], updated_text, parse_mode="Markdown")
         
         # Update the database with the new content
@@ -330,7 +330,7 @@ async def delete_post(client, callback_query):
     message_id = int(callback_query.data.split("_")[1])
     
     # Fetch post data from DB
-    post_data = await get_post_data(message_id)  # Get post data from the database
+    post_data = get_post_data(message_id)  # Get post data from the database
     
     # Ensure the post is within 6 hours of posting time
     if datetime.now(IST) > post_data["edit_timestamp"]:
