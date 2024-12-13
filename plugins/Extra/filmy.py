@@ -24,45 +24,75 @@ def get_random_sticker():
     return random.choice(sticker_ids)
 
 
-@Client.on_message(filters.command("tpost"))
-async def channel_post(client, message):
-    random_sticker = get_random_sticker()
-    try:
-        m = await message.reply_sticker(random_sticker)
-        await asyncio.sleep(1)
-        await m.delete()
-    except Exception as e:
-        await message.reply(f"Failed to send sticker: {e}")
-        return
+from pyrogram import Client
+from pyrogram.errors import UserNotParticipant, PeerIdInvalid, ChatAdminRequired
+from pyrogram.types import InlineKeyboardMarkup
+from pyrogram.enums import ChatMemberStatus, ParseMode
 
+async def is_user_admin_or_owner(client: Client, channel_id: str, user_id: int):
+    """
+    Check if the user is an admin or the owner of the channel.
+    Returns:
+        - True if the user is an admin or owner
+        - False if the user is neither admin nor owner
+        - Error message if an exception occurs
+    """
+    try:
+        # Get the chat member information
+        member = await client.get_chat_member(channel_id, user_id)
+        
+        # Check if the member is an admin or the owner
+        if member.status in [ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.OWNER]:
+            return True
+        
+        return False
+
+    except UserNotParticipant:
+        return {"error": "Bot is not a member of the channel"}
+    
+    except PeerIdInvalid:
+        return {"error": "The bot's access to the channel is invalid. Please add the bot to the group again. If the bot is already in the group, try removing and re-adding it."}
+
+    except ChatAdminRequired:
+        return {"error": "The bot needs to be an admin in the group & channel to perform this action."}
+    
+    except Exception as e:
+        return {"error": f"An error occurred: {str(e)}"}
+
+@Client.on_message(filters.command("tpost"))
+async def cpost(client, message):
     command_parts = message.text.split()
     if len(command_parts) < 2 or not message.reply_to_message:
-        await message.reply("Provide a valid channel ID and reply to a message using /cpost <channel_id>.")
+        await message.reply(
+            "<b>Please provide a valid channel ID and reply to a message using /cpost <channel_id>.\nUse /chelp to know about formatting\nIf you Don't Know Your Channel Id\nJust Forward Me Any Message From Your Channel And Reply That Message /id .</b>", 
+            parse_mode=ParseMode.HTML
+        )
         return
 
     channel_id = command_parts[1]
+
     if not channel_id.startswith("-100"):
-        await message.reply("Invalid channel ID. It must start with '-100'.")
+        await message.reply(
+            "<b>Invalid channel ID. Please provide a valid channel ID starting with '-100'.</b>", 
+            parse_mode=ParseMode.HTML
+        )
         return
 
+    # Check if the user is admin or owner of the target channel
     user_id = message.from_user.id
+    result = await is_user_admin_or_owner(client, channel_id, user_id)
 
-    # Check if the bot is a member of the channel
-    try:
-        bot_member = await client.get_chat_member(channel_id, client.me.id)
-    except (ChannelInvalid, ChatAdminRequired) as e:
-        # Bot is not a member of the channel, ask user to add the bot
-        add_bot_button = InlineKeyboardButton("Add me to this channel", url=f"https://t.me/{client.me.username}?startgroup=new")
-        reply_markup = InlineKeyboardMarkup([[add_bot_button]])
-        await message.reply("I am not a member of this channel. Please add me first.", reply_markup=reply_markup)
-        return
-
-    if not await is_user_admin_or_owner(client, channel_id, user_id):
-        await message.reply("You don't have permission to post in this channel.")
+    if isinstance(result, bool):
+        if not result:
+            await message.reply("<b>You don't have permission to post in this channel.</b>", parse_mode=ParseMode.HTML)
+            return
+    elif isinstance(result, dict) and "error" in result:
+        await message.reply(f"<b>{result['error']}</b>", parse_mode=ParseMode.HTML)
         return
 
     replied_message = message.reply_to_message
     caption = replied_message.caption or replied_message.text or ""
+
     inline_buttons = extract_buttons_from_caption(caption)
     caption_without_buttons = remove_button_links(caption)
     reply_markup = InlineKeyboardMarkup(inline_buttons) if inline_buttons else None
@@ -74,7 +104,8 @@ async def channel_post(client, message):
                 photo=replied_message.photo.file_id,
                 caption=caption_without_buttons,
                 parse_mode=ParseMode.MARKDOWN,
-                reply_markup=reply_markup
+                reply_markup=reply_markup,
+                disable_web_page_preview=True
             )
         elif replied_message.video:
             await client.send_video(
@@ -82,7 +113,8 @@ async def channel_post(client, message):
                 video=replied_message.video.file_id,
                 caption=caption_without_buttons,
                 parse_mode=ParseMode.MARKDOWN,
-                reply_markup=reply_markup
+                reply_markup=reply_markup,
+                disable_web_page_preview=True
             )
         elif replied_message.document:
             await client.send_document(
@@ -90,38 +122,23 @@ async def channel_post(client, message):
                 document=replied_message.document.file_id,
                 caption=caption_without_buttons,
                 parse_mode=ParseMode.MARKDOWN,
-                reply_markup=reply_markup
+                reply_markup=reply_markup,
+                disable_web_page_preview=True
             )
         elif replied_message.text:
             await client.send_message(
                 chat_id=channel_id,
                 text=caption_without_buttons,
                 parse_mode=ParseMode.MARKDOWN,
-                reply_markup=reply_markup
+                reply_markup=reply_markup,
+                disable_web_page_preview=True
             )
         else:
-            await message.reply("Unsupported media type.")
+            await message.reply("<b>Unsupported media type to forward.</b>", parse_mode=ParseMode.HTML)
+
         await message.reply(f"Message posted to channel {channel_id} successfully!")
     except Exception as e:
-        await message.reply(f"Failed to post the message: {e}")
-
-
-async def is_user_admin_or_owner(client, channel_id, user_id):
-    """
-    Check if the user is an admin or the owner of the channel.
-    Returns True if the user is an admin or owner, False otherwise.
-    """
-    try:
-        # Get the chat member information
-        member = await client.get_chat_member(channel_id, user_id)
-        
-        # Check if the member is an admin or the owner
-        if member.status in [ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.OWNER]:
-            return True
-        return False
-    except Exception as e:
-        return False
-
+        await message.reply(f"Failed to post the message. Error: {str(e)}")
 
 def extract_buttons_from_caption(caption: str):
     """
