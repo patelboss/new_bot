@@ -192,7 +192,7 @@ async def index_files_to_db(lst_msg_id, chat, msg, bot):
             temp.CANCEL = False
 
             buttons = [
-                [InlineKeyboardButton("Cancel", callback_data=index_cancel)]
+                [InlineKeyboardButton("Cancel", callback_data='index_cancel')]
             ]
             reply_markup = InlineKeyboardMarkup(buttons)
 
