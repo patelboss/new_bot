@@ -19,7 +19,7 @@ sticker_ids = [
 #def get_random_sticker():
 #    return random.choice(sticker_ids)
 
-@Client.on_message(filters.command("cpost"))
+@Client.on_message(filters.command("tpost"))
 async def cpost(client, message):
 #    random_sticker = get_random_sticker()
 #    m = await message.reply_sticker(random_sticker)
