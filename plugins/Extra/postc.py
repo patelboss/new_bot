@@ -205,3 +205,33 @@ async def chelp(client, message):
     await asyncio.sleep(2)  # Wait for 2 seconds
     await m.delete()  # Delete the sticker message
     await message.reply(TEXTS["HELP_TEXT"], parse_mode=ParseMode.HTML)  # Send the help text
+
+async def is_user_admin_or_owner(client, chat_id, user_id):
+    """
+    Check if the given user is an admin or the owner of a chat (channel or group).
+
+    Args:
+        client (Client): The Pyrogram client instance.
+        chat_id (str): The ID of the chat to check.
+        user_id (int): The ID of the user to check.
+
+    Returns:
+        bool: True if the user is an admin or the owner, False otherwise.
+        dict: Error message if something goes wrong.
+    """
+    try:
+        # Get chat member information
+        member = await client.get_chat_member(chat_id, user_id)
+
+        # Check if the user is an admin or the owner
+        if member.status in {ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.OWNER}:
+            return True
+        return False
+    except UserNotParticipant:
+        return {"error": TEXTS["error_messages"]["UserNotParticipant"]}
+    except PeerIdInvalid:
+        return {"error": TEXTS["error_messages"]["PeerIdInvalid"]}
+    except ChatAdminRequired:
+        return {"error": TEXTS["error_messages"]["ChatAdminRequired"]}
+    except Exception as e:
+        return {"error": f"Unexpected error: {str(e)}"}
