@@ -22,7 +22,7 @@ def get_random_sticker():
     return random.choice(sticker_ids)
 
 
-@Client.on_message(filters.command("tpost"))
+@Client.on_message(filters.command("cpost"))
 async def channel_post(client, message):
     random_sticker = get_random_sticker()
     try:
