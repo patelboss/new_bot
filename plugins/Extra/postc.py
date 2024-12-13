@@ -3,7 +3,7 @@ from pyrogram.errors import ChatAdminRequired
 from pyrogram.enums import ChatMemberStatus
 from datetime import datetime
 from pytz import timezone
-from database import save_channel_stats, extract_common_words, save_template_data
+from database.stats import save_channel_stats, extract_common_words, save_template_data
 
 IST = timezone('Asia/Kolkata')
 
@@ -170,7 +170,7 @@ from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from datetime import datetime, timedelta
 from pytz import timezone
-from database import save_post_data, get_user_channels, delete_post_data, update_post_data
+from database.stats import save_post_data, get_user_channels, delete_post_data, update_post_data
 
 IST = timezone('Asia/Kolkata')
 
