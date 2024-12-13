@@ -6,6 +6,31 @@ TEXTS = {
     "user_not_specified": "<b>Please specify a user ID.</b>",
     "user_not_found": "<b>User not found.</b>",
     "user_post_data": "<b>User ID:</b> {user_id}\n\n{posts}",
+   
+    "invalid_channel_id": (
+        "<b>Invalid channel ID. Please provide a valid channel ID starting with '-100'.</b>"
+    ),
+    "permission_denied": (
+        "<b>You don't have permission to post in this channel.</b>"
+    ),
+    "no_message_to_post": (
+        "<b>Please provide a valid channel ID and reply to a message using /cpost <channel_id>.\n"
+        "Use /chelp to know about formatting.\n"
+        "If you don't know your Channel Id, just forward me any message from your channel and reply "
+        "to that message with /id.</b>"
+    ),
+    "failed_to_post": "<b>Failed to post the message. Error: {error}</b>",
+    "post_success": (
+        "<b>Message posted to channel {channel_id} successfully!</b>"
+    ),
+    "unsupported_media": "<b>Unsupported media type to forward.</b>",
+    "random_sticker": [
+        "CAACAgIAAxkBAAItAmdbY-9IY20HNfLFeeboOOex74M0AAL9AQACFkJrCqSvYaKm6vLJHgQ",
+        "CAACAgIAAxkBAAIs1GdbWBhGfsD2U3Z2pGiR-d64z08mAAJvAAPb234AAZlbUKh7k4B0HgQ",
+        "CAACAgIAAxkBAAIsz2dbV_286mg26Vx67MOWmyG-WvK7AAJtAAPb234AAXUe7IXy-0SlHgQ",
+        "CAACAgQAAxkBAAIs_mdbY-Zk1JR7yRLoWsi8NbJEMFerAALVGAACOqGIUIer-Up9iv5aHgQ",
+        "CAACAgQAAxkBAAIs-mdbY96brNo0bbqiAT0h9aHmGjfZAAISDgACQln9BFRvgD6jmKybHgQ"
+    ],
     "error_messages": {
         "UserNotParticipant": "Bot is not a member of the channel.",
         "PeerIdInvalid": (
