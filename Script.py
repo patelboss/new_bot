@@ -258,7 +258,10 @@ Nᴀᴍᴇ - {}"""
 
     TOP_ALRT_MSG = """Cʜᴇᴄᴋɪɴɢ Fᴏʀ Mᴏᴠɪᴇ Iɴ Dᴀᴛᴀʙᴀsᴇ..."""
 
-    MELCOW_ENG = """<b>Hᴇʟʟᴏ {} 😍, Aɴᴅ Wᴇʟᴄᴏᴍᴇ Tᴏ {} Gʀᴏᴜᴘ ❤️</b>"""
+    MELCOW_ENG = """
+    <b>Hᴇʟʟᴏ {} 😍 Welcome 🤗 to {}
+    Chaliye shuru karte hai 
+    Ab Aayega Majaa 🥳. </b>"""
 
     SHORTLINK_INFO = """
 
