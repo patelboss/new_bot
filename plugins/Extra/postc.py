@@ -3,7 +3,15 @@ from pyrogram.errors import ChatAdminRequired
 from pyrogram.enums import ChatMemberStatus
 from datetime import datetime
 from pytz import timezone
-from database.stats import save_channel_stats, extract_common_words, save_template_data
+from database.stats import save_channel_stats, save_template_data
+from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from pyrogram import Client, filters
+from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from datetime import datetime, timedelta
+from pytz import timezone
+from database.stats import save_post_data, get_user_channels, delete_post_data, update_post_data
+import re
+from collections import Counter
 
 IST = timezone('Asia/Kolkata')
 
@@ -59,8 +67,6 @@ async def add_channel(client, message):
             await message.reply(f"The bot does not have admin rights in the channel {channel_id}.")
         except Exception as e:
             await message.reply(f"Error while adding channel {channel_id}: {str(e)}")
-
-from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 @Client.on_message(filters.command("set_template"))
 async def set_template(client, message):
@@ -166,13 +172,6 @@ async def send_post_with_template(client, channel_id, message_text, user_id):
     # Send the post to the channel
     await client.send_message(channel_id, message_text, **message_options)
 
-from pyrogram import Client, filters
-from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
-from datetime import datetime, timedelta
-from pytz import timezone
-from database.stats import save_post_data, get_user_channels, delete_post_data, update_post_data
-
-IST = timezone('Asia/Kolkata')
 
 # Handle the post command - allow users to select a message they want to post
 @Client.on_message(filters.command('post'))
@@ -346,3 +345,24 @@ async def delete_post(client, callback_query):
     
     await callback_query.answer("Your post has been deleted.")
     
+
+def extract_common_words(posts):
+    # Combine all post texts into one large string
+    combined_text = " ".join([post.text for post in posts])
+    
+    # Remove non-alphanumeric characters and split text into words
+    words = re.findall(r'\b\w+\b', combined_text.lower())
+    
+    # Define a set of common stop words to exclude
+    stop_words = {"the", "and", "a", "to", "is", "of", "in", "for", "on", "it"}
+    
+    # Filter out stop words
+    filtered_words = [word for word in words if word not in stop_words]
+    
+    # Count frequency of each word
+    word_counts = Counter(filtered_words)
+    
+    # Get top 5 most common words
+    top_words = word_counts.most_common(5)
+    
+    return top_words
