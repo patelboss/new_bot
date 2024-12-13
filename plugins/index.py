@@ -10,7 +10,8 @@ from database.ia_filterdb import save_file
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from utils import temp
 import re
-
+from pyrogram import InlineKeyboardButton, InlineKeyboardMarkup
+import time  # Importing the time module
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 lock = asyncio.Lock()
@@ -65,71 +66,88 @@ async def index_files(bot, query):
     await index_files_to_db(int(lst_msg_id), chat, msg, bot)
 
 
-@Client.on_message((filters.forwarded | (filters.regex("(https://)?(t\.me/|telegram\.me/|telegram\.dog/)(c/)?(\d+|[a-zA-Z_0-9]+)/(\d+)$")) & filters.text) & filters.private & filters.incoming)
-async def send_for_index(bot, message):
-    if message.text:
-        regex = re.compile("(https://)?(t\.me/|telegram\.me/|telegram\.dog/)(c/)?(\d+|[a-zA-Z_0-9]+)/(\d+)$")
-        match = regex.match(message.text)
-        if not match:
-            return await message.reply('Invalid link')
-        
-        chat_id = match.group(4)
-        last_msg_id = int(match.group(5))
-        if chat_id.isnumeric():
-            chat_id = int(("-100" + chat_id))
+@Client.on_message(filters.command("index") & filters.private)
+async def index_command(bot, message):
+    # Check if the command is a reply to a forwarded message
+    if not message.reply_to_message:
+        return await message.reply("Please reply to a forwarded message or a valid link to use the /index command.")
     
-    elif message.forward_from_chat.type == enums.ChatType.CHANNEL:
-        last_msg_id = message.forward_from_message_id
-        chat_id = message.forward_from_chat.username or message.forward_from_chat.id
-    else:
-        return
+    # Process the replied message
+    replied_msg = message.reply_to_message
 
-    try:
-        await bot.get_chat(chat_id)
-    except ChannelInvalid:
-        return await message.reply('This may be a private channel / group. Make me an admin over there to index the files.')
-    except (UsernameInvalid, UsernameNotModified):
-        return await message.reply('Invalid Link specified.')
-    except Exception as e:
-        logger.exception(e)
-        return await message.reply(f'Errors - {e}')
+    # For forwarded messages or valid Telegram links
+    if replied_msg.forward_from_chat or replied_msg.text:
+        # Extract details from forwarded message or link
+        if replied_msg.text:
+            regex = re.compile("(https://)?(t\.me/|telegram\.me/|telegram\.dog/)(c/)?(\d+|[a-zA-Z_0-9]+)/(\d+)$")
+            match = regex.match(replied_msg.text)
+            if not match:
+                return await message.reply("Invalid link. Please ensure it's a valid Telegram link.")
 
-    try:
-        k = await bot.get_messages(chat_id, last_msg_id)
-    except:
-        return await message.reply('Make sure I am an admin in the channel, if the channel is private.')
+            chat_id = match.group(4)
+            last_msg_id = int(match.group(5))
+            if chat_id.isnumeric():
+                chat_id = int("-100" + chat_id)
 
-    if k.empty:
-        return await message.reply('This may be a group, and I am not an admin of the group.')
+        elif replied_msg.forward_from_chat.type == enums.ChatType.CHANNEL:
+            last_msg_id = replied_msg.forward_from_message_id
+            chat_id = replied_msg.forward_from_chat.username or replied_msg.forward_from_chat.id
+        else:
+            return await message.reply("Unsupported message type. Please reply to a valid forwarded message or link.")
 
-    if message.from_user.id in ADMINS:
+        # Check bot permissions and chat validity
+        try:
+            await bot.get_chat(chat_id)
+        except ChannelInvalid:
+            return await message.reply("This may be a private channel/group. Make me an admin over there to index the files.")
+        except (UsernameInvalid, UsernameNotModified):
+            return await message.reply("Invalid Link specified.")
+        except Exception as e:
+            logger.exception(e)
+            return await message.reply(f"Errors - {e}")
+
+        # Verify message ID exists
+        try:
+            k = await bot.get_messages(chat_id, last_msg_id)
+        except:
+            return await message.reply("Make sure I am an admin in the channel, if the channel is private.")
+
+        if k.empty:
+            return await message.reply("This may be a group, and I am not an admin of the group.")
+
+        # Handle admin request or send to moderators
+        if message.from_user.id in ADMINS:
+            buttons = [
+                [InlineKeyboardButton("Yes", callback_data=f"index#accept#{chat_id}#{last_msg_id}#{message.from_user.id}")],
+                [InlineKeyboardButton("close", callback_data="close_data")]
+            ]
+            reply_markup = InlineKeyboardMarkup(buttons)
+            return await message.reply(
+                f"Do you want to index this Channel/Group?\n\nChat ID/Username: <code>{chat_id}</code>\nLast Message ID: <code>{last_msg_id}</code>",
+                reply_markup=reply_markup
+            )
+
+        if type(chat_id) is int:
+            try:
+                link = (await bot.create_chat_invite_link(chat_id)).invite_link
+            except ChatAdminRequired:
+                return await message.reply("Make sure I am an admin in the chat and have permission to invite users.")
+        else:
+            link = f"@{replied_msg.forward_from_chat.username}"
+
         buttons = [
-            [InlineKeyboardButton('Yes', callback_data=f'index#accept#{chat_id}#{last_msg_id}#{message.from_user.id}')],
-            [InlineKeyboardButton('close', callback_data='close_data')]
+            [InlineKeyboardButton("Accept Index", callback_data=f"index#accept#{chat_id}#{last_msg_id}#{message.from_user.id}")],
+            [InlineKeyboardButton("Reject Index", callback_data=f"index#reject#{chat_id}#{message.id}#{message.from_user.id}")]
         ]
         reply_markup = InlineKeyboardMarkup(buttons)
-        return await message.reply(
-            f'Do you want to index this Channel/Group?\n\nChat ID/Username: <code>{chat_id}</code>\nLast Message ID: <code>{last_msg_id}</code>',
+        await bot.send_message(
+            LOG_CHANNEL,
+            f"#IndexRequest\n\nBy: {message.from_user.mention} (<code>{message.from_user.id}</code>)\nChat ID/Username: <code>{chat_id}</code>\nLast Message ID: <code>{last_msg_id}</code>\nInviteLink: {link}",
             reply_markup=reply_markup
         )
-
-    if type(chat_id) is int:
-        try:
-            link = (await bot.create_chat_invite_link(chat_id)).invite_link
-        except ChatAdminRequired:
-            return await message.reply('Make sure I am an admin in the chat and have permission to invite users.')
+        return await message.reply("Thank you for the contribution. Wait for my moderators to verify the files.")
     else:
-        link = f"@{message.forward_from_chat.username}"
-
-    buttons = [
-        [InlineKeyboardButton('Accept Index', callback_data=f'index#accept#{chat_id}#{last_msg_id}#{message.from_user.id}')],
-        [InlineKeyboardButton('Reject Index', callback_data=f'index#reject#{chat_id}#{message.id}#{message.from_user.id}')]
-    ]
-    reply_markup = InlineKeyboardMarkup(buttons)
-    await bot.send_message(LOG_CHANNEL,
-                           f'#IndexRequest\n\nBy: {message.from_user.mention} (<code>{message.from_user.id}</code>)\nChat ID/Username: <code>{chat_id}</code>\nLast Message ID: <code>{last_msg_id}</code>\nInviteLink: {link}',
-                           reply_markup=reply_markup)
-    await message.reply('Thank you for the contribution. Wait for my moderators to verify the files.')
+        return await message.reply("Please reply to a forwarded message or a valid link to use the /index command.")
 
 
 @Client.on_message(filters.command('setskip') & filters.user(ADMINS))
@@ -145,8 +163,6 @@ async def set_skip_number(bot, message):
     else:
         await message.reply("Give me a skip number.")
 
-
-import time  # Importing the time module
 
 # Function to format time in human-readable format: e.g., 1m 10s or 12h 20m 30s
 def format_time(seconds):
@@ -175,6 +191,17 @@ async def index_files_to_db(lst_msg_id, chat, msg, bot):
             current = temp.CURRENT
             temp.CANCEL = False
 
+            buttons = [
+                [InlineKeyboardButton("Cancel", callback_data="cancel_index")]
+            ]
+            reply_markup = InlineKeyboardMarkup(buttons)
+
+            # Initial message update with cancel button
+            await msg.edit(
+                "Starting to save files. Click 'Cancel' to stop.",
+                reply_markup=reply_markup
+            )
+
             async for message in bot.iter_messages(chat, lst_msg_id, temp.CURRENT):
                 if temp.CANCEL:
                     elapsed_time = round(time.time() - start_time)  # Calculate elapsed time
@@ -184,7 +211,8 @@ async def index_files_to_db(lst_msg_id, chat, msg, bot):
                         f"Duplicate Files Skipped: <code>{duplicate}</code>\nDeleted Messages Skipped: <code>{deleted}</code>\n"
                         f"Non-Media messages skipped: <code>{no_media + unsupported}</code> (Unsupported Media - `<code>{unsupported}</code>`)\n"
                         f"Errors Occurred: <code>{errors}</code>\n"
-                        f"Elapsed Time: <code>{formatted_time}</code>"
+                        f"Elapsed Time: <code>{formatted_time}</code>",
+                        reply_markup=None  # Remove cancel button after process is complete
                     )
                     break
 
@@ -207,7 +235,7 @@ async def index_files_to_db(lst_msg_id, chat, msg, bot):
                         retry_count = 0
                         while retry_count < 5:  # Retry logic for editing the message
                             try:
-                                await msg.edit_text(new_message_text)
+                                await msg.edit_text(new_message_text, reply_markup=reply_markup)
                                 last_message_text = new_message_text  # Update last message content
                                 break
                             except TimeoutError:
@@ -258,7 +286,7 @@ async def index_files_to_db(lst_msg_id, chat, msg, bot):
 
         except Exception as e:
             logger.exception(e)
-            await msg.edit(f"Error: {e}")
+            await msg.edit(f"Error: {e}", reply_markup=None)
         else:
             elapsed_time = round(time.time() - start_time)  # Calculate elapsed time
             formatted_time = format_time(elapsed_time)  # Format the time
@@ -268,5 +296,6 @@ async def index_files_to_db(lst_msg_id, chat, msg, bot):
                 f"Deleted Messages Skipped: <code>{deleted}</code>\n"
                 f"Non-Media messages skipped: <code>{no_media + unsupported}</code> (Unsupported Media - `<code>{unsupported}</code>`)\n"
                 f"Errors Occurred: <code>{errors}</code>\n"
-                f"Elapsed Time: <code>{formatted_time}</code>"
+                f"Elapsed Time: <code>{formatted_time}</code>",
+                reply_markup=None  # Remove cancel button after process is complete
             )
