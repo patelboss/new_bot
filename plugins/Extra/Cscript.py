@@ -1,28 +1,11 @@
 TEXTS = {
-    "invalid_channel_id": (
-        "<b>Invalid channel ID. Please provide a valid channel ID starting with '-100'.</b>"
-    ),
-    "permission_denied": (
-        "<b>You don't have permission to post in this channel.</b>"
-    ),
-    "no_message_to_post": (
-        "<b>Please provide a valid channel ID and reply to a message using /cpost <channel_id>.\n"
-        "Use /chelp to know about formatting.\n"
-        "If you don't know your Channel Id, just forward me any message from your channel and reply "
-        "to that message with /id.</b>"
-    ),
-    "failed_to_post": "<b>Failed to post the message. Error: {error}</b>",
-    "post_success": (
-        "<b>Message posted to channel {channel_id} successfully!</b>"
-    ),
-    "unsupported_media": "<b>Unsupported media type to forward.</b>",
-    "random_sticker": [
-        "CAACAgIAAxkBAAItAmdbY-9IY20HNfLFeeboOOex74M0AAL9AQACFkJrCqSvYaKm6vLJHgQ",
-        "CAACAgIAAxkBAAIs1GdbWBhGfsD2U3Z2pGiR-d64z08mAAJvAAPb234AAZlbUKh7k4B0HgQ",
-        "CAACAgIAAxkBAAIsz2dbV_286mg26Vx67MOWmyG-WvK7AAJtAAPb234AAXUe7IXy-0SlHgQ",
-        "CAACAgQAAxkBAAIs_mdbY-Zk1JR7yRLoWsi8NbJEMFerAALVGAACOqGIUIer-Up9iv5aHgQ",
-        "CAACAgQAAxkBAAIs-mdbY96brNo0bbqiAT0h9aHmGjfZAAISDgACQln9BFRvgD6jmKybHgQ"
-    ],
+    "admin_only": "<b>This command is only available to admins.</b>",
+    "channel_not_specified": "<b>Please specify a channel ID.</b>",
+    "channel_not_found": "<b>Channel not found.</b>",
+    "channel_stats": "<b>Channel ID:</b> {channel_id}\n<b>First Added Date:</b> {first_added_date}\n<b>Member Count:</b> {member_count}\n<b>Average Posts Per Day:</b> {average_posts_per_day}",
+    "user_not_specified": "<b>Please specify a user ID.</b>",
+    "user_not_found": "<b>User not found.</b>",
+    "user_post_data": "<b>User ID:</b> {user_id}\n\n{posts}",
     "error_messages": {
         "UserNotParticipant": "Bot is not a member of the channel.",
         "PeerIdInvalid": (
