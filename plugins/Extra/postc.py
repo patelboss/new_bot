@@ -19,7 +19,7 @@ sticker_ids = [
 #def get_random_sticker():
 #    return random.choice(sticker_ids)
 
-@Client.on_message(filters.command("tpost"))
+@Client.on_message(filters.command("cpost"))
 async def cpost(client, message):
 #    random_sticker = get_random_sticker()
 #    m = await message.reply_sticker(random_sticker)
@@ -54,8 +54,8 @@ async def cpost(client, message):
     reply_markup = InlineKeyboardMarkup(inline_buttons) if inline_buttons else None
 
 #    random_sticker = get_random_sticker()
-    m = await message.reply_sticker("CAACAgQAAxkBAAIs_mdbY-Zk1JR7yRLoWsi8NbJEMFerAALVGAACOqGIUIer-Up9iv5aHgQ")
-    await asyncio.sleep(5)
+    m = await message.reply_sticker("CAACAgIAAxkBAAItiGdbfpaxWep4EM9_-96N_gop6O0VAAJiAANOXNIpTqLDGEjEK3EeBA")
+    await asyncio.sleep(2)
     await m.delete()
         #continue 
 
@@ -149,8 +149,8 @@ async def private_cpost(client, message):
     reply_markup = InlineKeyboardMarkup(inline_buttons) if inline_buttons else None
 
 #    random_sticker = get_random_sticker()
-    m = await message.reply_sticker("CAACAgQAAxkBAAIs_mdbY-Zk1JR7yRLoWsi8NbJEMFerAALVGAACOqGIUIer-Up9iv5aHgQ")
-    await asyncio.sleep(5)
+    m = await message.reply_sticker("CAACAgIAAxkBAAItiGdbfpaxWep4EM9_-96N_gop6O0VAAJiAANOXNIpTqLDGEjEK3EeBA")
+    await asyncio.sleep(2)
     await m.delete()
         #continue 
 
@@ -205,7 +205,7 @@ async def private_cpost(client, message):
                 text="Unsupported media type to forward.",
             )
 
-        await message.reply(f"Message posted to channel {channel_id} successfully!")
+        await message.reply(f"<b>Message posted to channel {channel_id} successfully!</b>", parse_mode=ParseMode.HTML)
 #        logger.info(f"Message posted to channel {channel_id} successfully.")
     except Exception as e:
 #        logger.exception(f"Failed to post the message. Error: {str(e)}")
@@ -311,6 +311,6 @@ Simply type <code>&gt;</code> at the beginning of a line:
 """
 #    random_sticker = get_random_sticker()
     m = await message.reply_sticker("CAACAgIAAxkBAAIMU2dBzBWjzGCg_x2tFumZ76z5l5JiAAJiAANOXNIpTqLDGEjEK3EeBA")
-    await asyncio.sleep(3)
+    await asyncio.sleep(2)
     await m.delete()
     await message.reply(help_text, parse_mode=ParseMode.HTML)
