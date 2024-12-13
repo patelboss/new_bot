@@ -8,7 +8,7 @@ import re
 
 # ------------------------ Command Handler ------------------------
 
-@Client.on_message(filters.command("tpost"))
+@Client.on_message(filters.command("cpost"))
 async def cpost(client, message):
     command_parts = message.text.split()
     
@@ -83,8 +83,8 @@ async def cpost(client, message):
         await message.reply(TEXTS["post_success"].format(channel_id=channel_id), parse_mode=ParseMode.HTML)
     except Exception as e:
         await message.reply(TEXTS["failed_to_post"].format(error=str(e)), parse_mode=ParseMode.HTML)
-@Client.on_message(filters.command("tpost"))
-async def cpost(client, message):
+@Client.on_message(filters.command("ppost"))
+async def ppost(client, message):
     command_parts = message.text.split()
     
     if len(command_parts) < 2 or not message.reply_to_message:
@@ -124,7 +124,8 @@ async def cpost(client, message):
                 caption=caption_without_buttons,
                 parse_mode=ParseMode.MARKDOWN,
                 reply_markup=reply_markup,
-                disable_web_page_preview=True
+                disable_web_page_preview=True,
+                protect_content=True
             )
         elif replied_message.video:
             await client.send_video(
@@ -133,7 +134,8 @@ async def cpost(client, message):
                 caption=caption_without_buttons,
                 parse_mode=ParseMode.MARKDOWN,
                 reply_markup=reply_markup,
-                disable_web_page_preview=True
+                disable_web_page_preview=True,
+                protect_content=True
             )
         elif replied_message.document:
             await client.send_document(
@@ -142,7 +144,8 @@ async def cpost(client, message):
                 caption=caption_without_buttons,
                 parse_mode=ParseMode.MARKDOWN,
                 reply_markup=reply_markup,
-                disable_web_page_preview=True
+                disable_web_page_preview=True,
+                protect_content=True
             )
         elif replied_message.text:
             await client.send_message(
@@ -151,6 +154,7 @@ async def cpost(client, message):
                 parse_mode=ParseMode.MARKDOWN,
                 reply_markup=reply_markup,
                 disable_web_page_preview=True,
+                protect_content=True
                 
             )
         else:
