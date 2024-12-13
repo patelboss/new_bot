@@ -1,10 +1,12 @@
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from pyrogram.enums import ParseMode, ChatMemberStatus
+from pyrogram.errors.exceptions.bad_request_400 import ChannelInvalid, ChatAdminRequired, UsernameInvalid, UsernameNotModified
 import re
 import logging
 import random
 import asyncio
+
 # Initialize logger
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -27,7 +29,7 @@ async def channel_post(client, message):
     random_sticker = get_random_sticker()
     try:
         m = await message.reply_sticker(random_sticker)
-        await asyncio.sleep(3)
+        await asyncio.sleep(1)
         await m.delete()
     except Exception as e:
         await message.reply(f"Failed to send sticker: {e}")
@@ -44,7 +46,18 @@ async def channel_post(client, message):
         return
 
     user_id = message.from_user.id
-    if not await is_user_admin_or_ownar(client, channel_id, user_id):
+
+    # Check if the bot is a member of the channel
+    try:
+        bot_member = await client.get_chat_member(channel_id, client.me.id)
+    except (ChannelInvalid, ChatAdminRequired) as e:
+        # Bot is not a member of the channel, ask user to add the bot
+        add_bot_button = InlineKeyboardButton("Add me to this channel", url=f"https://t.me/{client.me.username}?startgroup=new")
+        reply_markup = InlineKeyboardMarkup([[add_bot_button]])
+        await message.reply("I am not a member of this channel. Please add me first.", reply_markup=reply_markup)
+        return
+
+    if not await is_user_admin_or_owner(client, channel_id, user_id):
         await message.reply("You don't have permission to post in this channel.")
         return
 
@@ -92,7 +105,8 @@ async def channel_post(client, message):
     except Exception as e:
         await message.reply(f"Failed to post the message: {e}")
 
-async def is_user_admin_or_ownar(client, channel_id, user_id):
+
+async def is_user_admin_or_owner(client, channel_id, user_id):
     """
     Check if the user is an admin or the owner of the channel.
     Returns True if the user is an admin or owner, False otherwise.
@@ -106,8 +120,6 @@ async def is_user_admin_or_ownar(client, channel_id, user_id):
             return True
         return False
     except Exception as e:
-        # Handle any errors (e.g., user is not a member of the channel)
-        #logger.error(f"Error checking user permissions: {str(e)}")
         return False
 
 
@@ -116,19 +128,16 @@ def extract_buttons_from_caption(caption: str):
     Extracts buttons in the format: {BUTTON_TEXT}-{URL}
     """
     button_links = []
-    pattern = r"\{(.*?)\}\-{(https?:\/\/[^\s]+)}"  # Correct pattern to match button text and URL
-#    logger.info(f"Button extraction pattern: {pattern}")
+    pattern = r"\{(.*?)\}\-{(https?:\/\/[^\s]+)}"
     
     # Using re.findall() to find all matches
     matches = re.findall(pattern, caption)
-#    logger.info(f"Matches found: {matches}")
     
     for text, url in matches:
- #       logger.info(f"Creating button: {text} - {url}")
         button_links.append([InlineKeyboardButton(text=text, url=url)])
     
-  #  logger.info(f"Extracted inline buttons: {button_links}")
     return button_links
+
 
 def remove_button_links(caption: str):
     """
