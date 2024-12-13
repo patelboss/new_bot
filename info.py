@@ -104,9 +104,9 @@ LONG_IMDB_DESCRIPTION = False
 SPELL_CHECK_REPLY = True #is_enabled(environ.get("SPELL_CHECK_REPLY", "True"), True)
 MELCOW_NEW_USERS = is_enabled((environ.get('MELCOW_NEW_USERS', "True")), True)
 PROTECT_CONTENT = is_enabled((environ.get('PROTECT_CONTENT', "False")), False)
-PUBLIC_FILE_STORE = is_enabled((environ.get('PUBLIC_FILE_STORE', "True")), True)
-NO_RESULTS_MSG = False #bool(environ.get("NO_RESULTS_MSG", True))
-USE_CAPTION_FILTER = bool(environ.get('USE_CAPTION_FILTER', True))
+PUBLIC_FILE_STORE = True #is_enabled((environ.get('PUBLIC_FILE_STORE', "True")), True)
+NO_RESULTS_MSG = True #False #bool(environ.get("NO_RESULTS_MSG", True))
+USE_CAPTION_FILTER = True #bool(environ.get('USE_CAPTION_FILTER', True))
 
 # Token Verification Info :
 VERIFY = False
@@ -124,7 +124,7 @@ SHORTLINK_URL = environ.get('SHORTLINK_URL', '')
 SHORTLINK_API = environ.get('SHORTLINK_API', '')
 
 # Others
-MAX_B_TN = environ.get("MAX_B_TN", "5")
+MAX_B_TN = environ.get("MAX_B_TN", "10")
 PORT = environ.get("PORT", "8080")
 MSG_ALRT = environ.get('MSG_ALRT', 'Hello My Dear Friends ❤️')
 CUSTOM_FILE_CAPTION = environ.get("CUSTOM_FILE_CAPTION", f"{script.CAPTION}")
