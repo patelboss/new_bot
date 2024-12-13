@@ -193,3 +193,15 @@ def remove_button_links(caption: str):
 
 def get_random_sticker():
     return random.choice(TEXTS["random_sticker"])
+from pyrogram import Client, filters
+from pyrogram.enums import ParseMode
+import asyncio
+from plugins.Extra.Cscript import TEXTS  # Import the TEXTS dictionary
+
+@Client.on_message(filters.command("chelp"))
+async def chelp(client, message):
+    # Use the imported texts directly from TEXTS dictionary
+    m = await message.reply_sticker(TEXTS["STICKER_ID"])  # Send the sticker
+    await asyncio.sleep(2)  # Wait for 2 seconds
+    await m.delete()  # Delete the sticker message
+    await message.reply(TEXTS["HELP_TEXT"], parse_mode=ParseMode.HTML)  # Send the help text
