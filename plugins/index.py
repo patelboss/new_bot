@@ -10,7 +10,6 @@ from database.ia_filterdb import save_file
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from utils import temp
 import re
-from pyrogram import InlineKeyboardButton, InlineKeyboardMarkup
 from pyrogram.enums import ParseMode, ChatMemberStatus
 import time  # Importing the time module
 logger = logging.getLogger(__name__)
@@ -36,7 +35,7 @@ async def index_files(bot, query):
     if raju == 'reject':
         await query.message.delete()
         await bot.send_message(int(from_user),
-                               f'Your Submission for indexing {chat} has been declined by our moderators.',
+                               f'<b>Your Submission for indexing {chat} has been declined by our moderators.\nThis is may be because your channel not have media file\n\nIf you have anything to tell admin \ntype message and reply that message by /feedback<b>', parse_mode=ParseMode.HTML
                                reply_to_message_id=int(lst_msg_id))
         return
 
