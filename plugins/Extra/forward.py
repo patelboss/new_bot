@@ -61,7 +61,7 @@ async def forward_command(client: Client, message: Message):
         
         # Save the forwarding data in the database
         #save_forward_data(from_channel, to_channels, forward_type, added_by=message.from_user.id, user_id=message.from_user.id)
-        logger.info(f"Forwarding setup completed by user {message.from_user.id}.")
+        #logger.info(f"Forwarding setup completed by user {message.from_user.id}.")
 
         # Acknowledge the setup
         await message.reply(
