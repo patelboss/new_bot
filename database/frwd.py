@@ -27,10 +27,10 @@ async def save_forward_data(from_channel, to_channels, forward_type, added_by, u
         LOGGER(__name__).info(f"Forward data saved for {from_channel} to {to_channels}")
 
         # Now, save user in all target channels
-        for channel in to_channels:
-            save_user_in_channel(user_id, channel)
+       # for channel in to_channels:
+        #    save_user_in_channel(user_id, channel)
 
-        LOGGER(__name__).info(f"User {user_id} saved in all target channels.")
+       # LOGGER(__name__).info(f"User {user_id} saved in all target channels.")
 
     except Exception as e:
         LOGGER(__name__).error(f"Error saving forward data: {e}")
@@ -82,7 +82,7 @@ def save_user_in_channel(user_id, channel, channel_id, channel_name, channel_typ
             LOGGER(__name__).info(f"User {user_id} updated in channel {channel}.")
         else:
             # If the user doesn't exist, insert the new user data
-            user_collection.insert_one(user_data)
+            collection.insert_one(forward_data)
             LOGGER(__name__).info(f"User {user_id} saved in channel {channel}.")
 
     except Exception as e:
@@ -102,9 +102,9 @@ from datetime import datetime
 from pymongo import MongoClient
 
 # Assuming you have a collection where channel data is stored
-client = MongoClient(DATABASE_URI)
-db = client[DATABASE_NAME]
-user_collection = db["user_data"]
+#client = MongoClient(DATABASE_URI)
+#db = client[DATABASE_NAME]
+#user_collection = db["user_data"]
 
 def get_all_channels():
     """
