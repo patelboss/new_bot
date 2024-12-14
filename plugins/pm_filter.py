@@ -1421,7 +1421,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
         if not files_:
             return await query.answer('Nᴏ sᴜᴄʜ ғɪʟᴇ ᴇxɪsᴛ.')
         files = files_
-        title = {clean_file_name(file['file_name'])}
+        title = {clean_file_name(files['file_name'])}
         size = get_size(files["file_size"])
         f_caption = files["caption"]
         settings = await get_settings(query.message.chat.id)
@@ -1521,7 +1521,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
         if not files_:
             return await query.answer('Nᴏ sᴜᴄʜ ғɪʟᴇ ᴇxɪsᴛ.')
         files = files_
-        title = {clean_file_name(file['file_name'])}
+        title = {clean_file_name(files['file_name'])}
         size = get_size(files['file_size'])
         f_caption = files['caption']
         settings = await get_settings(query.message.chat.id)
