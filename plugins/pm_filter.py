@@ -15,6 +15,10 @@ from database.connections_mdb import mydb, active_connection, all_connections, d
 from database.gfilters_mdb import find_gfilter, get_gfilters, del_allg
 from urllib.parse import quote_plus
 from TechVJ.util.file_properties import get_name, get_hash, get_media_file_size
+import traceback
+import random
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ChatPermissions
+from pyrogram import enums
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.ERROR)
@@ -29,10 +33,6 @@ BUTTONS2 = {}
 SPELL_CHECK = {}
 
 @Client.on_message(filters.group & filters.text & filters.incoming)
-import traceback
-import random
-from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ChatPermissions
-from pyrogram import enums
 
 async def give_filter(client, message):
     chat_id = message.chat.id
