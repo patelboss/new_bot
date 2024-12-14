@@ -1,12 +1,12 @@
 from pymongo import MongoClient
 from datetime import datetime
 from info import DATABASE_URI, DATABASE_NAME, ADMINS
-
+import logging
 # Initialize MongoDB client and database
 client = MongoClient(DATABASE_URI)
 db = client[DATABASE_NAME]
 collection = db['Forward_data']  # Store forward-related data here
-
+logger = logging.getLogger("Forward")
 async def save_forward_data(from_channel, to_channels, forward_type, added_by, user_id):
     """
     Save forward data when the user sets up forwarding
@@ -24,7 +24,7 @@ async def save_forward_data(from_channel, to_channels, forward_type, added_by, u
 
         # Save the data for the 'from_channel' as well
         collection.insert_one(forward_data)
-        LOGGER(__name__).info(f"Forward data saved for {from_channel} to {to_channels}")
+        logger.info(f"Forward data saved for {from_channel} to {to_channels}")
 
         # Now, save user in all target channels
        # for channel in to_channels:
@@ -33,7 +33,7 @@ async def save_forward_data(from_channel, to_channels, forward_type, added_by, u
        # LOGGER(__name__).info(f"User {user_id} saved in all target channels.")
 
     except Exception as e:
-        LOGGER(__name__).error(f"Error saving forward data: {e}")
+        logger.error(f"Error saving forward data: {e}")
 
 from datetime import datetime
 from pymongo import UpdateOne
@@ -79,14 +79,14 @@ def save_user_in_channel(user_id, channel, channel_id, channel_name, channel_typ
                 '$currentDate': {'last_updated_date': True},  # Use currentDate for updating the last_updated_date field
             }
             user_collection.update_one({'user_id': user_id, 'channel': channel}, update_data)
-            LOGGER(__name__).info(f"User {user_id} updated in channel {channel}.")
+            logger.info(f"User {user_id} updated in channel {channel}.")
         else:
             # If the user doesn't exist, insert the new user data
             collection.insert_one(forward_data)
-            LOGGER(__name__).info(f"User {user_id} saved in channel {channel}.")
+            logger.info(f"User {user_id} saved in channel {channel}.")
 
     except Exception as e:
-        LOGGER(__name__).error(f"Error saving user {user_id} in channel {channel}: {e}")
+        logger.error(f"Error saving user {user_id} in channel {channel}: {e}")
 
 def get_forward_data():
     """
@@ -96,7 +96,7 @@ def get_forward_data():
         data = list(collection.find())
         return data
     except Exception as e:
-        LOGGER(__name__).error(f"Error retrieving forward data: {e}")
+        logger.error(f"Error retrieving forward data: {e}")
         return []
 from datetime import datetime
 from pymongo import MongoClient
@@ -127,7 +127,7 @@ def get_all_channels():
         return channel_info
 
     except Exception as e:
-        LOGGER(__name__).error(f"Error fetching channels from database: {str(e)}")
+        logger.error(f"Error fetching channels from database: {str(e)}")
         return []
 
 def get_channel_data_by_id(channel_id):
@@ -153,5 +153,5 @@ def get_channel_data_by_id(channel_id):
         return user_data_list
 
     except Exception as e:
-        LOGGER(__name__).error(f"Error fetching data for channel ID {channel_id}: {str(e)}")
+        logger.error(f"Error fetching data for channel ID {channel_id}: {str(e)}")
         return []
