@@ -57,7 +57,7 @@ async def post_message(client, message):
     else:
         await message.reply(TEXTS["failed_to_post"].format(error=error), parse_mode=ParseMode.HTML)
 
-async def send_post(client, channel_id, replied_message, caption_without_buttons, reply_markup, parse_mode=ParseMode.HTML):
+async def send_post(client, channel_id, replied_message, caption_without_buttons, reply_markup, protect_content):
     try:
         if replied_message.photo:
             await client.send_photo(
