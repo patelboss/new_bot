@@ -39,6 +39,12 @@ async def give_filter(client, message):
     user = message.from_user  # Get the user object
     user_id = user.id if user else 0  # Fallback to 0 if no user ID is available
 
+    if user_id == 0:
+        await message.reply_text("<b>You are an anonymous admin. I can't work with it. Search Will Work Only If user Has User Id So Turn Off remain Anonymous from admin rights</b>", parse_mode=enums.ParseMode.HTML)
+        return
+
+    
+
     try:
         # If not from the support chat
         if chat_id != SUPPORT_CHAT_ID:
