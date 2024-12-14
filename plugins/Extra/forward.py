@@ -60,7 +60,7 @@ async def forward_command(client: Client, message: Message):
             await fetch_and_save_channel_data(client, message.from_user.id, channel)
         
         # Save the forwarding data in the database
-        save_forward_data(from_channel, to_channels, forward_type, added_by=message.from_user.id, user_id=message.from_user.id)
+        #save_forward_data(from_channel, to_channels, forward_type, added_by=message.from_user.id, user_id=message.from_user.id)
         logger.info(f"Forwarding setup completed by user {message.from_user.id}.")
 
         # Acknowledge the setup
@@ -213,7 +213,7 @@ async def start_forwarding(client: Client, from_channel, to_channels, forward_ty
     
     #Forward messages from the 'from_channel' to the 'to_channels'
     
-    @Client.on_message(filters.chat(from_channel))
+    @Client.on_message(filters.chat(from_channel) & filter.incoming)
     async def forward_message(client, message: Message):
         try:
             logger.info(f"Forwarding message {message.message_id} from {from_channel} to {to_channels}.")
