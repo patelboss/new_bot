@@ -31,6 +31,17 @@ BUTTONS0 = {}
 BUTTONS1 = {}
 BUTTONS2 = {}
 SPELL_CHECK = {}
+# config.py
+FILTER_KEYWORDS = ['[', '@', 'www.', 'movie', 'www', 'telegram', 'tg']
+#from config import FILTER_KEYWORDS
+
+def clean_file_name(file_name):
+    return ' '.join(filter(lambda x: not any(keyword in x for keyword in FILTER_KEYWORDS), file_name.split()))
+
+InlineKeyboardButton(
+    text=f"☞{get_size(file['file_size'])} ◉ {clean_file_name(file['file_name'])}",
+    callback_data=f'{pre}#{file["file_id"]}'
+)
 
 @Client.on_message(filters.group & filters.text & filters.incoming)
 
@@ -184,7 +195,7 @@ async def next_page(bot, query):
         btn = [
             [
                 InlineKeyboardButton(
-                    text=f"☞{get_size(file['file_size'])} ◉ {' '.join(filter(lambda x: not any(x.startswith(prefix) for prefix in ['[', '@', 'www.', 'movie', 'www', 'telegram', 'tg']), file['file_name'].split()))}", callback_data=f'{pre}#{file["file_id"]}'
+                    text=f"☞{get_size(file['file_size'])} ◉ {clean_file_name(file['file_name'])}", callback_data=f'{pre}#{file["file_id"]}'
                 ),
             ]
             for file in files
@@ -327,7 +338,7 @@ async def advantage_spoll_choker(bot, query):
                 reqstr1 = query.from_user.id if query.from_user else 0
                 reqstr = await bot.get_users(reqstr1)
                 if NO_RESULTS_MSG:
-                    await bot.send_message(chat_id=LOG_CHANNEL, text=(script.NORSLTS.format(reqstr.id, reqstr.mention, movie)))
+                    await bot.send_message(chat_id=NRC_CHANNEL, text=(script.NORSLTS.format(reqstr.id, reqstr.mention, movie)))
                 k = await query.message.edit(script.MVE_NT_FND)
                 await asyncio.sleep(10)
                 await k.delete()
@@ -418,7 +429,7 @@ async def filter_yearss_cb_handler(client: Client, query: CallbackQuery):
         btn = [
             [
                 InlineKeyboardButton(
-                    text=f"☞{get_size(file['file_size'])} ◉ {' '.join(filter(lambda x: not any(x.startswith(prefix) for prefix in ['[', '@', 'www.', 'movie', 'www', 'telegram', 'tg']), file['file_name'].split()))}", callback_data=f'{pre}#{file["file_id"]}'
+                    text=f"☞{get_size(file['file_size'])} ◉ {clean_file_name(file['file_name'])}", callback_data=f'{pre}#{file["file_id"]}'
                 ),
             ]
             for file in files
@@ -580,7 +591,7 @@ async def filter_episodes_cb_handler(client: Client, query: CallbackQuery):
         btn = [
             [
                 InlineKeyboardButton(
-                    text=f"☞{get_size(file['file_size'])} ◉ {' '.join(filter(lambda x: not any(x.startswith(prefix) for prefix in ['[', '@', 'www.', 'movie', 'www', 'telegram', 'tg']), file['file_name'].split()))}", callback_data=f'{pre}#{file["file_id"]}'
+                    text=f"☞{get_size(file['file_size'])} ◉ {clean_file_name(file['file_name'])}", callback_data=f'{pre}#{file["file_id"]}'
                 ),
             ]
             for file in files
@@ -744,7 +755,7 @@ async def filter_languages_cb_handler(client: Client, query: CallbackQuery):
         btn = [
             [
                 InlineKeyboardButton(
-                    text=f"☞{get_size(file['file_size'])} ◉ {' '.join(filter(lambda x: not any(x.startswith(prefix) for prefix in ['[', '@', 'www.', 'movie', 'www', 'telegram', 'tg']), file['file_name'].split()))}", callback_data=f'{pre}#{file["file_id"]}'
+                    text=f"☞{get_size(file['file_size'])} ◉ {clean_file_name(file['file_name'])}", callback_data=f'{pre}#{file["file_id"]}'
                 ),
             ]
             for file in files
@@ -937,7 +948,7 @@ async def filter_seasons_cb_handler(client: Client, query: CallbackQuery):
         btn = [
             [
                 InlineKeyboardButton(
-                    text=f"☞{get_size(file['file_size'])} ◉ {' '.join(filter(lambda x: not any(x.startswith(prefix) for prefix in ['[', '@', 'www.', 'movie', 'www', 'telegram', 'tg']), file['file_name'].split()))}", callback_data=f'{pre}#{file["file_id"]}'
+                    text=f"☞{get_size(file['file_size'])} ◉ {clean_file_name(file['file_name'])}", callback_data=f'{pre}#{file["file_id"]}'
                 ),
             ]
             for file in files
@@ -1075,7 +1086,7 @@ async def filter_qualities_cb_handler(client: Client, query: CallbackQuery):
         btn = [
             [
                 InlineKeyboardButton(
-                    text=f"☞{get_size(file['file_size'])} ◉ {' '.join(filter(lambda x: not any(x.startswith(prefix) for prefix in ['[', '@', 'www.', 'movie', 'www', 'telegram', 'tg']), file['file_name'].split()))}", callback_data=f'{pre}#{file["file_id"]}'
+                    text=f"☞{get_size(file['file_size'])} ◉ {clean_file_name(file['file_name'])}", callback_data=f'{pre}#{file["file_id"]}'
                 ),
             ]
             for file in files
@@ -1084,7 +1095,7 @@ async def filter_qualities_cb_handler(client: Client, query: CallbackQuery):
         btn = [
             [
                 InlineKeyboardButton(
-                    text=f"{' '.join(filter(lambda x: not any(x.startswith(prefix) for prefix in ['[', '@', 'www.', 'movie', 'www', 'telegram', 'tg']), file['file_name'].split()))}",
+                    text=f"{clean_file_name(file['file_name'])}",
                     callback_data=f'{pre}#{file["file_id"]}',
                 ),
                 InlineKeyboardButton(
@@ -2976,7 +2987,7 @@ async def auto_filter(client, name, msg, reply_msg, ai_search, spoll=False):
         btn = [
             [
                 InlineKeyboardButton(
-                    text=f"☞{get_size(file['file_size'])} ◉ {' '.join(filter(lambda x: not any(x.startswith(prefix) for prefix in ['[', '@', 'www.', 'www', 'movie', 'telegram', 'tg']), file['file_name'].split()))}", callback_data=f'{pre}#{file["file_id"]}'
+                    text=f"☞{get_size(file['file_size'])} ◉ {clean_file_name(file['file_name'])}", callback_data=f'{pre}#{file["file_id"]}'
                 ),
             ]
             for file in files
@@ -3067,7 +3078,7 @@ async def auto_filter(client, name, msg, reply_msg, ai_search, spoll=False):
         if not settings["button"]:
             cap+="<b>\n\n<u>🍿 Your Movie Files 👇</u></b>\n"
             for file in files:
-                cap += f"<b>\n📁 <a href='https://telegram.me/{temp.U_NAME}?start=files_{file['file_id']}'>[{get_size(file['file_size'])}] {' '.join(filter(lambda x: not any(x.startswith(prefix) for prefix in ['[', '@', 'www.', 'movie','www', 'telegram', 'tg']), file['file_name'].split()))}\n</a></b>"
+                cap += f"<b>\n📁 <a href='https://telegram.me/{temp.U_NAME}?start=files_{file['file_id']}'>[{get_size(file['file_size'])}] {clean_file_name(file['file_name'])}\n</a></b>"
     else:
         if settings["button"]:
             cap = f"<b>Tʜᴇ Rᴇꜱᴜʟᴛꜱ Fᴏʀ ☞ {search}\n\nRᴇǫᴜᴇsᴛᴇᴅ Bʏ ☞ {message.from_user.mention}\nʀᴇsᴜʟᴛ sʜᴏᴡ ɪɴ ☞ {remaining_seconds} sᴇᴄᴏɴᴅs\n\nᴘᴏᴡᴇʀᴇᴅ ʙʏ ☞ : <b> @FILMYKEEDHA</b> \n\nWait little bit before tapping again</b>"
@@ -3075,7 +3086,7 @@ async def auto_filter(client, name, msg, reply_msg, ai_search, spoll=False):
             cap = f"<b>Tʜᴇ Rᴇꜱᴜʟᴛꜱ Fᴏʀ ☞ {search}\n\nRᴇǫᴜᴇsᴛᴇᴅ Bʏ ☞ {message.from_user.mention}\nʀᴇsᴜʟᴛ sʜᴏᴡ ɪɴ ☞ {remaining_seconds} sᴇᴄᴏɴᴅs\n\nᴘᴏᴡᴇʀᴇᴅ ʙʏ ☞ : <b> @FILMYKEEDHA</b> \n\nWait little bit before tapping again</b>"
             cap+="<b><u>🍿 Your Movie Files 👇</u></b>\n\n"
             for file in files:
-                cap += f"<b>📁 <a href='https://telegram.me/{temp.U_NAME}?start=files_{file['file_id']}'>[{get_size(file['file_size'])}] {' '.join(filter(lambda x: not any(x.startswith(prefix) for prefix in ['[', '@', 'www.', 'www', 'movie', 'telegram', 'tg']), file['file_name'].split()))}\n\n</a></b>"
+                cap += f"<b>📁 <a href='https://telegram.me/{temp.U_NAME}?start=files_{file['file_id']}'>[{get_size(file['file_size'])}] {clean_file_name(file['file_name'])}\n\n</a></b>"
 
     if imdb and imdb.get('poster'):
         try:
@@ -3209,7 +3220,7 @@ async def advantage_spell_chok(client, name, msg, reply_msg, vj_search=None):
                     [InlineKeyboardButton("Request Group", url="https://t.me/+GXTgHzS9LtViN2U9")]
                 ]
                 if NO_RESULTS_MSG:
-                    await client.send_message(chat_id=LOG_CHANNEL, text=(script.NORSLTS.format(reqstr.id, reqstr.mention, mv_rqst)))
+                    await client.send_message(chat_id=NRF_CHANNEL, text=(script.NORSLTS.format(reqstr.id, reqstr.mention, mv_rqst)))
                 k = await safe_edit_text(reply_msg, script.I_CUDNT.format(mv_rqst), reply_markup=InlineKeyboardMarkup(button))
                 await asyncio.sleep(30)
                 await k.delete()
