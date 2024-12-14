@@ -98,3 +98,60 @@ def get_forward_data():
     except Exception as e:
         LOGGER(__name__).error(f"Error retrieving forward data: {e}")
         return []
+from datetime import datetime
+from pymongo import MongoClient
+
+# Assuming you have a collection where channel data is stored
+client = MongoClient(DATABASE_URI)
+db = client[DATABASE_NAME]
+user_collection = db["user_data"]
+
+def get_all_channels():
+    """
+    Retrieve a list of all added channels along with their ID and member count.
+    """
+    try:
+        channels = user_collection.distinct('channel_data.channel_id')  # Get distinct channel IDs
+        channel_info = []
+
+        for channel_id in channels:
+            channel = user_collection.find_one({'channel_data.channel_id': channel_id})
+            if channel:
+                channel_data = channel.get('channel_data')
+                channel_info.append({
+                    'channel_id': channel_data['channel_id'],
+                    'channel_name': channel_data['channel_name'],
+                    'members_count': channel_data['members_count']
+                })
+
+        return channel_info
+
+    except Exception as e:
+        LOGGER(__name__).error(f"Error fetching channels from database: {str(e)}")
+        return []
+
+def get_channel_data_by_id(channel_id):
+    """
+    Fetch data for a specific channel by its ID.
+    """
+    try:
+        # Fetch all users for the specified channel ID
+        users_in_channel = user_collection.find({'channel_data.channel_id': channel_id})
+        user_data_list = []
+
+        for user in users_in_channel:
+            user_data = {
+                'user_id': user.get('user_id'),
+                'channel': user.get('channel'),
+                'first_added_date': user['channel_data'].get('first_added_date'),
+                'last_updated_date': user['channel_data'].get('last_updated_date'),
+                'members_count': user['channel_data'].get('members_count'),
+                'average_post_views': user['channel_data'].get('average_post_views')
+            }
+            user_data_list.append(user_data)
+
+        return user_data_list
+
+    except Exception as e:
+        LOGGER(__name__).error(f"Error fetching data for channel ID {channel_id}: {str(e)}")
+        return []
