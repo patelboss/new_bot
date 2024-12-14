@@ -816,3 +816,16 @@ async def get_seconds(time_string):
         return value * 86400 * 365
     else:
         return 0
+
+
+# config.py
+FILTER_KEYWORDS = ['[', '@', 'www.', 'movie', 'www', 'telegram', 'tg']
+#from config import FILTER_KEYWORDS
+
+def clean_file_name(file_name):
+    return ' '.join(filter(lambda x: not any(keyword in x for keyword in FILTER_KEYWORDS), file_name.split()))
+
+#InlineKeyboardButton(
+#    text=f"☞{get_size(file['file_size'])} ◉ {clean_file_name(file['file_name'])}",
+#    callback_data=f'{pre}#{file["file_id"]}'
+#)
