@@ -37,7 +37,7 @@ async def start(client, message):
     await message.react(emoji="🤩")
     random_sticker = get_random_sticker()
     m = await message.reply_sticker(random_sticker)
-    await asyncio.sleep(3)
+    await asyncio.sleep(1)
     await m.delete()
     if message.chat.type in [enums.ChatType.GROUP, enums.ChatType.SUPERGROUP]:
         # Inline Keyboard Buttons for Private Chat
@@ -94,11 +94,10 @@ async def start(client, message):
         if CLONE_MODE == True:
             buttons.append([InlineKeyboardButton('🤖 Cʀᴇᴀᴛᴇ Yᴏᴜʀ Oᴡɴ Cʟᴏɴᴇ Bᴏᴛ 🤖', callback_data='clone')])
         reply_markup = InlineKeyboardMarkup(buttons)
-        random_sticker = get_random_sticker()
-        m = await message.reply_sticker(random_sticker)
-        
-        await asyncio.sleep(3)
-        await m.delete()
+#        random_sticker = get_random_sticker()
+#        m = await message.reply_sticker(random_sticker)
+#        await asyncio.sleep(3)
+#        await m.delete()
         await message.reply_photo(
             photo=random.choice(PICS),
             caption=script.START_TXT.format(message.from_user.mention, temp.U_NAME, temp.B_NAME),
@@ -432,6 +431,11 @@ async def start(client, message):
         return
         
     elif data.startswith("all"):
+        random_sticker = get_random_sticker()
+        m = await message.reply_sticker(random_sticker)
+        await asyncio.sleep(3)
+        await m.delete()
+
         files = temp.GETALL.get(file_id)
         if not files:
             return await message.reply('<b><i>No such file exist.</b></i>')
@@ -492,6 +496,11 @@ async def start(client, message):
         return    
         
     elif data.startswith("files"):
+        random_sticker = get_random_sticker()
+        m = await message.reply_sticker(random_sticker)
+        await asyncio.sleep(3)
+        await m.delete()
+        
         user = message.from_user.id
         if temp.SHORT.get(user)==None:
             await message.reply_text(text="<b>Please Search Again in Group</b>")
