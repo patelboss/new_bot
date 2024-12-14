@@ -1,6 +1,6 @@
 from pymongo import MongoClient
 from datetime import datetime
-from info import DATABASE_URI, DATABASE_NAME, ADMINS, LOGGER
+from info import DATABASE_URI, DATABASE_NAME, ADMINS
 
 # Initialize MongoDB client and database
 client = MongoClient(DATABASE_URI)
