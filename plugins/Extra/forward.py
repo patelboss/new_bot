@@ -31,15 +31,6 @@ async def forward_command(client: Client, message: Message):
         forward_type, from_channel, *to_channels = args[1:]
         logger.info(f"Forwarding type: {forward_type}, From channel: {from_channel}, To channels: {to_channels}")
 
-        # Check user rights in the source and target channels
-        has_permission = await check_user_rights(client, message.from_user.id, from_channel, to_channels)
-        if not has_permission:
-            await message.reply(
-                "<b>You must be an admin or owner in the source and target channels to set up forwarding.</b>",
-                parse_mode=ParseMode.HTML
-            )
-            logger.warning(f"User {message.from_user.id} does not have permission to forward messages.")
-            return
         
         # Check if bot is in the target channel(s)
         bot_in_channels = await check_bot_in_channels(client, from_channel, to_channels)
@@ -49,6 +40,15 @@ async def forward_command(client: Client, message: Message):
                 parse_mode=ParseMode.HTML
             )
             logger.warning(f"Bot is not a member of all target channels for user {message.from_user.id}.")
+            return
+        # Check user rights in the source and target channels
+        has_permission = await check_user_rights(client, message.from_user.id, from_channel, to_channels)
+        if not has_permission:
+            await message.reply(
+                "<b>You must be an admin or owner in the source and target channels to set up forwarding.</b>",
+                parse_mode=ParseMode.HTML
+            )
+            logger.warning(f"User {message.from_user.id} does not have permission to forward messages.")
             return
         
         # Save the forwarding data in the database
