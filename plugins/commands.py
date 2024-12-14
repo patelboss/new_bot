@@ -13,6 +13,7 @@ from database.connections_mdb import active_connection
 from urllib.parse import quote_plus
 from TechVJ.util.file_properties import get_name, get_hash, get_media_file_size
 import builtins
+from pmfilter import clean_file_name
 BATCH_FILES = {}
 join_db = JoinReqs
 
@@ -439,7 +440,7 @@ async def start(client, message):
             file_id = file["file_id"]
             files_ = await get_file_details(file_id)
             files1 = files_
-            title = ' '.join(filter(lambda x: not x.startswith('[') and not x.startswith('@'), files1["file_name"].split()))
+            title = {clean_file_name(file['file_name'])}
             size=get_size(files1["file_size"])
             f_caption=files1["caption"]
             if CUSTOM_FILE_CAPTION:
@@ -575,7 +576,7 @@ async def start(client, message):
             pass
         return await message.reply('No such file exist.')
     files = files_
-    title = '@Filmykeedha  ' + ' '.join(filter(lambda x: not x.startswith('[') and not x.startswith('@'), files["file_name"].split()))
+    title = '@Filmykeedha  ' + {clean_file_name(file['file_name'])}
     size=get_size(files["file_size"])
     f_caption=files["caption"]
     if CUSTOM_FILE_CAPTION:
