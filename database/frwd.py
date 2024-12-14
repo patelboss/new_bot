@@ -35,22 +35,6 @@ async def save_forward_data(from_channel, to_channels, forward_type, added_by, u
     except Exception as e:
         LOGGER(__name__).error(f"Error saving forward data: {e}")
 
-def save_user_in_channel(user_id, channel):
-    """
-    Save user in a specific channel (this is a placeholder function)
-    You may want to save to a different collection or handle user/channel relationships
-    """
-    try:
-        user_data = {
-            'user_id': user_id,
-            'channel': channel,
-            'saved_date': datetime.now()
-        }
-        # Save the user data into the channel collection
-        user_collection.insert_one(user_data)
-        LOGGER(__name__).info(f"User {user_id} saved in channel {channel}.")
-    except Exception as e:
-        LOGGER(__name__).error(f"Error saving user {user_id} in channel {channel}: {e}")
 from datetime import datetime
 from pymongo import UpdateOne
 
