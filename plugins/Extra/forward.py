@@ -3,7 +3,7 @@ from pyrogram import Client, filters
 from pyrogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup
 from pyrogram.enums import ParseMode, ChatMemberStatus
 from pyrogram.errors import UserNotParticipant, PeerIdInvalid, ChatAdminRequired
-from database.frwd import save_forward_data, get_forward_data, save_user_in_channel  # Assuming these functions are defined in your database handling
+from database.frwd import save_forward_data, get_forward_data, save_user_in_channel, get_channel_data_by_id, get_all_channels  # Assuming these functions are defined in your database handling
 from info import ADMINS
 from datetime import datetime
 import pytz
@@ -227,3 +227,74 @@ async def start_forwarding(client: Client, from_channel, to_channels, forward_ty
         
         except Exception as e:
             logger.error(f"Error forwarding message {message.message_id}: {e}")    
+
+
+
+
+
+
+@Client.on_message(filters.command("frwd_stats") & filters.user(ADMINS))
+async def frwd_stats(client: Client, message: Message):
+    """
+    Command to view forwarding statistics and user/channel data for a specific channel ID,
+    available only to admins.
+    """
+    try:
+        # Extract the channel_id argument from the message (if provided)
+        args = message.text.split()
+        if len(args) == 2:
+            channel_id = args[1]
+        else:
+            # If no channel_id is provided, list all channels
+            channel_id = None
+
+        if channel_id:
+            # Fetch data for the specified channel ID
+            channel_data = get_channel_data_by_id(channel_id)
+
+            if not channel_data:
+                await message.reply(f"No data available for channel ID: {channel_id}.")
+                return
+
+            # Format and display the specific channel data
+            response = f"Forwarding Stats for Channel ID: {channel_id}\n\n"
+            for user_data in channel_data:
+                user_id = user_data['user_id']
+                first_added_date = user_data['first_added_date']
+                last_updated_date = user_data['last_updated_date']
+                members_count = user_data['members_count']
+                average_views = user_data['average_post_views']
+
+                # Constructing the formatted response
+                response += f"User ID: {user_id}\n"
+                response += f"First Added: {first_added_date.strftime('%Y-%m-%d %H:%M:%S')}\n"
+                response += f"Last Updated: {last_updated_date.strftime('%Y-%m-%d %H:%M:%S')}\n"
+                response += f"Members Count: {members_count}\n"
+                response += f"Average Views per Post: {average_views}\n\n"
+
+            await message.reply(response)
+
+        else:
+            # Fetch all channels if no channel_id is provided
+            channel_info = get_all_channels()
+
+            if not channel_info:
+                await message.reply("No channels found.")
+                return
+
+            # List all added channels with their ID and member count
+            response = "List of Added Channels:\n\n"
+            for channel in channel_info:
+                channel_id = channel['channel_id']
+                channel_name = channel['channel_name']
+                members_count = channel['members_count']
+
+                # Construct the formatted response
+                response += f"Channel: {channel_name} (ID: {channel_id})\n"
+                response += f"Members Count: {members_count}\n\n"
+
+            await message.reply(response)
+
+    except Exception as e:
+        await message.reply(f"Error fetching forwarding statistics: {str(e)}")
+        logger.error(f"Error in frwd_stats command: {e}")
