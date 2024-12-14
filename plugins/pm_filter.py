@@ -38,10 +38,10 @@ FILTER_KEYWORDS = ['[', '@', 'www.', 'movie', 'www', 'telegram', 'tg']
 def clean_file_name(file_name):
     return ' '.join(filter(lambda x: not any(keyword in x for keyword in FILTER_KEYWORDS), file_name.split()))
 
-InlineKeyboardButton(
-    text=f"☞{get_size(file['file_size'])} ◉ {clean_file_name(file['file_name'])}",
-    callback_data=f'{pre}#{file["file_id"]}'
-)
+#InlineKeyboardButton(
+#    text=f"☞{get_size(file['file_size'])} ◉ {clean_file_name(file['file_name'])}",
+#    callback_data=f'{pre}#{file["file_id"]}'
+#)
 
 @Client.on_message(filters.group & filters.text & filters.incoming)
 
