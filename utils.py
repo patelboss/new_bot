@@ -239,20 +239,22 @@ async def broadcast_messages(user_id, message, forward=False):
         await asyncio.sleep(e.x)
         return await broadcast_messages(user_id, message, forward)
     except InputUserDeactivated:
+        # Delete the user only if the account is deactivated
         await db.delete_user(int(user_id))
         logger.info(f"{user_id} - Removed from database (deleted account).")
         return False, "Deleted"
     except UserIsBlocked:
-        await db.delete_user(int(user_id))
+        # Do not delete, just log that the user has blocked the bot
         logger.info(f"{user_id} - Blocked the bot.")
         return False, "Blocked"
     except PeerIdInvalid:
-        await db.delete_user(int(user_id))
+        # Do not delete, just log that the PeerId is invalid
         logger.info(f"{user_id} - PeerIdInvalid.")
         return False, "Error"
     except Exception as e:
         logger.error(f"Error broadcasting to {user_id}: {e}")
         return False, "Error"
+    
 
 async def broadcast_messages_group(chat_id, message, forward=False):
     try:
@@ -272,8 +274,8 @@ async def broadcast_messages_group(chat_id, message, forward=False):
     except Exception as e:
         logger.error(f"Error broadcasting to group {chat_id}: {e}")
         return False, "Error"
-    
-    
+
+
 async def search_gagala(text):
     usr_agent = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
