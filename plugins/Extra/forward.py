@@ -71,6 +71,9 @@ async def forward_command(client: Client, message: Message):
         
         # Start forwarding messages
         await start_forwarding(client, from_channel, to_channels, forward_type)
+        logger.info(f"awaiting start forwarding function")
+        
+        
     
     except Exception as e:
         logger.error(f"Error in /forward command: {e}")
@@ -123,7 +126,7 @@ async def calculate_average_views(client, channel):
     return 100  # Return a fixed value for now
 
 
-def save_user_in_channel(user_id, channel, channel_id, channel_name, channel_type, invite_link, members_count, average_views):
+def saving_user_in_channel(user_id, channel, channel_id, channel_name, channel_type, invite_link, members_count, average_views):
     """
     Save the user and channel data in the database.
     """
@@ -143,7 +146,7 @@ def save_user_in_channel(user_id, channel, channel_id, channel_name, channel_typ
         }
         
         # Save data in your collection (replace with your actual database call)
-        user_collection.insert_one(user_data)
+        Forward_data.insert_one(user_data)
         logger.info(f"User {user_id} data saved for channel {channel}.")
     
     except Exception as e:
@@ -205,9 +208,11 @@ async def check_bot_in_channels(client: Client, from_channel, to_channels):
         return False
 
 async def start_forwarding(client: Client, from_channel, to_channels, forward_type):
-    """
-    Forward messages from the 'from_channel' to the 'to_channels'
-    """
+    logger.info(f"awaited successfully start forwarding function")
+        
+    
+    #Forward messages from the 'from_channel' to the 'to_channels'
+    
     @Client.on_message(filters.chat(from_channel))
     async def forward_message(client, message: Message):
         try:
