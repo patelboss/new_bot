@@ -14,7 +14,7 @@ from pyrogram.errors import UserNotParticipant, PeerIdInvalid, ChatAdminRequired
 bot = Client
 # Set timezone for India (IST)
 IST = pytz.timezone('Asia/Kolkata')
-
+logger = logging.getLogger("Forward")
 # Command to start forwarding (accessible by everyone)
 @bot.on_message(filters.command("forward"))
 async def forward_command(client, message: Message):
