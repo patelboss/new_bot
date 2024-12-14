@@ -3,7 +3,7 @@ from pyrogram import Client, filters
 from pyrogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup
 from pyrogram.enums import ParseMode, ChatMemberStatus
 from pyrogram.errors import UserNotParticipant, PeerIdInvalid, ChatAdminRequired
-from database.frwd import save_forward_data, get_forward_data  # Assuming these functions are defined in your database handling
+from database.frwd import save_forward_data, get_forward_data, save_user_in_channel  # Assuming these functions are defined in your database handling
 from info import ADMINS
 from datetime import datetime
 import pytz
@@ -18,7 +18,7 @@ from pyrogram.types import Message, ParseMode
 from datetime import datetime
 import logging
 
-logger = logging.getLogger(__name__)
+#logger = logging.getLogger(__name__)
 
 @Client.on_message(filters.command("forward"))
 async def forward_command(client: Client, message: Message):
