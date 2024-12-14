@@ -454,7 +454,7 @@ async def start(client, message):
                     logger.exception(e)
                     f_caption=f_caption
             if f_caption is None:
-                f_caption = f"{clean_file_name(files1["file_name"])"
+                f_caption = f"{clean_file_name(files1['file_name'])"
             if not await db.has_premium_access(message.from_user.id):
                 if not await check_verification(client, message.from_user.id) and VERIFY == True:
                     btn = [[
