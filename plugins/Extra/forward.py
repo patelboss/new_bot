@@ -14,7 +14,7 @@ logger = logging.getLogger("Forward")
 
 # Command to start forwarding (accessible by everyone)
 from pyrogram import Client, filters
-from pyrogram.types import Message, ParseMode
+from pyrogram.types import Messagee
 from datetime import datetime
 import logging
 
