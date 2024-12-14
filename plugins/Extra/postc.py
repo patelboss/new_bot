@@ -12,13 +12,13 @@ async def post_message(client, message):
     command_parts = message.text.split()
     
     if len(command_parts) < 2 or not message.reply_to_message:
-        await message.reply(TEXTS["no_message_to_post"], parse_mode="HTML")
+        await message.reply(TEXTS["no_message_to_post"], parse_mode=ParseMode.HTML)
         return
 
     channel_id = command_parts[1]
 
     if not channel_id.startswith("-100"):
-        await message.reply(TEXTS["invalid_channel_id"], parse_mode="HTML")
+        await message.reply(TEXTS["invalid_channel_id"], parse_mode=ParseMode.HTML)
         return
 
     user_id = message.from_user.id
@@ -26,10 +26,10 @@ async def post_message(client, message):
 
     if isinstance(result, bool):
         if not result:
-            await message.reply(TEXTS["permission_denied"], parse_mode="HTML")
+            await message.reply(TEXTS["permission_denied"], parse_mode=ParseMode.HTML)
             return
     elif isinstance(result, dict) and "error" in result:
-        await message.reply(f"<b>{result['error']}</b>", parse_mode="HTML")
+        await message.reply(f"<b>{result['error']}</b>", parse_mode=ParseMode.HTML)
         return
 
     replied_message = message.reply_to_message
@@ -53,18 +53,18 @@ async def post_message(client, message):
     )
 
     if success:
-        await message.reply(TEXTS["post_success"].format(channel_id=channel_id), parse_mode="HTML")
+        await message.reply(TEXTS["post_success"].format(channel_id=channel_id), parse_mode=ParseMode.HTML)
     else:
-        await message.reply(TEXTS["failed_to_post"].format(error=error), parse_mode="HTML")
+        await message.reply(TEXTS["failed_to_post"].format(error=error), parse_mode=ParseMode.HTML)
 
-async def send_post(client, channel_id, replied_message, caption_without_buttons, reply_markup, protect_content=False):
+async def send_post(client, channel_id, replied_message, caption_without_buttons, reply_markup, parse_mode=ParseMode.HTML):
     try:
         if replied_message.photo:
             await client.send_photo(
                 chat_id=channel_id,
                 photo=replied_message.photo.file_id,
                 caption=caption_without_buttons,
-                parse_mode="MARKDOWN",
+                parse_mode=ParseMode.MARKDOWN,
                 reply_markup=reply_markup,
                 protect_content=protect_content,
             )
@@ -73,7 +73,7 @@ async def send_post(client, channel_id, replied_message, caption_without_buttons
                 chat_id=channel_id,
                 video=replied_message.video.file_id,
                 caption=caption_without_buttons,
-                parse_mode="MARKDOWN",
+                parse_mode=ParseMode.MARKDOWN,
                 reply_markup=reply_markup,
                 protect_content=protect_content,
             )
@@ -82,7 +82,7 @@ async def send_post(client, channel_id, replied_message, caption_without_buttons
                 chat_id=channel_id,
                 document=replied_message.document.file_id,
                 caption=caption_without_buttons,
-                parse_mode="MARKDOWN",
+                parse_mode=ParseMode.MARKDOWN,
                 reply_markup=reply_markup,
                 protect_content=protect_content,
             )
@@ -90,7 +90,7 @@ async def send_post(client, channel_id, replied_message, caption_without_buttons
             await client.send_message(
                 chat_id=channel_id,
                 text=caption_without_buttons,
-                parse_mode="MARKDOWN",
+                parse_mode=ParseMode.MARKDOWN,
                 reply_markup=reply_markup,
                 protect_content=protect_content,
                 disable_web_page_preview=True,  # Disable web preview for text messages
