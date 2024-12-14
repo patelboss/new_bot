@@ -19,7 +19,7 @@ import traceback
 import random
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ChatPermissions
 from pyrogram import enums
-
+from utils import clean_file_name
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.ERROR)
 lock = asyncio.Lock()
@@ -31,17 +31,6 @@ BUTTONS0 = {}
 BUTTONS1 = {}
 BUTTONS2 = {}
 SPELL_CHECK = {}
-# config.py
-FILTER_KEYWORDS = ['[', '@', 'www.', 'movie', 'www', 'telegram', 'tg']
-#from config import FILTER_KEYWORDS
-
-def clean_file_name(file_name):
-    return ' '.join(filter(lambda x: not any(keyword in x for keyword in FILTER_KEYWORDS), file_name.split()))
-
-#InlineKeyboardButton(
-#    text=f"☞{get_size(file['file_size'])} ◉ {clean_file_name(file['file_name'])}",
-#    callback_data=f'{pre}#{file["file_id"]}'
-#)
 
 @Client.on_message(filters.group & filters.text & filters.incoming)
 
