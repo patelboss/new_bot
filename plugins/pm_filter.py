@@ -29,85 +29,110 @@ BUTTONS2 = {}
 SPELL_CHECK = {}
 
 @Client.on_message(filters.group & filters.text & filters.incoming)
+import traceback
+import random
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ChatPermissions
+from pyrogram import enums
+
 async def give_filter(client, message):
     chat_id = message.chat.id
-    user_id = message.from_user.id if message.from_user else 0
+    user = message.from_user  # Get the user object
+    user_id = user.id if user else 0  # Fallback to 0 if no user ID is available
 
-    # If the message is not from the support chat
-    if chat_id != SUPPORT_CHAT_ID:
-        settings = await get_settings(chat_id)
+    try:
+        # If not from the support chat
+        if chat_id != SUPPORT_CHAT_ID:
+            settings = await get_settings(chat_id)
 
-        # Check if forced subscription is enabled
-        if settings.get("fsub"):
-            try:
-                btn = await pub_is_subscribed(client, message, settings["fsub"])
-                if btn:
-                    btn.append([InlineKeyboardButton("Unmute Me 🔕", callback_data=f"unmuteme#{user_id}")])
-                    await client.restrict_chat_member(chat_id, user_id, ChatPermissions(can_send_messages=False))
-                    await message.reply_photo(
-                        photo=random.choice(PICS),
-                        caption=f"👋 Hello {message.from_user.mention},\n\nPlease join the channel and then click the 'Unmute Me' button. 😇",
-                        reply_markup=InlineKeyboardMarkup(btn),
-                        parse_mode=enums.ParseMode.HTML,
-                    )
-                    return
-            except Exception as e:
-                print(e)
+            if settings.get("fsub"):
+                try:
+                    btn = await pub_is_subscribed(client, message, settings["fsub"])
+                    if btn:
+                        btn.append([InlineKeyboardButton("Unmute Me 🔕", callback_data=f"unmuteme#{user_id}")])
 
-        # Handle manual filters
-        manual = await manual_filters(client, message)
-        if not manual:
-            # Check for auto-filter settings
-            if settings.get("auto_ffilter", False):
+                        # Check if user exists before attempting to restrict
+                        if user:
+                            await client.restrict_chat_member(chat_id, user_id, ChatPermissions(can_send_messages=False))
+
+                        photo = random.choice(PICS) if PICS else None
+                        mention = user.mention if user else "Anonymous User"
+
+                        # Send FSub message
+                        if photo:
+                            await message.reply_photo(
+                                photo=photo,
+                                caption=f"👋 Hello {mention},\n\n"
+                                        "Please join the channel and then click the 'Unmute Me' button. 😇",
+                                reply_markup=InlineKeyboardMarkup(btn),
+                                parse_mode=enums.ParseMode.HTML,
+                            )
+                        else:
+                            await message.reply_text(
+                                f"👋 Hello {mention},\n\n"
+                                "Please join the channel and then click the 'Unmute Me' button. 😇",
+                                reply_markup=InlineKeyboardMarkup(btn),
+                            )
+                        return
+                except Exception as e:
+                    await send_error_log(client, "GFILTER", e)
+
+            # Handle manual and auto filters
+            manual = await manual_filters(client, message)
+            if not manual and settings.get("auto_ffilter", False):
                 ai_search = True
                 reply_msg = await message.reply_text(f"<b><i>Searching for {message.text} 🔍</i></b>")
                 await auto_filter(client, message.text, message, reply_msg, ai_search)
-            else:
-                grpid = await active_connection(str(user_id))
-                await save_group_settings(grpid, "auto_ffilter", True)
-                settings = await get_settings(chat_id)
-                if settings.get("auto_ffilter"):
-                    ai_search = True
-                    reply_msg = await message.reply_text(f"<b><i>Searching for {message.text} 🔍</i></b>")
-                    await auto_filter(client, message.text, message, reply_msg, ai_search)
 
-    # If the message is from the support chat
-    else:
-        search = message.text
-        temp_files, temp_offset, total_results = await get_search_results(
-            chat_id=chat_id, query=search.lower(), offset=0, filter=True
-        )
-        if total_results > 0:
-            # If files are found, reply with the group link
-            await message.reply_text(
-                f"<b>Hey {message.from_user.mention}, {total_results} results found in my database for your query '{search}'.\n\n"
-                "This is a support group, so you can't get files here.\n\n"
-                "Search Group Link: https://t.me/Filmykeedha/306</b>",
-                disable_web_page_preview=True
-            )
-            
+        # If from the support chat
         else:
-            # If no files are found, create a request
-            try:
-                reporter = str(message.from_user.id)
-                mention = message.from_user.mention
-                content = search
-
+            search = message.text
+            temp_files, temp_offset, total_results = await get_search_results(
+                chat_id=chat_id, query=search.lower(), offset=0, filter=True
+            )
+            if total_results > 0:
+                mention = user.mention if user else "Anonymous User"
+                await message.reply_text(
+                    f"<b>Hey {mention}, {total_results} results found for '{search}'.\n\n"
+                    "This is a support group, so you can't get files here.\n\n"
+                    "Search Group Link: https://t.me/Filmykeedha/306</b>",
+                    disable_web_page_preview=True
+                )
+            else:
                 if REQST_CHANNEL:
                     btn = [[
-                        InlineKeyboardButton('View Request', url=f"{message.link}"),
-                        InlineKeyboardButton('Show Options', callback_data=f'show_option#{reporter}')
+                        InlineKeyboardButton('View Request', url=message.link),
+                        InlineKeyboardButton('Show Options', callback_data=f'show_option#{user_id}')
                     ]]
-                    await client.send_message(
-                        chat_id=REQST_CHANNEL,
-                        text=f"<b>𝖱𝖾𝗉𝗈𝗋𝗍𝖾𝗋 : {mention} ({reporter})\n\n𝖬𝖾𝗌𝗌𝖺𝗀𝖾 : {content}</b>",
-                        reply_markup=InlineKeyboardMarkup(btn)
-                    )
+                    try:
+                        mention = user.mention if user else "Anonymous User"
+                        await client.send_message(
+                            chat_id=REQST_CHANNEL,
+                            text=f"<b>Reporter: {mention} ({user_id})\n\nMessage: {search}</b>",
+                            reply_markup=InlineKeyboardMarkup(btn)
+                        )
+                    except Exception as e:
+                        await send_error_log(client, "GFILTER", e)
                 else:
                     await message.reply_text("<b>Request channel is not configured. Please contact the admin.</b>")
-            except Exception as e:
-                await message.reply_text(f"<b>Error while requesting: {e}</b>")
+    except Exception as e:
+        await send_error_log(client, "GFILTER", e)
 
+
+async def send_error_log(client, prefix, error):
+    """
+    Send error logs to LOG_CHANNEL with a unique prefix and traceback.
+    """
+    try:
+        error_details = "".join(traceback.format_exception(None, error, error.__traceback__))
+        await client.send_message(
+            LOG_CHANNEL,
+            f"<b>{prefix} Error:</b>\n\n"
+            f"<pre>{error_details}</pre>",
+            parse_mode=enums.ParseMode.HTML,
+        )
+    except Exception as log_error:
+        print(f"Failed to send error log: {log_error}")
+        
 @Client.on_message(filters.private & filters.text & filters.incoming)
 async def pm_text(bot, message):
     content = message.text
