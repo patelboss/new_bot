@@ -13,6 +13,13 @@ IST = pytz.timezone('Asia/Kolkata')
 logger = logging.getLogger("Forward")
 
 # Command to start forwarding (accessible by everyone)
+from pyrogram import Client, filters
+from pyrogram.types import Message, ParseMode
+from datetime import datetime
+import logging
+
+logger = logging.getLogger(__name__)
+
 @Client.on_message(filters.command("forward"))
 async def forward_command(client: Client, message: Message):
     try:
@@ -23,7 +30,7 @@ async def forward_command(client: Client, message: Message):
         if len(args) < 3:
             await message.reply(
                 "Usage: <code>/forward &lt;f/c/pf/cf&gt; &lt;from_channel_id&gt; &lt;to_channel_id&gt;</code>",
-                parse_mode=ParseMode.HTML
+                parse_mode=ParseMode.HTML  # Correctly using ParseMode.HTML
             )
             logger.warning("Forward command usage error: Invalid number of arguments.")
             return
@@ -31,25 +38,30 @@ async def forward_command(client: Client, message: Message):
         forward_type, from_channel, *to_channels = args[1:]
         logger.info(f"Forwarding type: {forward_type}, From channel: {from_channel}, To channels: {to_channels}")
 
-        
         # Check if bot is in the target channel(s)
         bot_in_channels = await check_bot_in_channels(client, from_channel, to_channels)
         if not bot_in_channels:
             await message.reply(
                 "<b>Bot must be a member of all target channels.</b>",
-                parse_mode=ParseMode.HTML
+                parse_mode=ParseMode.HTML  # Correctly using ParseMode.HTML
             )
             logger.warning(f"Bot is not a member of all target channels for user {message.from_user.id}.")
             return
+        
         # Check user rights in the source and target channels
         has_permission = await check_user_rights(client, message.from_user.id, from_channel, to_channels)
         if not has_permission:
             await message.reply(
                 "<b>You must be an admin or owner in the source and target channels to set up forwarding.</b>",
-                parse_mode=ParseMode.HTML
+                parse_mode=ParseMode.HTML  # Correctly using ParseMode.HTML
             )
             logger.warning(f"User {message.from_user.id} does not have permission to forward messages.")
             return
+        
+        # Fetch channel data and save to the database for both source and target channels
+        await fetch_and_save_channel_data(client, message.from_user.id, from_channel)
+        for channel in to_channels:
+            await fetch_and_save_channel_data(client, message.from_user.id, channel)
         
         # Save the forwarding data in the database
         save_forward_data(from_channel, to_channels, forward_type, added_by=message.from_user.id, user_id=message.from_user.id)
@@ -58,7 +70,7 @@ async def forward_command(client: Client, message: Message):
         # Acknowledge the setup
         await message.reply(
             "<b>Forwarding setup complete! I will start forwarding messages.</b>",
-            parse_mode=ParseMode.HTML
+            parse_mode=ParseMode.HTML  # Correctly using ParseMode.HTML
         )
         
         # Start forwarding messages
@@ -68,9 +80,79 @@ async def forward_command(client: Client, message: Message):
         logger.error(f"Error in /forward command: {e}")
         await message.reply(
             "<b>An error occurred while setting up forwarding.</b>",
-            parse_mode=ParseMode.HTML
+            parse_mode=ParseMode.HTML  # Correctly using ParseMode.HTML
         )
 
+
+async def fetch_and_save_channel_data(client, user_id, channel):
+    """
+    Fetch and save channel data for the specified channel.
+    """
+    try:
+        # Fetch channel information
+        chat = await client.get_chat(channel)
+
+        # Extract necessary details
+        channel_id = chat.id
+        channel_name = chat.title
+        channel_type = "private" if chat.type == "private" else "public"
+        invite_link = await client.export_chat_invite_link(channel)  # This requires bot to be an admin
+        members_count = await client.get_chat_members_count(channel)
+
+        # Calculate average views (this is a placeholder for the actual logic)
+        average_views = await calculate_average_views(client, channel)
+
+        # Save the channel and user data
+        save_user_in_channel(
+            user_id=user_id,
+            channel=channel,
+            channel_id=channel_id,
+            channel_name=channel_name,
+            channel_type=channel_type,
+            invite_link=invite_link,
+            members_count=members_count,
+            average_views=average_views
+        )
+
+    except Exception as e:
+        logger.error(f"Error fetching and saving data for channel {channel}: {e}")
+
+
+async def calculate_average_views(client, channel):
+    """
+    Dummy function to calculate average views for posts in the channel.
+    Replace this with the actual logic for tracking views per post.
+    """
+    # Placeholder for the actual average views calculation logic
+    return 100  # Return a fixed value for now
+
+
+def save_user_in_channel(user_id, channel, channel_id, channel_name, channel_type, invite_link, members_count, average_views):
+    """
+    Save the user and channel data in the database.
+    """
+    try:
+        # Define the data to be saved
+        user_data = {
+            'user_id': user_id,
+            'channel': channel,
+            'channel_id': channel_id,
+            'channel_name': channel_name,
+            'channel_type': channel_type,
+            'invite_link': invite_link,
+            'members_count': members_count,
+            'average_views': average_views,
+            'saved_date': datetime.now(),
+            'updated_date': datetime.now()  # Save the date of saving
+        }
+        
+        # Save data in your collection (replace with your actual database call)
+        user_collection.insert_one(user_data)
+        logger.info(f"User {user_id} data saved for channel {channel}.")
+    
+    except Exception as e:
+        logger.error(f"Error saving user {user_id} data for channel {channel}: {e}")
+        
 async def check_user_rights(client: Client, user_id, from_channel, to_channels):
     """
     Check if the user is an admin or owner in the from_channel and all target channels.
