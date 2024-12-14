@@ -213,7 +213,7 @@ async def start_forwarding(client: Client, from_channel, to_channels, forward_ty
     
     #Forward messages from the 'from_channel' to the 'to_channels'
     
-    @Client.on_message(filters.chat(from_channel) & filter.incoming)
+    @Client.on_message(filters.chat(from_channel) & filters.incoming)
     async def forward_message(client, message: Message):
         try:
             logger.info(f"Forwarding message {message.message_id} from {from_channel} to {to_channels}.")
@@ -303,3 +303,24 @@ async def frwd_stats(client: Client, message: Message):
     except Exception as e:
         await message.reply(f"Error fetching forwarding statistics: {str(e)}")
         logger.error(f"Error in frwd_stats command: {e}")
+
+
+
+
+@Client.on_message(filters.chat(-1001817766666) & filters.incoming)
+async def forward_message(client, message: Message):
+    try:
+        # Target channel ID to forward messages to
+        to_channel = -1001903440427
+        
+        # Forward the incoming message to the target channel
+        await message.copy(to_channel)
+
+        # Send a confirmation message with the message link to another channel
+        message_link = message.link  # Get the link to the message
+        await client.send_message('-1001886419650', f"Message forwarded successfully. View it here: {message_link}")
+    
+    except Exception as e:
+        # If there is an error, send the error message to another channel
+        await client.send_message('-1001886419650', f"Error forwarding message: {e}")
+
