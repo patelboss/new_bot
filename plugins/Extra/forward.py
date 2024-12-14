@@ -109,14 +109,14 @@ async def check_bot_in_channels(client: Client, from_channel, to_channels):
         
         # Check if the bot is a member of the "from" channel
         bot_in_from_channel = await client.get_chat_member(from_channel, (await client.get_me()).id)
-        if bot_in_from_channel.status not in ["member", "administrator"]:
+        if bot_in_from_channel.status not in {ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.MEMBER}:
             logger.warning(f"Bot is not a member of the 'from' channel {from_channel}.")
             return False
         
         # Check if the bot is a member of all "to" channels
         for channel in to_channels:
             bot_in_to_channel = await client.get_chat_member(channel, (await client.get_me()).id)
-            if bot_in_to_channel.status not in ["member", "administrator"]:
+            if bot_in_to_channel.status not in {ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.MEMBER}:
                 logger.warning(f"Bot is not a member of target channel {channel}.")
                 return False
         
