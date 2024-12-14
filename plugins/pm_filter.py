@@ -3189,7 +3189,9 @@ async def advantage_spell_chok(client, name, msg, reply_msg, vj_search=None):
 
     # Enhanced matching logic using fuzzy matching
     if AI_SPELL_CHECK and vj_search:
+        
         try:
+            vj_search_new = False
             vj_ai_msg = await safe_edit_text(reply_msg, "<b><i>Advanced AI is trying to find the best match for your request.</i></b>")
             matched_movie = None
             for techvj in movielist:
