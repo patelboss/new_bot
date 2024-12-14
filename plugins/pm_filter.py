@@ -3103,7 +3103,7 @@ async def auto_filter(client, name, msg, reply_msg, ai_search, spoll=False):
             await message.delete()
 
 import logging
-
+from rapidfuzz import fuzz, process
 # Configure logging
 logger = logging.getLogger("advantage_spell_chok")
 logger.setLevel(logging.DEBUG)
@@ -3118,8 +3118,6 @@ async def safe_edit_text(msg, new_text, **kwargs):
         return await msg.edit_text(new_text, **kwargs)
     logger.debug("Message not modified as the text is identical.")
     return msg
-import re
-from fuzzywuzzy import fuzz, process
 
 async def advantage_spell_chok(client, name, msg, reply_msg, vj_search):
     mv_id = msg.id
@@ -3132,15 +3130,17 @@ async def advantage_spell_chok(client, name, msg, reply_msg, vj_search):
     settings = await get_settings(msg.chat.id)
     logger.debug(f"Chat settings: {settings}")
 
-    # Separate numbers and text from the request
-    numbers_in_query = re.findall(r'\d+', mv_rqst)  # Extract all numbers
-    text_in_query = re.sub(r'\d+', '', mv_rqst).strip()  # Remove numbers to leave only text
-    logger.info(f"Text part of the request: {text_in_query}")
-    logger.info(f"Numbers found in query: {numbers_in_query}")
+    # Process the query string with enhanced logging
+    query = re.sub(
+        r"\b(pl(i|e)*?(s|z+|ease|se|ese|(e+)s(e)?)|((send|snd|giv(e)?|gib)(\sme)?)|movie(s)?|new|latest|br((o|u)h?)*|^h(e|a)?(l)*(o)*|mal(ayalam)?|t(h)?amil|file|that|find|und(o)*|kit(t(i|y)?)?o(w)?|thar(u)?(o)*w?|kittum(o)*|aya(k)*(um(o)*)?|full\smovie|any(one)|with\ssubtitle(s)?)",
+        "", msg.text, flags=re.IGNORECASE
+    ).strip() + " movie"
+    logger.info(f"Processed query: {query}")
 
     # Fetch movie data
     try:
         movies = await get_poster(mv_rqst, bulk=True)
+        logger.info(f"Fetched {len(movies)} movies for query: {mv_rqst}")
     except Exception as e:
         logger.error(f"Error fetching movies: {e}")
         reqst_gle = mv_rqst.replace(" ", "+")
@@ -3160,62 +3160,51 @@ async def advantage_spell_chok(client, name, msg, reply_msg, vj_search):
     SPELL_CHECK[mv_id] = movielist
     logger.info(f"Fetched movie list: {movielist}")
 
-    # Use fuzzy matching on the text part of the request
-    best_match, score = process.extractOne(text_in_query, movielist, scorer=fuzz.partial_ratio)
-    logger.info(f"Best match found: {best_match} with score: {score}")
+    # Enhanced matching logic using fuzzy matching
+    if AI_SPELL_CHECK and vj_search:
+        logger.debug("AI Spell Check enabled. Attempting to find the best match.")
+        vj_search_new = False
+        vj_ai_msg = await safe_edit_text(reply_msg, "<b><i>Advanced AI is trying to find the best match for your request.</i></b>")
+        matched_movie = None
+        for techvj in movielist:
+            ratio = fuzz.ratio(mv_rqst.lower(), techvj.lower())
+            logger.debug(f"Comparing '{mv_rqst}' with '{techvj}', similarity ratio: {ratio}")
+            if ratio > 70:  # Define a threshold for a good match
+                matched_movie = techvj
+                logger.info(f"Best match found: {matched_movie} with ratio: {ratio}")
+                break
 
-    if score >= 70:  # If the score is 80 or above, reattach the number to the best match
-        logger.info(f"Match score is above 80, reattaching the number to the match")
-        if numbers_in_query:
-            best_match_with_number = f"{best_match} {' '.join(numbers_in_query)}"
-            logger.info(f"Final matched movie: {best_match_with_number}")
-            await auto_filter(client, best_match_with_number, msg, reply_msg, vj_search)
+        if matched_movie:
+            await auto_filter(client, matched_movie, msg, reply_msg, vj_search_new)
         else:
-            # If no numbers were found, just proceed with the best match
-            await auto_filter(client, best_match, msg, reply_msg, vj_search)
-    else:
-        # No match with score above 80, proceed with spell check
-        if AI_SPELL_CHECK and vj_search:
-            vj_search_new = False
-            vj_ai_msg = await safe_edit_text(reply_msg, "<b><i>Advance Ai Try To Find Your Movie With Your Wrong Spelling.</i></b>")
-            for techvj in movielist:
-                try:
-                    mv_rqst = mv_rqst.capitalize()
-                except Exception as e:
-                    logger.warning(f"Error capitalizing movie request: {e}")
-                if mv_rqst.startswith(techvj[0]):
-                    logger.info(f"AI processing matched movie: {techvj}")
-                    await auto_filter(client, techvj, msg, reply_msg, vj_search_new)
-                    break
-            else:
-                reqst_gle = mv_rqst.replace(" ", "+")
-                button = [
-                    [InlineKeyboardButton("Gᴏᴏɢʟᴇ", url=f"https://www.google.com/search?q={reqst_gle}")],
-                    [InlineKeyboardButton("Request Group", url="https://t.me/+GXTgHzS9LtViN2U9")]
-                ]
-                if NO_RESULTS_MSG:
-                    await client.send_message(chat_id=LOG_CHANNEL, text=(script.NORSLTS.format(reqstr.id, reqstr.mention, mv_rqst)))
-                k = await safe_edit_text(reply_msg, script.I_CUDNT.format(mv_rqst), reply_markup=InlineKeyboardMarkup(button))
-                await asyncio.sleep(30)
-                await k.delete()
-                return
-        else:
-            # Show spell-check options if no match was found or no AI search
-            btn = [
-                [InlineKeyboardButton(text=movie_name.strip(), callback_data=f"spol#{reqstr1}#{k}")]
-                for k, movie_name in enumerate(movielist)
+            logger.warning(f"No suitable match found for '{mv_rqst}'. Redirecting to Google search.")
+            reqst_gle = mv_rqst.replace(" ", "+")
+            button = [
+                [InlineKeyboardButton("Gᴏᴏɢʟᴇ", url=f"https://www.google.com/search?q={reqst_gle}")],
+                [InlineKeyboardButton("Request Group", url="https://t.me/+GXTgHzS9LtViN2U9")]
             ]
-            btn.append([InlineKeyboardButton(text="Close", callback_data=f'spol#{reqstr1}#close_spellcheck')])
-            spell_check_del = await safe_edit_text(reply_msg, script.CUDNT_FND.format(mv_rqst), reply_markup=InlineKeyboardMarkup(btn))
-            logger.info(f"Displayed spell-check results for: {mv_rqst}")
+            if NO_RESULTS_MSG:
+                await client.send_message(chat_id=LOG_CHANNEL, text=(script.NORSLTS.format(reqstr.id, reqstr.mention, mv_rqst)))
+            k = await safe_edit_text(reply_msg, script.I_CUDNT.format(mv_rqst), reply_markup=InlineKeyboardMarkup(button))
+            await asyncio.sleep(30)
+            await k.delete()
+            return
+    else:
+        btn = [
+            [InlineKeyboardButton(text=movie_name.strip(), callback_data=f"spol#{reqstr1}#{k}")]
+            for k, movie_name in enumerate(movielist)
+        ]
+        btn.append([InlineKeyboardButton(text="Close", callback_data=f'spol#{reqstr1}#close_spellcheck')])
+        spell_check_del = await safe_edit_text(reply_msg, script.CUDNT_FND.format(mv_rqst), reply_markup=InlineKeyboardMarkup(btn))
+        logger.info(f"Displayed spell-check results for: {mv_rqst}")
 
-            try:
-                if settings.get('auto_delete', False):
-                    logger.debug("Auto-deleting the spell-check message after 600 seconds.")
-                    await asyncio.sleep(600)
-                    await spell_check_del.delete()
-            except Exception as e:
-                logger.error(f"Error in auto-delete: {e}")
+        try:
+            if settings.get('auto_delete', False):
+                logger.debug("Auto-deleting the spell-check message after 600 seconds.")
+                await asyncio.sleep(600)
+                await spell_check_del.delete()
+        except Exception as e:
+            logger.error(f"Error in auto-delete: {e}")
 
 async def manual_filters(client, message, text=False):
     settings = await get_settings(message.chat.id)
