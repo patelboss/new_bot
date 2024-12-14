@@ -3192,7 +3192,7 @@ async def advantage_spell_chok(client, name, msg, reply_msg, vj_search=None):
         
         try:
             vj_search_new = False
-            vj_ai_msg = await safe_edit_text(reply_msg, "<b><i>Advanced AI is trying to find the best match for your request.</i></b>")
+            vj_ai_msg = await safe_edit_text(reply_msg, "<b><i>Advanced AI is trying to find the best match for your request. Wait...</i></b>")
             matched_movie = None
             for techvj in movielist:
                 ratio = fuzz.ratio(mv_rqst.lower(), techvj.lower())
