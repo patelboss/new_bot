@@ -17,7 +17,7 @@ async def pm_broadcast(bot, message):
         try:
             b_msg = await asyncio.wait_for(
                 bot.ask(chat_id=message.from_user.id, text="Send your broadcast message (type or forward)."),
-                timeout=60
+                timeout=65
             )
         except asyncio.TimeoutError:
             await message.reply_text("⏳ Time's up! Broadcast canceled.")
@@ -47,6 +47,18 @@ async def pm_broadcast(bot, message):
                         deleted += 1
                     else:
                         failed += 1
+                except FloodWait as x:
+                    logger.warning(f"FloodWait of {x.value} seconds encountered. Waiting...")
+                    await asyncio.sleep(x.value)
+                except InputUserDeactivated:
+                    logger.warning(f"User {user['id']} is deactivated.")
+                    deleted += 1
+                except UserIsBlocked:
+                    logger.warning(f"User {user['id']} has blocked the bot.")
+                    blocked += 1
+                except PeerIdInvalid:
+                    logger.warning(f"Invalid peer ID for user {user['id']}.")
+                    failed += 1
                 except Exception as e:
                     logger.error(f"Error broadcasting to user {user['id']}: {e}")
                     failed += 1
@@ -60,6 +72,7 @@ async def pm_broadcast(bot, message):
     except Exception as e:
         logger.error(f"Error in pm_broadcast: {e}")
         await message.reply_text("An error occurred during the PM broadcast.")
+
 
 @Client.on_message(filters.command("grp_broadcast") & filters.user(ADMINS))
 async def broadcast_group(bot, message):
@@ -95,6 +108,9 @@ async def broadcast_group(bot, message):
                         success += 1
                     else:
                         failed += 1
+                except FloodWait as e:
+                    logger.warning(f"FloodWait of {e.value} seconds encountered. Waiting...")
+                    await asyncio.sleep(e.value)
                 except Exception as e:
                     logger.error(f"Error broadcasting to group {group['id']}: {e}")
                     failed += 1
