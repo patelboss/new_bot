@@ -3194,7 +3194,6 @@ async def safe_edit_text(msg, new_text, **kwargs):
     logger.debug("Message not modified as the text is identical.")
     return msg
 
-
 async def advantage_spell_chok(client, name, msg, reply_msg, vj_search=None):
     mv_id = msg.id
     mv_rqst = msg.text.strip()
@@ -3250,7 +3249,7 @@ async def advantage_spell_chok(client, name, msg, reply_msg, vj_search=None):
             matched_movie, score = result[0], result[1]  # Correct unpacking
 
             # If we find a match with a high enough score, consider it a match
-            if score > 85:  # Adjust threshold as needed (85% match or higher)
+            if score > 75:  # Adjust threshold as needed (85% match or higher)
                 await auto_filter(client, matched_movie, msg, reply_msg, vj_search_new)
             else:
                 # Show multiple possible matches
@@ -3268,11 +3267,20 @@ async def advantage_spell_chok(client, name, msg, reply_msg, vj_search=None):
             # Show the best match with higher confidence, else top 5 closest matches
             best_match, score = process.extractOne(mv_rqst, movielist, scorer=fuzz.token_sort_ratio)
 
-            if score > 85:  # Best match found with enough confidence
+            if score > 65:  # Best match found with enough confidence
                 await auto_filter(client, best_match, msg, reply_msg, vj_search_new=False)
             else:
                 # Show top 5 closest matches with fuzzywuzzy
                 best_matches = process.extract(mv_rqst, movielist, scorer=fuzz.token_sort_ratio, limit=5)
+                if not best_matches:
+                    reqst_gle = mv_rqst.replace(" ", "+")
+                    button = [
+                        [InlineKeyboardButton("Gᴏᴏɢʟᴇ", url=f"https://www.google.com/search?q={reqst_gle}")],
+                        [InlineKeyboardButton("Request Group", url="https://t.me/+GXTgHzS9LtViN2U9")]
+                    ]
+                    await safe_edit_text(reply_msg, f"**No matches found** for **{mv_rqst}**. Try searching on Google.", reply_markup=InlineKeyboardMarkup(button))
+                    return
+                
                 btn = [
                     [InlineKeyboardButton(text=f"{match[0]} (Score: {match[1]})", callback_data=f"spol#{reqstr1}#{i}")]
                     for i, match in enumerate(best_matches)
@@ -3287,7 +3295,7 @@ async def advantage_spell_chok(client, name, msg, reply_msg, vj_search=None):
                     await spell_check_del.delete()
         except Exception as e:
             await send_error_log(client, "3254", e)
-            await send_error_log(client, "Error in spell-check display or auto-delete", e)
+            #await send_error_log(client, "Error in spell-check display or auto-delete", e)
 
 
 async def manual_filters(client, message, text=False):
