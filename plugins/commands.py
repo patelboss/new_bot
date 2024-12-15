@@ -296,7 +296,7 @@ async def start(client, message):
                 if "BATCH_FILE_CAPTION" in globals() and BATCH_FILE_CAPTION:
                     try:
                         caption = BATCH_FILE_CAPTION.format(
-                            file_name=title or "",
+                            file_name= {clean_file_name(title)} or "",
                             file_size=size or "",
                             file_caption=caption or ""
                         )
