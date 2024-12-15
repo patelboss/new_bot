@@ -20,6 +20,10 @@ import random
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ChatPermissions
 from pyrogram import enums
 from utils import clean_file_name
+from fuzzywuzzy import fuzz, process
+import logging
+from rapidfuzz import fuzz, process
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.ERROR)
 lock = asyncio.Lock()
@@ -3170,9 +3174,6 @@ async def auto_filter(client, name, msg, reply_msg, ai_search, spoll=False):
             await asyncio.sleep(300)
             await fuk.delete()
             await message.delete()
-
-import logging
-from rapidfuzz import fuzz, process
 # Configure logging
 logger = logging.getLogger("advantage_spell_chok")
 logger.setLevel(logging.DEBUG)
@@ -3193,8 +3194,6 @@ async def safe_edit_text(msg, new_text, **kwargs):
     logger.debug("Message not modified as the text is identical.")
     return msg
 
-from fuzzywuzzy import fuzz, process
-from pyrogram import InlineKeyboardButton, InlineKeyboardMarkup
 
 async def advantage_spell_chok(client, name, msg, reply_msg, vj_search=None):
     mv_id = msg.id
