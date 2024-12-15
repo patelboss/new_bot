@@ -146,8 +146,6 @@ async def is_subscribed(bot, query):
 
     return True
 
-
-
 async def get_poster(query, bulk=False, id=False, file=None):
     if not id:
         query = (query.strip()).lower()
@@ -162,32 +160,41 @@ async def get_poster(query, bulk=False, id=False, file=None):
                 year = list_to_str(year[:1]) 
         else:
             year = None
+        
+        # Search movies
         movieid = imdb.search_movie(title.lower(), results=10)
-        if not movieid:
+        if not movieid:  # No search results
             return None
+
+        # Filter by year (if applicable)
         if year:
-            filtered=list(filter(lambda k: str(k.get('year')) == str(year), movieid))
-            if not filtered:
+            filtered = list(filter(lambda k: str(k.get('year')) == str(year), movieid))
+            if not filtered:  # If year filter returns nothing, fallback to all results
                 filtered = movieid
         else:
             filtered = movieid
-        movieid=list(filter(lambda k: k.get('kind') in ['movie', 'tv series'], filtered))
-        if not movieid:
+        
+        # Filter for valid kinds (movies or TV series)
+        movieid = list(filter(lambda k: k.get('kind') in ['movie', 'tv series'], filtered))
+        if not movieid:  # If kind filter returns nothing, fallback to original results
             movieid = filtered
+        
+        # Return list of movies for bulk=True
         if bulk:
-            return movieid
+            return movieid if movieid else None  # Explicitly handle empty list
+
+        # If not bulk, select the first movie
         movieid = movieid[0].movieID
     else:
         movieid = query
+
+    # Fetch detailed movie data
     movie = imdb.get_movie(movieid)
     if not movie:
         return None
-    if movie.get("original air date"):
-        date = movie["original air date"]
-    elif movie.get("year"):
-        date = movie.get("year")
-    else:
-        date = "N/A"
+
+    # Extract relevant details
+    date = movie.get("original air date") or movie.get("year") or "N/A"
     plot = ""
     if not LONG_IMDB_DESCRIPTION:
         plot = movie.get('plot')
@@ -196,7 +203,7 @@ async def get_poster(query, bulk=False, id=False, file=None):
     else:
         plot = movie.get('plot outline')
     if plot and len(plot) > 800:
-        plot = plot[0:800] + "..."
+        plot = plot[:800] + "..."
 
     return {
         'title': movie.get('title'),
@@ -213,10 +220,10 @@ async def get_poster(query, bulk=False, id=False, file=None):
         "certificates": list_to_str(movie.get("certificates")),
         "languages": list_to_str(movie.get("languages")),
         "director": list_to_str(movie.get("director")),
-        "writer":list_to_str(movie.get("writer")),
-        "producer":list_to_str(movie.get("producer")),
-        "composer":list_to_str(movie.get("composer")) ,
-        "cinematographer":list_to_str(movie.get("cinematographer")),
+        "writer": list_to_str(movie.get("writer")),
+        "producer": list_to_str(movie.get("producer")),
+        "composer": list_to_str(movie.get("composer")),
+        "cinematographer": list_to_str(movie.get("cinematographer")),
         "music_team": list_to_str(movie.get("music department")),
         "distributors": list_to_str(movie.get("distributors")),
         'release_date': date,
@@ -225,8 +232,9 @@ async def get_poster(query, bulk=False, id=False, file=None):
         'poster': movie.get('full-size cover url'),
         'plot': plot,
         'rating': str(movie.get("rating")),
-        'url':f'https://www.imdb.com/title/tt{movieid}'
+        'url': f'https://www.imdb.com/title/tt{movieid}'
     }
+
 async def broadcast_messages(user_id, message, forward=False):
     try:
         if forward:
