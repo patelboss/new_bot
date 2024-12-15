@@ -3165,8 +3165,16 @@ async def advantage_spell_chok(client, name, msg, reply_msg, vj_search=None):
 
     try:
         movies = await get_poster(mv_rqst, bulk=True)
-        if not movies:  # Handle no results
-            raise ValueError("No movies found")
+        if not movies:
+            reqst_gle = mv_rqst.replace(" ", "+")
+            button = [
+                [InlineKeyboardButton("Gᴏᴏɢʟᴇ", url=f"https://www.google.com/search?q={reqst_gle}")],
+                [InlineKeyboardButton("Request Group", url="https://t.me/+GXTgHzS9LtViN2U9")]
+            ]
+            await safe_edit_text(reply_msg, f"I couldn't find any movies related to **{mv_rqst}**.\nTry searching on Google:", reply_markup=InlineKeyboardMarkup(button))
+            return
+            
+            #raise ValueError("No movies found")
     except Exception as e:
         await send_error_log(client, "Error fetching movies", e)
         reqst_gle = mv_rqst.replace(" ", "+")
