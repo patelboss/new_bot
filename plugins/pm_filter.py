@@ -2942,7 +2942,10 @@ async def auto_filter(client, name, msg, reply_msg, ai_search, spoll=False):
         if message.text.startswith("/"): return  # ignore commands
         if re.findall("((^\/|^,|^!|^\.|^[\U0001F600-\U000E007F]).*)", message.text):
             return
-        if len(message.text) < 100:
+        if len(message.text) >= 50 :
+            await safe_edit_text(reply_msg, "<b><i>message is too long. try with short name if available\nelse tell my admin for this error by /feedback in my PM</i></b>")
+        
+        if len(message.text) < 50 :
             search = name
             search = search.lower()
             find = search.split(" ")
