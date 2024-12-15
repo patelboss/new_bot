@@ -80,6 +80,7 @@ async def give_filter(client, message):
                             )
                         return
                 except Exception as e:
+                    await send_error_log(client, "82", e)
                     await send_error_log(client, "GFILTER", e)
 
             # Handle manual and auto filters
@@ -117,14 +118,34 @@ async def give_filter(client, message):
                             reply_markup=InlineKeyboardMarkup(btn)
                         )
                     except Exception as e:
+                        await send_error_log(client, "119", e)
                         await send_error_log(client, "GFILTER", e)
                 else:
                     await message.reply_text("<b>Request channel is not configured. Please contact the admin.</b>")
     except Exception as e:
+        await send_error_log(client, "123", e)
         await send_error_log(client, "GFILTER", e)
 
 
-async def send_error_log(client, prefix, error):
+async def send_error_log(client, prefix, error, additional_info=None):
+    """
+    Enhanced: Sends error logs to LOG_CHANNEL with a prefix, traceback, and optional additional info.
+    """
+    try:
+        error_details = "".join(traceback.format_exception(None, error, error.__traceback__))
+        log_message = (
+            f"<b>Error at Line {prefix}:</b>\n\n"
+            f"<pre>{error_details}</pre>"
+        )
+        if additional_info:
+            log_message += f"\n<b>Additional Info:</b> {additional_info}"
+        await client.send_message(
+            LOG_CHANNEL,
+            log_message,
+            parse_mode=enums.ParseMode.HTML,
+        )
+    except Exception as log_error:
+        print(f"Failed to send error log: {log_error}")
     """
     Send error logs to LOG_CHANNEL with a unique prefix and traceback.
     """
@@ -1432,6 +1453,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
                                                        file_size='' if size is None else size,
                                                        file_caption='' if f_caption is None else f_caption)
             except Exception as e:
+                await send_error_log(client, "1434", e)
                 logger.exception(e)
             f_caption = f_caption
         if f_caption is None:
@@ -1468,6 +1490,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
         except PeerIdInvalid:
             await query.answer(url=f"https://telegram.me/{temp.U_NAME}?start={ident}_{file_id}")
         except Exception as e:
+            await send_error_log(client, "1470", e)
             await query.answer(url=f"https://telegram.me/{temp.U_NAME}?start={ident}_{file_id}")
             await send_error_log(client, "1470", e)
             
@@ -1495,6 +1518,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
         except PeerIdInvalid:
             await query.answer(url=f"https://telegram.me/{temp.U_NAME}?start=sendfiles3_{key}")
         except Exception as e:
+            await send_error_log(client, "1497", e)
             logger.exception(e)
             await query.answer(url=f"https://telegram.me/{temp.U_NAME}?start=sendfiles4_{key}")
             await send_error_log(client, "1500", e)
@@ -1536,6 +1560,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
                                                        file_size='' if size is None else size,
                                                        file_caption='' if f_caption is None else f_caption)
             except Exception as e:
+                await send_error_log(client, "1538", e)
                 logger.exception(e)
                 await send_error_log(client, "1539", e)
             f_caption = f_caption
@@ -1604,6 +1629,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
                     if deleted % 50 == 0:
                         await query.message.edit_text(f"<b>Process started for deleting files from DB. Successfully deleted {str(deleted)} files from DB for your query {keyword} !\n\nPlease wait...</b>")
             except Exception as e:
+                await send_error_log(client, "1606", e)
                 logger.exception(e)
                 await send_error_log(client, "1606", e)
                 await query.message.edit_text(f'Error: {e}')
@@ -2156,6 +2182,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 reply_markup=InlineKeyboardMarkup(button)
             )
         except Exception as e:
+            await send_error_log(client, "2158", e)
             print(e)  # print the error message
             await query.answer(f"☣something went wrong sweetheart\n\n{e}", show_alert=True)
             return
@@ -3117,6 +3144,7 @@ async def auto_filter(client, name, msg, reply_msg, ai_search, spoll=False):
                 await hmm.delete()
                 await message.delete()
         except Exception as e:
+            await send_error_log(client, "3119", e)
             logger.exception(e) 
             fek = await reply_msg.edit_text(text=cap, reply_markup=InlineKeyboardMarkup(btn))
             try:
@@ -3191,6 +3219,7 @@ async def advantage_spell_chok(client, name, msg, reply_msg, vj_search=None):
             
             #raise ValueError("No movies found")
     except Exception as e:
+        await send_error_log(client, "3193", e)
         await send_error_log(client, "Error fetching movies", e)
         reqst_gle = mv_rqst.replace(" ", "+")
         button = [
@@ -3238,6 +3267,7 @@ async def advantage_spell_chok(client, name, msg, reply_msg, vj_search=None):
                 await k.delete()
                 return
         except Exception as e:
+            await send_error_log(client, "3240", e)
             await send_error_log(client, "Error in AI spell check", e)
     else:
         try:
@@ -3252,6 +3282,7 @@ async def advantage_spell_chok(client, name, msg, reply_msg, vj_search=None):
                 await asyncio.sleep(600)
                 await spell_check_del.delete()
         except Exception as e:
+            await send_error_log(client, "3254", e)
             await send_error_log(client, "Error in spell-check display or auto-delete", e)
 
 async def manual_filters(client, message, text=False):
@@ -3444,6 +3475,7 @@ async def manual_filters(client, message, text=False):
                                 await auto_filter(client, message.text, message, reply_msg, ai_search)
 
                 except Exception as e:
+                    await send_error_log(client, "3446", e)
                     logger.exception(e)
                 break
     else:
@@ -3691,6 +3723,7 @@ async def global_filters(client, message, text=False):
 
                                 
                 except Exception as e:
+                    await send_error_log(client, "3693", e)
                     logger.exception(e)
                 break
     else:
