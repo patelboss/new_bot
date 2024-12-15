@@ -3248,7 +3248,7 @@ async def advantage_spell_chok(client, name, msg, reply_msg, vj_search=None):
             matched_movie = None
             for techvj in movielist:
                 ratio = fuzz.ratio(mv_rqst.lower(), techvj.lower())
-                if ratio > 70:
+                if ratio > 60:
                     matched_movie = techvj
                     break
 
