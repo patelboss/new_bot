@@ -20,10 +20,6 @@ import random
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ChatPermissions
 from pyrogram import enums
 from utils import clean_file_name
-from fuzzywuzzy import fuzz, process
-import logging
-from rapidfuzz import fuzz, process
-
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.ERROR)
 lock = asyncio.Lock()
@@ -3174,6 +3170,9 @@ async def auto_filter(client, name, msg, reply_msg, ai_search, spoll=False):
             await asyncio.sleep(300)
             await fuk.delete()
             await message.delete()
+
+import logging
+from rapidfuzz import fuzz, process
 # Configure logging
 logger = logging.getLogger("advantage_spell_chok")
 logger.setLevel(logging.DEBUG)
@@ -3196,16 +3195,15 @@ async def safe_edit_text(msg, new_text, **kwargs):
 
 async def advantage_spell_chok(client, name, msg, reply_msg, vj_search=None):
     mv_id = msg.id
-    mv_rqst = msg.text.strip()
+    mv_rqst = name
     reqstr1 = msg.from_user.id if msg.from_user else 0
     reqstr = await client.get_users(reqstr1)
 
     settings = await get_settings(msg.chat.id)
 
-    # Clean up and format the query
     query = re.sub(
         r"\b(pl(i|e)*?(s|z+|ease|se|ese|(e+)s(e)?)|((send|snd|giv(e)?|gib)(\sme)?)|movie(s)?|new|latest|br((o|u)h?)*|^h(e|a)?(l)*(o)*|mal(ayalam)?|t(h)?amil|file|that|find|und(o)*|kit(t(i|y)?)?o(w)?|thar(u)?(o)*w?|kittum(o)*|aya(k)*(um(o)*)?|full\smovie|any(one)|with\ssubtitle(s)?)",
-        "", mv_rqst, flags=re.IGNORECASE
+        "", msg.text, flags=re.IGNORECASE
     ).strip() + " movie"
 
     try:
@@ -3218,19 +3216,23 @@ async def advantage_spell_chok(client, name, msg, reply_msg, vj_search=None):
             ]
             await safe_edit_text(reply_msg, f"I couldn't find any movies related to **{mv_rqst}**.\nTry searching on Google:", reply_markup=InlineKeyboardMarkup(button))
             return
+            
+            #raise ValueError("No movies found")
     except Exception as e:
         await send_error_log(client, "3193", e)
+        await send_error_log(client, "Error fetching movies", e)
         reqst_gle = mv_rqst.replace(" ", "+")
         button = [
             [InlineKeyboardButton("Gᴏᴏɢʟᴇ", url=f"https://www.google.com/search?q={reqst_gle}")],
             [InlineKeyboardButton("Request Group", url="https://t.me/+GXTgHzS9LtViN2U9")]
         ]
+        if NO_RESULTS_MSG:
+            await client.send_message(chat_id=NRF_CHANNEL, text=(script.NORSLTS.format(reqstr.id, reqstr.mention, mv_rqst)))
         k = await safe_edit_text(reply_msg, script.I_CUDNT.format(mv_rqst), reply_markup=InlineKeyboardMarkup(button))
         await asyncio.sleep(30)
         await k.delete()
         return
 
-    # Collect all movie titles
     movielist = [
         movie.get('title') for movie in movies if movie.get('title')
     ] + [
@@ -3243,60 +3245,45 @@ async def advantage_spell_chok(client, name, msg, reply_msg, vj_search=None):
         try:
             vj_search_new = False
             vj_ai_msg = await safe_edit_text(reply_msg, "<b><i>Advanced AI is trying to find the best match for your request. Wait...</i></b>")
-            
-            # Use fuzzywuzzy's process.extractOne for the best match
-            result = process.extractOne(mv_rqst, movielist, scorer=fuzz.ratio)
-            matched_movie, score = result[0], result[1]  # Correct unpacking
+            matched_movie = None
+            for techvj in movielist:
+                ratio = fuzz.ratio(mv_rqst.lower(), techvj.lower())
+                if ratio > 70:
+                    matched_movie = techvj
+                    break
 
-            # If we find a match with a high enough score, consider it a match
-            if score > 75:  # Adjust threshold as needed (85% match or higher)
+            if matched_movie:
                 await auto_filter(client, matched_movie, msg, reply_msg, vj_search_new)
             else:
-                # Show multiple possible matches
                 reqst_gle = mv_rqst.replace(" ", "+")
                 button = [
                     [InlineKeyboardButton("Gᴏᴏɢʟᴇ", url=f"https://www.google.com/search?q={reqst_gle}")],
                     [InlineKeyboardButton("Request Group", url="https://t.me/+GXTgHzS9LtViN2U9")]
                 ]
-                await safe_edit_text(reply_msg, script.I_CUDNT.format(mv_rqst), reply_markup=InlineKeyboardMarkup(button))
+                if NO_RESULTS_MSG:
+                    await client.send_message(chat_id=NRF_CHANNEL, text=(script.NORSLTS.format(reqstr.id, reqstr.mention, mv_rqst)))
+                k = await safe_edit_text(reply_msg, script.I_CUDNT.format(mv_rqst), reply_markup=InlineKeyboardMarkup(button))
+                await asyncio.sleep(30)
+                await k.delete()
                 return
         except Exception as e:
             await send_error_log(client, "3240", e)
+            await send_error_log(client, "Error in AI spell check", e)
     else:
         try:
-            # Show the best match with higher confidence, else top 5 closest matches
-            best_match, score = process.extractOne(mv_rqst, movielist, scorer=fuzz.token_sort_ratio)
+            btn = [
+                [InlineKeyboardButton(text=movie_name.strip(), callback_data=f"spol#{reqstr1}#{k}")]
+                for k, movie_name in enumerate(movielist)
+            ]
+            btn.append([InlineKeyboardButton(text="Close", callback_data=f'spol#{reqstr1}#close_spellcheck')])
+            spell_check_del = await safe_edit_text(reply_msg, script.CUDNT_FND.format(mv_rqst), reply_markup=InlineKeyboardMarkup(btn))
 
-            if score > 65:  # Best match found with enough confidence
-                await auto_filter(client, best_match, msg, reply_msg, vj_search_new=False)
-            else:
-                # Show top 5 closest matches with fuzzywuzzy
-                best_matches = process.extract(mv_rqst, movielist, scorer=fuzz.token_sort_ratio, limit=5)
-                if not best_matches:
-                    reqst_gle = mv_rqst.replace(" ", "+")
-                    button = [
-                        [InlineKeyboardButton("Gᴏᴏɢʟᴇ", url=f"https://www.google.com/search?q={reqst_gle}")],
-                        [InlineKeyboardButton("Request Group", url="https://t.me/+GXTgHzS9LtViN2U9")]
-                    ]
-                    await safe_edit_text(reply_msg, f"**No matches found** for **{mv_rqst}**. Try searching on Google.", reply_markup=InlineKeyboardMarkup(button))
-                    return
-                
-                btn = [
-                    [InlineKeyboardButton(text=f"{match[0]} (Score: {match[1]})", callback_data=f"spol#{reqstr1}#{i}")]
-                    for i, match in enumerate(best_matches)
-                ]
-                btn.append([InlineKeyboardButton(text="Close", callback_data=f'spol#{reqstr1}#close_spellcheck')])
-
-                # Show the buttons with the closest matches
-                spell_check_del = await safe_edit_text(reply_msg, script.CUDNT_FND.format(mv_rqst), reply_markup=InlineKeyboardMarkup(btn))
-
-                if settings.get('auto_delete', False):
-                    await asyncio.sleep(600)
-                    await spell_check_del.delete()
+            if settings.get('auto_delete', False):
+                await asyncio.sleep(600)
+                await spell_check_del.delete()
         except Exception as e:
             await send_error_log(client, "3254", e)
-            #await send_error_log(client, "Error in spell-check display or auto-delete", e)
-
+            await send_error_log(client, "Error in spell-check display or auto-delete", e)
 
 async def manual_filters(client, message, text=False):
     settings = await get_settings(message.chat.id)
