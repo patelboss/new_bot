@@ -3151,8 +3151,13 @@ async def safe_edit_text(msg, new_text, **kwargs):
     Logs both the original and new text for debugging.
     """
     if msg.text != new_text:
-        logger.debug(f"Editing message: Old Text: {msg.text}, New Text: {new_text}")
-        return await msg.edit_text(new_text, **kwargs)
+        try 
+            logger.debug(f"Editing message: Old Text: {msg.text}, New Text: {new_text}")
+            return await msg.edit_text(new_text, **kwargs)
+        except FloodWait as e:
+            await asyncio.sleep(e.value)
+            await send_error_log(client, "FloodWait in safe edit", e)
+        
     logger.debug("Message not modified as the text is identical.")
     return msg
 
