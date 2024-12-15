@@ -3150,25 +3150,23 @@ async def safe_edit_text(msg, new_text, **kwargs):
     logger.debug("Message not modified as the text is identical.")
     return msg
 
-
 async def advantage_spell_chok(client, name, msg, reply_msg, vj_search=None):
     mv_id = msg.id
     mv_rqst = name
     reqstr1 = msg.from_user.id if msg.from_user else 0
     reqstr = await client.get_users(reqstr1)
 
-    # Fetch settings
     settings = await get_settings(msg.chat.id)
 
-    # Process the query string with enhanced logging
     query = re.sub(
         r"\b(pl(i|e)*?(s|z+|ease|se|ese|(e+)s(e)?)|((send|snd|giv(e)?|gib)(\sme)?)|movie(s)?|new|latest|br((o|u)h?)*|^h(e|a)?(l)*(o)*|mal(ayalam)?|t(h)?amil|file|that|find|und(o)*|kit(t(i|y)?)?o(w)?|thar(u)?(o)*w?|kittum(o)*|aya(k)*(um(o)*)?|full\smovie|any(one)|with\ssubtitle(s)?)",
         "", msg.text, flags=re.IGNORECASE
     ).strip() + " movie"
 
-    # Fetch movie data
     try:
         movies = await get_poster(mv_rqst, bulk=True)
+        if not movies:  # Handle no results
+            raise ValueError("No movies found")
     except Exception as e:
         await send_error_log(client, "Error fetching movies", e)
         reqst_gle = mv_rqst.replace(" ", "+")
@@ -3183,20 +3181,22 @@ async def advantage_spell_chok(client, name, msg, reply_msg, vj_search=None):
         await k.delete()
         return
 
-    # Process fetched movies
-    movielist = [movie.get('title') for movie in movies] + [f"{movie.get('title')} {movie.get('year')}" for movie in movies]
+    movielist = [
+        movie.get('title') for movie in movies if movie.get('title')
+    ] + [
+        f"{movie.get('title')} {movie.get('year')}" for movie in movies if movie.get('title') and movie.get('year')
+    ]
+
     SPELL_CHECK[mv_id] = movielist
 
-    # Enhanced matching logic using fuzzy matching
     if AI_SPELL_CHECK and vj_search:
-        
         try:
             vj_search_new = False
             vj_ai_msg = await safe_edit_text(reply_msg, "<b><i>Advanced AI is trying to find the best match for your request. Wait...</i></b>")
             matched_movie = None
             for techvj in movielist:
                 ratio = fuzz.ratio(mv_rqst.lower(), techvj.lower())
-                if ratio > 70:  # Define a threshold for a good match
+                if ratio > 70:
                     matched_movie = techvj
                     break
 
@@ -3230,6 +3230,7 @@ async def advantage_spell_chok(client, name, msg, reply_msg, vj_search=None):
                 await spell_check_del.delete()
         except Exception as e:
             await send_error_log(client, "Error in spell-check display or auto-delete", e)
+
 async def manual_filters(client, message, text=False):
     settings = await get_settings(message.chat.id)
     group_id = message.chat.id
