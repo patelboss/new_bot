@@ -3246,10 +3246,11 @@ async def advantage_spell_chok(client, name, msg, reply_msg, vj_search=None):
             vj_ai_msg = await safe_edit_text(reply_msg, "<b><i>Advanced AI is trying to find the best match for your request. Wait...</i></b>")
             
             # Use fuzzywuzzy's process.extractOne for the best match
-            matched_movie, score = process.extractOne(mv_rqst, movielist, scorer=fuzz.ratio)
+            result = process.extractOne(mv_rqst, movielist, scorer=fuzz.ratio)
+            matched_movie, score = result[0], result[1]  # Correct unpacking
 
             # If we find a match with a high enough score, consider it a match
-            if score > 65:  # Adjust threshold as needed (85% match or higher)
+            if score > 85:  # Adjust threshold as needed (85% match or higher)
                 await auto_filter(client, matched_movie, msg, reply_msg, vj_search_new)
             else:
                 # Show multiple possible matches
@@ -3267,7 +3268,7 @@ async def advantage_spell_chok(client, name, msg, reply_msg, vj_search=None):
             # Show the best match with higher confidence, else top 5 closest matches
             best_match, score = process.extractOne(mv_rqst, movielist, scorer=fuzz.token_sort_ratio)
 
-            if score > 75:  # Best match found with enough confidence
+            if score > 85:  # Best match found with enough confidence
                 await auto_filter(client, best_match, msg, reply_msg, vj_search_new=False)
             else:
                 # Show top 5 closest matches with fuzzywuzzy
@@ -3287,6 +3288,7 @@ async def advantage_spell_chok(client, name, msg, reply_msg, vj_search=None):
         except Exception as e:
             await send_error_log(client, "3254", e)
             await send_error_log(client, "Error in spell-check display or auto-delete", e)
+
 
 async def manual_filters(client, message, text=False):
     settings = await get_settings(message.chat.id)
