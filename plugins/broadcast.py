@@ -47,9 +47,9 @@ async def pm_broadcast(bot, message):
                         deleted += 1
                     else:
                         failed += 1
-                except FloodWait as x:
-                    logger.warning(f"FloodWait of {x.value} seconds encountered. Waiting...")
-                    await asyncio.sleep(x.value)
+                except FloodWait as e:
+                    logger.warning(f"FloodWait of {e.x} seconds encountered. Waiting...")
+                    await asyncio.sleep(e.x)
                 except InputUserDeactivated:
                     logger.warning(f"User {user['id']} is deactivated.")
                     deleted += 1
