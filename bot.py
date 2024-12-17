@@ -47,6 +47,8 @@ async def send_alive_message(client: Client):
 
             end_time = time.time()
             response_time = round((end_time - start_time) * 1000, 2)  # in milliseconds
+            await asyncio.sleep(1)
+           
 
             # Edit the message with the final response time
             final_message = f"#alive\n\nCurrent time: {current_time}\nMy response time: {response_time}ms\nThank you 😊"
