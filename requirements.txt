@@ -44,3 +44,4 @@ openai==0.25.0
 git+https://github.com/Joelkb/cinemagoer
 rapidfuzz
 fuzzywuzzy
+markdown
