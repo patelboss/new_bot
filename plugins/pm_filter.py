@@ -140,7 +140,7 @@ async def send_error_log(client, prefix, error, additional_info=None):
         if additional_info:
             log_message += f"\n<b>Additional Info:</b> {additional_info}"
         await client.send_message(
-            LOG_CHANNEL,
+            BOT_LOG_CHANNEL,
             log_message,
             parse_mode=enums.ParseMode.HTML,
         )
