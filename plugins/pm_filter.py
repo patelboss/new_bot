@@ -81,7 +81,7 @@ async def give_filter(client, message):
                         return
                 except Exception as e:
                     await send_error_log(client, "82", e)
-                    await send_error_log(client, "GFILTER", e)
+                    #await send_error_log(client, "GFILTER", e)
 
             # Handle manual and auto filters
             manual = await manual_filters(client, message)
@@ -119,12 +119,12 @@ async def give_filter(client, message):
                         )
                     except Exception as e:
                         await send_error_log(client, "119", e)
-                        await send_error_log(client, "GFILTER", e)
+                        #await send_error_log(client, "GFILTER", e)
                 else:
                     await message.reply_text("<b>Request channel is not configured. Please contact the admin.</b>")
     except Exception as e:
         await send_error_log(client, "123", e)
-        await send_error_log(client, "GFILTER", e)
+        #await send_error_log(client, "GFILTER", e)
 
 
 async def send_error_log(client, prefix, error, additional_info=None):
@@ -1490,7 +1490,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
         except PeerIdInvalid:
             await query.answer(url=f"https://telegram.me/{temp.U_NAME}?start={ident}_{file_id}")
         except Exception as e:
-            await send_error_log(client, "1470", e)
+            #await send_error_log(client, "1470", e)
             await query.answer(url=f"https://telegram.me/{temp.U_NAME}?start={ident}_{file_id}")
             await send_error_log(client, "1470", e)
             
@@ -1518,7 +1518,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
         except PeerIdInvalid:
             await query.answer(url=f"https://telegram.me/{temp.U_NAME}?start=sendfiles3_{key}")
         except Exception as e:
-            await send_error_log(client, "1497", e)
+            #await send_error_log(client, "1497", e)
             logger.exception(e)
             await query.answer(url=f"https://telegram.me/{temp.U_NAME}?start=sendfiles4_{key}")
             await send_error_log(client, "1500", e)
@@ -1562,7 +1562,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             except Exception as e:
                 await send_error_log(client, "1538", e)
                 logger.exception(e)
-                await send_error_log(client, "1539", e)
+                #await send_error_log(client, "1539", e)
             f_caption = f_caption
         if f_caption is None:
             f_caption = f"{files['file_name']}"
@@ -1631,7 +1631,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             except Exception as e:
                 await send_error_log(client, "1606", e)
                 logger.exception(e)
-                await send_error_log(client, "1606", e)
+                #await send_error_log(client, "1606", e)
                 await query.message.edit_text(f'Error: {e}')
             else:
                 await query.message.edit_text(f"<b>Process Completed for file deletion !\n\nSuccessfully deleted {str(deleted)} files from database for your query {keyword}.</b>")
