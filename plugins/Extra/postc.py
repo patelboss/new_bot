@@ -141,12 +141,22 @@ def get_random_sticker():
 
 @Client.on_message(filters.command("chelp"))
 async def chelp(client, message):
-    # Use the imported texts directly from TEXTS dictionary
+    # Check if the user added "m" after the command
+    command_parts = message.text.split()
+    use_html = len(command_parts) > 1 and command_parts[1].lower() == "m"
+
+    # Send the sticker first
     m = await message.reply_sticker(TEXTS["STICKER_ID"])  # Send the sticker
     await asyncio.sleep(2)  # Wait for 2 seconds
     await m.delete()  # Delete the sticker message
-    await message.reply(TEXTS["HELP_TEXT"], parse_mode=ParseMode.HTML)  # Send the help text
 
+    if use_html:
+        # Send the help text in HTML format
+        await message.reply(TEXTS["HELP_TEXT"], parse_mode=ParseMode.HTML)
+    else:
+        # Display available text methods in Markdown format
+        await message.reply(TEXTS["AVAILABLE_TEXT_METHODS"], parse_mode=ParseMode.MARKDOWN)
+        
 async def is_user_admin_or_owner(client, chat_id, user_id):
     """
     Check if the given user is an admin or the owner of a chat (channel or group).
