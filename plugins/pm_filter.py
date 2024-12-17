@@ -134,6 +134,7 @@ async def send_error_log(client, prefix, error, additional_info=None):
     try:
         error_details = "".join(traceback.format_exception(None, error, error.__traceback__))
         log_message = (
+            f"#error"
             f"<b>Error at Line {prefix}:</b>\n\n"
             f"<pre>{error_details}</pre>"
         )
@@ -3220,7 +3221,7 @@ async def advantage_spell_chok(client, name, msg, reply_msg, vj_search=None):
             
             #raise ValueError("No movies found")
     except Exception as e:
-        await send_error_log(client, "3193", e)
+       # await send_error_log(client, "3193", e)
         await send_error_log(client, "Error fetching movies", e)
         reqst_gle = mv_rqst.replace(" ", "+")
         button = [
@@ -3268,7 +3269,7 @@ async def advantage_spell_chok(client, name, msg, reply_msg, vj_search=None):
                 await k.delete()
                 return
         except Exception as e:
-            await send_error_log(client, "3240", e)
+            #await send_error_log(client, "3240", e)
             await send_error_log(client, "Error in AI spell check", e)
     else:
         try:
@@ -3283,7 +3284,7 @@ async def advantage_spell_chok(client, name, msg, reply_msg, vj_search=None):
                 await asyncio.sleep(600)
                 await spell_check_del.delete()
         except Exception as e:
-            await send_error_log(client, "3254", e)
+            #await send_error_log(client, "3254", e)
             await send_error_log(client, "Error in spell-check display or auto-delete", e)
 
 async def manual_filters(client, message, text=False):
