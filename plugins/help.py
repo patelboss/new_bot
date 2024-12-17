@@ -1,6 +1,7 @@
 from pyrogram import Client, filters
 from pyrogram.types import Message
 from pyrogram.enums import ParseMode
+from plugins.Extra.Cscript import TEXTS
 
 @Client.on_message(filters.command('command_help'))
 async def command_help(client, message: Message):
@@ -67,3 +68,33 @@ Here are the commands you can use:
 """
     await message.reply_text(help_text, parse_mode=ParseMode.HTML)
   
+def get_random_sticker():
+    return random.choice(TEXTS["random_sticker"])
+
+@Client.on_message(filters.command("chelp"))
+async def chelp(client, message):
+    # Check if the user added "m" after the command
+    command_parts = message.text.split()
+    use_html = len(command_parts) > 1 and command_parts[1].lower() == "m"
+
+    # Send the sticker first
+    sticker_id = get_random_sticker()
+    
+    m = await message.reply_sticker(sticker_id, 'CAACAgIAAxkBAAEWouFnYZdWgByiIdBga-j3bXRMK7sL3QACYgADTlzSKU6iwxhIxCtxHgQ')  # Default sticker ID if missing
+    await asyncio.sleep(2)  # Wait for 2 seconds
+    await m.delete()  # Delete the sticker message
+
+    if use_html:
+        # Log and send the help text in HTML format
+      #  client.LOGGER(__name__).info("Sending help text in HTML format.")
+        await message.reply(
+            TEXTS.get("HELP_TEXT", "<b>Help text not available.</b>"),
+            parse_mode=ParseMode.HTML
+        )
+    else:
+        # Log and display available text methods in Markdown format
+        #client.LOGGER(__name__).info("Sending available text methods in Markdown format.")
+        await message.reply(
+            TEXTS.get("AVAILABLE_TEXT_METHODS", "**Available methods not found.**"),
+            parse_mode=ParseMode.MARKDOWN
+        )        
