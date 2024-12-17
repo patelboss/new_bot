@@ -32,7 +32,7 @@ TEXTS = {
         "ChatAdminRequired": (
             "The bot needs to be an admin in the group & channel to perform this action."
         )
-    },
+   # },
     "HELP_TEXT": """
 <b>Telegram Markdown & Formatting Guide:</b>
 
@@ -82,4 +82,50 @@ Simply type <code>&gt;</code> at the beginning of a line:
 <b> Join @Filmykeedha For More Updates.</b>
     """,
     "STICKER_ID": "CAACAgIAAxkBAAIMU2dBzBWjzGCg_x2tFumZ76z5l5JiAAJiAANOXNIpTqLDGEjEK3EeBA"
+#},
+    "AVAILABLE_TEXT_METHODS": """ 
+**Using HTML Methods in Telegram**
+
+Telegram supports HTML formatting in messages. Below are some commonly used methods and advanced techniques:
+
+1. **Basic Formatting**:
+   - **Bold**: `<b>Bold Text</b>` → **Bold Text**
+   - **Italic**: `<i>Italic Text</i>` → *Italic Text*
+   - **Underline**: `<u>Underlined Text</u>` → __Underlined Text__
+   - **Strikethrough**: `<s>Strikethrough Text</s>` → ~~Strikethrough Text~~
+
+2. **Links**:
+   - Hyperlink: `<a href="https://example.com">Click Here</a>` → [Click Here](https://example.com)
+   - Mention a User: `<a href="tg://user?id=123456789">Username</a>` → [Username](tg://user?id=123456789)
+
+3. **Monospace Text**:
+   - Single-line code: `<code>Inline Code</code>` → `Inline Code`
+   - Block code: `<pre>Block Code</pre>` → 
+     ```
+     Block Code
+     ```
+
+4. **Nested Formatting**:
+   - Combine styles: `<b><i>Bold and Italic</i></b>` → ***Bold and Italic***
+
+5. **Advanced Methods**:
+   - **Spoiler**: Use `<span class="tg-spoiler">Spoiler Text</span>` → Hidden text revealed upon clicking.
+   - **Custom Emojis**: `<tg-emoji emoji-id="1234567890123456789">🙂</tg-emoji>` → Custom emoji for premium users.
+
+6. **Media Captions**:
+   - You can use all the above methods in media captions as well:  
+     `<b>Bold Caption</b> <i>with Italics</i>`.
+
+---
+
+**Example**:
+
+```html
+<b>Welcome!</b> Here is an <a href="https://telegram.org">example</a> of Telegram HTML formatting.
+Click the <span class="tg-spoiler">spoiler</span> to reveal hidden text.
+<code>Inline Code</code> or a block of code:
+<pre>def hello_world():
+    print("Hello, world!")</pre>
+    
+    """
 }
