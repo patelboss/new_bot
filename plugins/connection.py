@@ -143,33 +143,3 @@ async def connections(client, message):
             "There are no active connections!! Connect to some groups first.",
             quote=True
         )
-from pyrogram import Client, filters
-from pyrogram.types import Message
-from pyrogram.enums import ParseMode
-
-@Client.on_message(filters.command('command_help'))
-async def command_help(client, message: Message):
-    help_text = """
-<b>🔌 Command Connection Management 🔌</b>
-Here are the commands to connect and manage groups with your private messages:
-
-🔹 <b>/connect [group_id]</b> - <i>Connect your group to your private chat</i>
-    ➡️ Use this command to connect your group with your private chat. This will allow you to receive group updates directly in your PM. You can use it in both private chats and groups. 
-    ➡️ For private chats, simply use `/connect [group_id]`, and for groups, the bot will automatically connect to the group you're using it in.
-
-🔹 <b>/connections</b> or <b>/connection</b> - <i>Check or manage all connected groups in PM</i>
-    ➡️ These commands allow you to view the list of all groups currently connected to your private chat. You can see which groups are linked and monitor your connections.
-    ➡️ You can also use these commands to manage your connections, like deleting them if needed.
-
-🔹 <b>/disconnect</b> - <i>Disconnect a group from your private chat</i>
-    ➡️ If you want to stop receiving messages from a connected group, simply use `/disconnect [group_id]` to disconnect that group from your PM. The bot will no longer forward messages from that group to you.
-
-🔹 <b>/id</b> - <i>Get the ID of the group, user, or channel</i>
-    ➡️ This command is useful for fetching IDs:
-    - If used in a group, you’ll get the group’s ID.
-    - If used in a private message, you’ll get the user’s Telegram ID.
-    - If replying to a forwarded message from a channel, it will return the channel’s ID.
-
-✨ These commands help you manage your group connections easily and keep your private messages organized! ✨
-"""
-    await message.reply_text(help_text, parse_mode=ParseMode.HTML)
