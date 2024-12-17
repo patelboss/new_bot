@@ -36,6 +36,7 @@ IST = pytz.timezone('Asia/Kolkata')
 IST = pytz.timezone('Asia/Kolkata')
 
 # Function to send alive message every 5 minutes
+@Client.on_message(filters.command("falive", CMD))
 async def send_alive_message(client: Client):
     while True:
         # Get the current time in IST
@@ -64,6 +65,6 @@ async def send_alive_message(client: Client):
         await asyncio.sleep(300)  # 5 minutes (asynchronous sleep)
 
 # Assuming this is added to your already running bot
-async def main(client: Client):
+#async def main(client: Client):
     # Start the periodic alive message
-    await send_alive_message(client)
+        await send_alive_message(client)
