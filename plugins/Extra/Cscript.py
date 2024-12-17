@@ -31,9 +31,9 @@ TEXTS = {
         ),
         "ChatAdminRequired": (
             "The bot needs to be an admin in the group & channel to perform this action."
-        )
-   # },
-    "HELP_TEXT": """
+        ),
+    #},
+    "HELP_TEXT":( """
 <b>Telegram Markdown & Formatting Guide:</b>
 
 <i>You can use these formatting methods in your messages:</i>
@@ -82,8 +82,8 @@ Simply type <code>&gt;</code> at the beginning of a line:
 <b> Join @Filmykeedha For More Updates.</b>
     """,
     "STICKER_ID": "CAACAgIAAxkBAAIMU2dBzBWjzGCg_x2tFumZ76z5l5JiAAJiAANOXNIpTqLDGEjEK3EeBA"
-#},
-    "AVAILABLE_TEXT_METHODS": """ 
+        ),
+    "AVAILABLE_TEXT_METHODS": (""" 
 **Using HTML Methods in Telegram**
 
 Telegram supports HTML formatting in messages. Below are some commonly used methods and advanced techniques:
@@ -128,4 +128,4 @@ Click the <span class="tg-spoiler">spoiler</span> to reveal hidden text.
     print("Hello, world!")</pre>
     
     """
-}
+                              )}
