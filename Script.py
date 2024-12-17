@@ -60,6 +60,7 @@ If you'd like to support this bot's future operations:
    • इसे दूसरों के साथ शेयर करें।  
    • "Donate" बटन पर क्लिक करें या /donate कमांड का उपयोग करके आर्थिक मदद करें।
 </pre>
+Use /help for commands 
 """
     ABOUT_TXT ="""
 <b>    
