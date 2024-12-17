@@ -47,7 +47,7 @@ async def send_alive_message(client: Client):
                 text=message,
                 parse_mode=ParseMode.MARKDOWN
             )
-            logging.info(f"Sent initial alive message to BOT_LOG_CHANNEL: {sent_message.message.id}")
+            logging.info(f"Sent initial alive message to BOT_LOG_CHANNEL: {sent_message.id}")
             
             end_time = time.time()
             response_time = round((end_time - start_time) * 1000, 2)  # in milliseconds
@@ -57,8 +57,8 @@ async def send_alive_message(client: Client):
             # Edit the message with the final response time
             final_message = f"#alive\n\nCurrent time: {current_time}\nMy response time: {response_time}ms\nThank you 😊"
             await client.edit_message_text(
-                chat_id=LOG_CHANNEL,
-                message_id=sent_message.message.id,
+                chat_id=BOT_LOG_CHANNEL,
+                message_id=sent_message.id,
                 text=final_message,
                 parse_mode=ParseMode.MARKDOWN
             )
