@@ -111,8 +111,8 @@ async def broadcast_group(bot, message):
                     else:
                         failed += 1
                 except FloodWait as e:
-                    logger.warning(f"FloodWait of {e.value} seconds encountered. Waiting...")
-                    await asyncio.sleep(e.value)
+                    logger.warning(f"FloodWait of {e.x} seconds encountered. Waiting...")
+                    await asyncio.sleep(e.x)
                 except Exception as e:
                     logger.error(f"Error broadcasting to group {group['id']}: {e}")
                     failed += 1
