@@ -131,17 +131,3 @@ async def delallgfilters(client, message):
             ]),
             quote=True
         )
-@Client.on_message(filters.command('Global_Filter') & filters.user(ADMINS))
-async def global_filter_help(client, message: Message):
-    help_text = """
-<b>🌟 Global Filter Management 🌟</b>
-Here are the commands you can use:
-
-🔹 <b>/addg [keyword]</b> - Add a new global filter  
-🔹 <b>/delg [keyword]</b> - Delete a specific global filter  
-🔹 <b>/gfilters</b> - View all active global filters  
-🔹 <b>/delallg</b> - Remove all global filters  
-
-✨ Make your bot smarter with global filters! ✨
-"""
-    await message.reply_text(help_text, parse_mode=ParseMode.HTML)
