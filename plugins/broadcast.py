@@ -17,7 +17,7 @@ async def pm_broadcast(bot, message):
         try:
             b_msg = await asyncio.wait_for(
                 bot.ask(chat_id=message.from_user.id, text="Send your broadcast message (type or forward)."),
-                timeout=65
+                timeout=120
             )
         except asyncio.TimeoutError:
             await message.reply_text("⏳ Time's up! Broadcast canceled.")
