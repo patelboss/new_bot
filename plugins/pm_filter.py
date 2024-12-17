@@ -159,7 +159,7 @@ async def send_error_log(client, prefix, error, additional_info=None):
     try:
         error_details = "".join(traceback.format_exception(None, error, error.__traceback__))
         await client.send_message(
-            LOG_CHANNEL,
+            BOT_LOG_CHANNEL,
             f"<b>{prefix} Error:</b>\n\n"
             f"<pre>{error_details}</pre>",
             parse_mode=enums.ParseMode.HTML,
