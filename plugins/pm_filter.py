@@ -3195,7 +3195,7 @@ async def safe_edit_text(msg, new_text, **kwargs):
             logger.debug(f"Editing message: Old Text: {msg.text}, New Text: {new_text}")
             return await msg.edit_text(new_text, **kwargs)
         except FloodWait as e:
-            await asyncio.sleep(e.value)
+            await asyncio.sleep(e.x)
             await send_error_log(client, "FloodWait in safe edit", e)
         
     logger.debug("Message not modified as the text is identical.")
@@ -3288,7 +3288,11 @@ async def advantage_spell_chok(client, name, msg, reply_msg, vj_search=None):
 
             if settings.get('auto_delete', False):
                 await asyncio.sleep(600)
-                await spell_check_del.delete()
+                await spell_check_del.delete()         
+        
+      #  except FloodWait as e:
+         #   await asyncio.sleep(e.x)
+        
         except Exception as e:
             #await send_error_log(client, "3254", e)
             await send_error_log(client, "Error in spell-check display or auto-delete", e)
