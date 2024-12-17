@@ -6,7 +6,7 @@ from pyrogram.errors import FloodWait, InputUserDeactivated, UserIsBlocked, Peer
 from info import ADMINS
 from database.users_chats_db import db
 from utils import broadcast_messages, broadcast_messages_group
-from pm_filter import send_error_log
+from plugins.pm_filter import send_error_log
 logger = logging.getLogger("broadcast")
 
 @Client.on_message(filters.command("broadcast") & filters.user(ADMINS))
