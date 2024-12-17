@@ -84,50 +84,46 @@ Simply type <code>&gt;</code> at the beginning of a line:
                 ),
     #"STICKER_ID": "CAACAgIAAxkBAAIMU2dBzBWjzGCg_x2tFumZ76z5l5JiAAJiAANOXNIpTqLDGEjEK3EeBA"
                
-    "AVAILABLE_TEXT_METHODS": (""" 
-**Using HTML Methods in Telegram**
+    "AVAILABLE_TEXT_METHODS": ("""
+        **Telegram HTML Formatting - Filmykeedha Example**
 
-Telegram supports HTML formatting in messages. Below are some commonly used methods and advanced techniques:
-
-1. **Basic Formatting**:
-   - **Bold**: `<b>Bold Text</b>` → **Bold Text**
-   - **Italic**: `<i>Italic Text</i>` → *Italic Text*
-   - **Underline**: `<u>Underlined Text</u>` → __Underlined Text__
-   - **Strikethrough**: `<s>Strikethrough Text</s>` → ~~Strikethrough Text~~
+1. **Text Formatting**:
+   - `<b>Filmykeedha</b>` → **Filmykeedha**
+   - `<i>Filmykeedha</i>` → *Filmykeedha*
+   - `<u>Filmykeedha</u>` → __Filmykeedha__
+   - `<s>Filmykeedha</s>` → ~~Filmykeedha~~
 
 2. **Links**:
-   - Hyperlink: `<a href="https://example.com">Click Here</a>` → [Click Here](https://example.com)
-   - Mention a User: `<a href="tg://user?id=123456789">Username</a>` → [Username](tg://user?id=123456789)
+   - **Hyperlink**: `<a href="https://t.me/filmykeedha">Filmykeedha</a>` → [Filmykeedha](https://t.me/filmykeedha)
+   - **Mention User**: `<a href="tg://user?id=123456789">Filmykeedha</a>` → [Filmykeedha](tg://user?id=123456789)
 
-3. **Monospace Text**:
-   - Single-line code: `<code>Inline Code</code>` → `Inline Code`
-   - Block code: `<pre>Block Code</pre>` → 
+3. **Code**:
+   - **Inline Code**: `<code>Code</code>` → `Code`
+   - **Block Code**: 
+     ```html
+     <code>Block Code</code>
      ```
-     Block Code
-     ```
 
-4. **Nested Formatting**:
-   - Combine styles: `<b><i>Bold and Italic</i></b>` → ***Bold and Italic***
+4. **Advanced Formatting**:
+   - **Spoiler**: `<span class="tg-spoiler">Spoiler Text</span>` → Spoiler Text (click to reveal)
+   - **Custom Emoji**: `<tg-emoji emoji-id="1234567890123456789">🙂</tg-emoji>` → Custom Emoji
 
-5. **Advanced Methods**:
-   - **Spoiler**: Use `<span class="tg-spoiler">Spoiler Text</span>` → Hidden text revealed upon clicking.
-   - **Custom Emojis**: `<tg-emoji emoji-id="1234567890123456789">🙂</tg-emoji>` → Custom emoji for premium users.
+5. **Inline Buttons**:
+   - **Button**: `<a href="https://telegram.me/Filmykeedha">Join Us</a>` → [Join Us](https://telegram.me/Filmykeedha)
 
-6. **Media Captions**:
-   - You can use all the above methods in media captions as well:  
-     `<b>Bold Caption</b> <i>with Italics</i>`.
-
+6. **Text Styling**:
+   - **Bold + Italic**: `<b><i>Text</i></b>` → ***Text***
+   - **Bold + Strikethrough**: `<b><s>Text</s></b>` → ~~**Text**~~
 ---
-
-**Example**:
-
-```html
-<b>Welcome!</b> Here is an <a href="https://telegram.org">example</a> of Telegram HTML formatting.
-Click the <span class="tg-spoiler">spoiler</span> to reveal hidden text.
-<code>Inline Code</code> or a block of code:
-<pre>def hello_world():
-    print("Hello, world!")</pre>
     
-    """
+*{BUTTON TEXT}-{URL}*
+*Note:* Don't Use **Wrong URL** & Don't Add **Extra Spaces** 
+** Use Command 
+** /cpost to post in channel & **
+** /ppost to post private post (that can't be forwarded) **
+** Join @Filmykeedha For More Updates.**
+**For Markdown formatting use */chelp m*
+      """
+       
                               )
       }
