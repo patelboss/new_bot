@@ -10,7 +10,15 @@ import re
 @Client.on_message(filters.command(["cpost", "ppost"]))
 async def post_message(client, message):
     command_parts = message.text.split()
-    
+
+    # Default to HTML parse mode
+    parse_mode = ParseMode.HTML
+
+    # If 'm' is provided as the first argument, set parse mode to Markdown
+    if len(command_parts) > 1 and command_parts[1].lower() == 'm':
+        parse_mode = ParseMode.MARKDOWN
+        command_parts.pop(1)  # Remove the 'm' argument
+
     if len(command_parts) < 2 or not message.reply_to_message:
         await message.reply(TEXTS["no_message_to_post"], parse_mode=ParseMode.HTML)
         return
@@ -50,6 +58,7 @@ async def post_message(client, message):
         caption_without_buttons,
         reply_markup,
         protect_content,
+        parse_mode  # Pass the determined parse mode
     )
 
     if success:
@@ -57,14 +66,14 @@ async def post_message(client, message):
     else:
         await message.reply(TEXTS["failed_to_post"].format(error=error), parse_mode=ParseMode.HTML)
 
-async def send_post(client, channel_id, replied_message, caption_without_buttons, reply_markup, protect_content):
+async def send_post(client, channel_id, replied_message, caption_without_buttons, reply_markup, protect_content, parse_mode):
     try:
         if replied_message.photo:
             await client.send_photo(
                 chat_id=channel_id,
                 photo=replied_message.photo.file_id,
                 caption=caption_without_buttons,
-                parse_mode=ParseMode.MARKDOWN,
+                parse_mode=parse_mode,
                 reply_markup=reply_markup,
                 protect_content=protect_content,
             )
@@ -73,7 +82,7 @@ async def send_post(client, channel_id, replied_message, caption_without_buttons
                 chat_id=channel_id,
                 video=replied_message.video.file_id,
                 caption=caption_without_buttons,
-                parse_mode=ParseMode.MARKDOWN,
+                parse_mode=parse_mode,
                 reply_markup=reply_markup,
                 protect_content=protect_content,
             )
@@ -82,7 +91,7 @@ async def send_post(client, channel_id, replied_message, caption_without_buttons
                 chat_id=channel_id,
                 document=replied_message.document.file_id,
                 caption=caption_without_buttons,
-                parse_mode=ParseMode.MARKDOWN,
+                parse_mode=parse_mode,
                 reply_markup=reply_markup,
                 protect_content=protect_content,
             )
@@ -90,7 +99,7 @@ async def send_post(client, channel_id, replied_message, caption_without_buttons
             await client.send_message(
                 chat_id=channel_id,
                 text=caption_without_buttons,
-                parse_mode=ParseMode.MARKDOWN,
+                parse_mode=parse_mode,
                 reply_markup=reply_markup,
                 protect_content=protect_content,
                 disable_web_page_preview=True,  # Disable web preview for text messages
@@ -100,6 +109,7 @@ async def send_post(client, channel_id, replied_message, caption_without_buttons
         return True, None
     except Exception as e:
         return False, str(e)
+
 # ------------------------ Button Extraction and Caption Removal ------------------------
 
 def extract_buttons_from_caption(caption: str):
@@ -128,10 +138,6 @@ def remove_button_links(caption: str):
 
 def get_random_sticker():
     return random.choice(TEXTS["random_sticker"])
-from pyrogram import Client, filters
-from pyrogram.enums import ParseMode
-import asyncio
-from plugins.Extra.Cscript import TEXTS  # Import the TEXTS dictionary
 
 @Client.on_message(filters.command("chelp"))
 async def chelp(client, message):
