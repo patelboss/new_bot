@@ -61,7 +61,7 @@ async def pm_broadcast(bot, message):
                     logger.warning(f"Invalid peer ID for user {user['id']}.")
                     failed += 1
                 except Exception as e:
-                    await send_error_log(client, f"Error broadcasting to user {user['id']}" e)
+                    await send_error_log(client, f"Error broadcasting to user {user['id']}", e)
                     logger.error(f"Error broadcasting to user {user['id']}: {e}")
                     failed += 1
 
