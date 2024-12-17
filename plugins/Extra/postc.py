@@ -5,7 +5,7 @@ from pyrogram.errors import UserNotParticipant, PeerIdInvalid, ChatAdminRequired
 from plugins.Extra.Cscript import TEXTS
 import random
 import re
-
+import asyncio
 # ------------------------ Command Handler ------------------------
 @Client.on_message(filters.command(["cpost", "ppost"]))
 async def post_message(client, message):
@@ -146,17 +146,24 @@ async def chelp(client, message):
     use_html = len(command_parts) > 1 and command_parts[1].lower() == "m"
 
     # Send the sticker first
-    m = await message.reply_sticker(TEXTS["STICKER_ID"])  # Send the sticker
+    m = await message.reply_sticker(TEXTS.get("STICKER_ID", "CAACAgIAAxkBAAEFxxx"))  # Default sticker ID if missing
     await asyncio.sleep(2)  # Wait for 2 seconds
     await m.delete()  # Delete the sticker message
 
     if use_html:
-        # Send the help text in HTML format
-        await message.reply(TEXTS["HELP_TEXT"], parse_mode=ParseMode.HTML)
+        # Log and send the help text in HTML format
+      #  client.LOGGER(__name__).info("Sending help text in HTML format.")
+        await message.reply(
+            TEXTS.get("HELP_TEXT", "<b>Help text not available.</b>"),
+            parse_mode=ParseMode.HTML
+        )
     else:
-        # Display available text methods in Markdown format
-        await message.reply(TEXTS["AVAILABLE_TEXT_METHODS"], parse_mode=ParseMode.MARKDOWN)
-        
+        # Log and display available text methods in Markdown format
+        #client.LOGGER(__name__).info("Sending available text methods in Markdown format.")
+        await message.reply(
+            TEXTS.get("AVAILABLE_TEXT_METHODS", "**Available methods not found.**"),
+            parse_mode=ParseMode.MARKDOWN
+        )        
 async def is_user_admin_or_owner(client, chat_id, user_id):
     """
     Check if the given user is an admin or the owner of a chat (channel or group).
