@@ -124,7 +124,7 @@ async def give_filter(client, message):
                     await message.reply_text("<b>Request channel is not configured. Please contact the admin.</b>")
     except FloodWait as e:
         await asyncio.sleep(e.x)
-        await message.reply_text("<b>Due to Flood Wait i am not able to search. Wait e second before new search</b>", parse_mode=ParseMode.HTML)
+        await message.reply_text(f"<b>Due to Flood Wait i am not able to search. Wait {e} second before new search</b>", parse_mode=ParseMode.HTML)
         return
         #await message.reply_text(
     
