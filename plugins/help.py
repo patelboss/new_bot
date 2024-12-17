@@ -98,3 +98,140 @@ async def chelp(client, message):
             TEXTS.get("AVAILABLE_TEXT_METHODS", "**Available methods not found.**"),
             parse_mode=ParseMode.MARKDOWN
         )        
+from pyrogram import Client, filters
+from pyrogram.types import Message
+from pyrogram.enums import ParseMode
+
+@Client.on_message(filters.command('misc'))
+async def misc_help(client, message: Message):
+    help_text = """
+<b>⚙️ Miscellaneous Commands ⚙️</b>
+Here are some useful commands to interact with the bot and gather information:
+
+🔹 <b>/Info</b> - <i>Get detailed information about yourself</i>
+    ➡️ This command provides you with information such as your user ID, username, and other useful details. Perfect for checking your account info.
+
+🔹 <b>/Alive</b> - <i>Check if the bot is online and responsive</i>
+    ➡️ Use this command to check if the bot is alive and running smoothly. It will respond with a confirmation message indicating the bot is operational.
+
+🔹 <b>/Ping</b> - <i>Check the bot's ping (latency)</i>
+    ➡️ This command checks the bot’s connection speed to the server by sending a ping. It will return the bot's ping in milliseconds, so you can monitor its responsiveness.
+
+🔹 <b>/Telegraph</b> - <i>Get a shareable link for a photo</i>
+    ➡️ This command allows you to upload a photo, and the bot will return a shareable link using the Telegraph service. Perfect for sharing images with others.
+
+🔹 <b>/Stickerid</b> - <i>Get the ID of a sticker</i>
+    ➡️ When you send a sticker and use this command, the bot will return the unique ID of that sticker, which can be useful for saving or sharing stickers.
+
+🔹 <b>/Getfileid</b> - <i>Get the file ID of any file</i>
+    ➡️ If you send any file (image, document, video, etc.), the bot will return its file ID, which you can use to reference or share that file later.
+
+✨ Use these commands to interact with the bot and make the most out of your experience! ✨
+"""
+    await message.reply_text(help_text, parse_mode=ParseMode.HTML)
+
+from pyrogram import Client, filters
+from pyrogram.types import Message
+from pyrogram.enums import ParseMode
+
+@Client.on_message(filters.command('contact_help'))
+async def contact_help(client, message: Message):
+    help_text = """
+<b>💬 Contact and Feedback Commands 💬</b>
+Here are the commands to help you report issues, communicate with admins, and manage your tokens:
+
+🔹 <b>/Feedback</b> - <i>Report an issue or give feedback</i>
+    ➡️ Use this command to report any problems or give feedback to the admin. Simply reply to this message to send your message, and the admin will review it.
+
+🔹 <b>/Talk</b> - <i>Start a conversation with the admin (requires a token)</i>
+    ➡️ If you want to talk directly to the admin, you’ll need a special token. If the admin wants to talk to you, they will send you the token.
+    ➡️ Use this command with the token to start a private conversation with the admin.
+
+🔹 <b>/create_code</b> - <i>Create a new "Talk" code (Admin only)</i>
+    ➡️ Only admins can use this command to create a new token for a user. The token allows the user to start a private conversation with the admin using the `/Talk` command.
+
+🔹 <b>/Delete_code</b> - <i>Delete a "Talk" code (Admin only)</i>
+    ➡️ Admins can delete a previously created "Talk" token. This will prevent the user from starting a conversation using that token.
+
+✨ These commands allow you to report issues and communicate directly with admins. Use them wisely! ✨
+"""
+    await message.reply_text(help_text, parse_mode=ParseMode.HTML)
+
+
+from pyrogram import Client, filters
+from pyrogram.types import Message
+from pyrogram.enums import ParseMode
+
+@Client.on_message(filters.command('Index_help'))
+async def index_help(client, message: Message):
+    help_text = """
+<b>📂 File Indexing Commands 📂</b>
+These commands help you manage and request files in the system. Here's how to use them:
+
+🔹 <b>/index</b> - <i>Request a file from the bot</i>
+    ➡️ If you have files stored with the bot, you can use this command to request one. The bot will process your request and provide the file you're looking for.
+
+🔹 <b>/Setskip</b> - <i>Set the index skip number</i>
+    ➡️ This command allows you to adjust the number of steps the bot will skip when indexing files. You can use this to customize how the bot processes requests and skips files in the indexing system.
+
+✨ Use these commands to manage your files more efficiently and streamline your experience with the bot! ✨
+"""
+    await message.reply_text(help_text, parse_mode=ParseMode.HTML)
+
+
+
+from pyrogram import Client, filters
+from pyrogram.types import Message
+from pyrogram.enums import ParseMode
+
+@Client.on_message(filters.command('fsub_help'))
+async def fsub_help(client, message: Message):
+    help_text = """
+<b>🔐 Force Subscribe Commands 🔐</b>
+These commands allow you to manage force subscription settings for your group:
+
+🔹 <b>/fsub &lt;channel id&gt;</b> - <i>Set a channel to force subscribe users in your group</i>
+    ➡️ Use this command to set a channel that users must subscribe to in order to interact with your group. Simply replace `<channel id>` with the actual channel ID.
+
+🔹 <b>/Nofsub</b> - <i>Delete the force subscribe channel</i>
+    ➡️ This command removes the currently set forced subscription channel from your group, allowing users to interact without subscribing to a channel.
+
+🔹 <b>/Id</b> - <i>Get your channel's ID</i>
+    ➡️ This command returns the ID of the channel you're using, which can be useful when setting or deleting the force subscribe channel.
+
+✨ Use these commands to manage subscriptions and ensure users are following the channels you set! ✨
+"""
+    await message.reply_text(help_text, parse_mode=ParseMode.HTML)
+
+
+from pyrogram import Client, filters
+from pyrogram.types import Message
+from pyrogram.enums import ParseMode
+
+@Client.on_message(filters.command('help'))
+async def help_command(client, message: Message):
+    help_text = """
+<b>🆘 Main Help Commands 🆘</b>
+Welcome to the bot! Here are the main help commands you can use to explore the bot's features:
+
+🔹 <b>/Index_help</b> - <i>Learn about index-related queries</i>
+    ➡️ This command will help you understand how to request files from the bot and manage index settings.
+
+🔹 <b>/Fsub_help</b> - <i>Get help with force subscribe channel</i>
+    ➡️ Use this to manage channels that users must subscribe to in order to access your group. Learn how to set, remove, or query the subscription channel.
+
+🔹 <b>/Filter_help</b> - <i>Get help with filters</i>
+    ➡️ Learn about how to add, delete, and manage filters in your group or globally.
+
+🔹 <b>/Misc</b> - <i>Access miscellaneous features</i>
+    ➡️ Some unique features that may not fit into other categories. This command includes checking the bot's status, user information, and other fun features.
+
+🔹 <b>/Contact_help</b> - <i>Learn how to contact the admin</i>
+    ➡️ Know how to report an issue or talk to the admin using tokens, feedback, and more.
+
+🔹 <b>/Chelp</b> - <i>Get help with posting in channels</i>
+    ➡️ Learn how to interact with channels and post content through the bot. This will help you post in channels with ease.
+
+✨ Use these commands to explore the bot's features and enhance your experience! ✨
+"""
+    await message.reply_text(help_text, parse_mode=ParseMode.HTML)
