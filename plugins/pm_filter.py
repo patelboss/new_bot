@@ -122,6 +122,10 @@ async def give_filter(client, message):
                         #await send_error_log(client, "GFILTER", e)
                 else:
                     await message.reply_text("<b>Request channel is not configured. Please contact the admin.</b>")
+    except FloodWait as e:
+        await asyncio.sleep(e.x)
+        #await message.reply_text(
+    
     except Exception as e:
         await send_error_log(client, "123", e)
         #await send_error_log(client, "GFILTER", e)
