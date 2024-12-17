@@ -32,7 +32,7 @@ TEXTS = {
         "ChatAdminRequired": (
             "The bot needs to be an admin in the group & channel to perform this action."
         ),
-    #},
+    },
     "HELP_TEXT":( """
 <b>Telegram Markdown & Formatting Guide:</b>
 
@@ -80,9 +80,10 @@ Simply type <code>&gt;</code> at the beginning of a line:
 <b> /cpost to post in channel & </b>
 <b> /ppost to post private post (that can't be forwarded) </b>
 <b> Join @Filmykeedha For More Updates.</b>
-    """,
-    "STICKER_ID": "CAACAgIAAxkBAAIMU2dBzBWjzGCg_x2tFumZ76z5l5JiAAJiAANOXNIpTqLDGEjEK3EeBA"
-        ),
+    """
+                ),
+    #"STICKER_ID": "CAACAgIAAxkBAAIMU2dBzBWjzGCg_x2tFumZ76z5l5JiAAJiAANOXNIpTqLDGEjEK3EeBA"
+               
     "AVAILABLE_TEXT_METHODS": (""" 
 **Using HTML Methods in Telegram**
 
@@ -128,4 +129,5 @@ Click the <span class="tg-spoiler">spoiler</span> to reveal hidden text.
     print("Hello, world!")</pre>
     
     """
-                              )}
+                              )
+      }
