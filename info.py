@@ -25,7 +25,7 @@ MELCOW_VID = environ.get("MELCOW_VID", "https://t.me/How_To_Open_Linkl")
 WELCOME_VIDEO_ID = environ.get("MELCOW_VID", "BAACAgQAAxkBAAEWWw5nXJ_bgRy9MY3ZNxpLzbIaysGuswAC2hoAAuLv4VIyB40_JD42Hh4E")
 SPELL_IMG = environ.get("SPELL_IMG", "https://te.legra.ph/file/15c1ad448dfe472a5cbb8.jpg")
 NRF_CHANNEL = int(environ.get('NRF_CHANNEL', '-1001886419650'))
-BOT_LOG_CHANNEL = int(environ.get('LOG_CHANNEL', '-1001886419650'))
+BOT_LOG_CHANNEL = int(environ.get('BOT_LOG_CHANNEL', '-1001886419650'))
 
 # Admins, Channels & Users
 LOG_CHANNEL = int(environ.get('LOG_CHANNEL', ''))
