@@ -4,7 +4,7 @@ from pyrogram.enums import ParseMode
 import random
 import asyncio
 from plugins.Extra.Cscript import TEXTS
-
+from info import ADMINS
 # Command to display connection management help
 @Client.on_message(filters.command('connection_help'))
 async def command_help(client, message: Message):
@@ -23,6 +23,9 @@ Manage and connect your groups to private messages with these commands:
 
 🔹 <b>/id</b> - <i>Get ID of group, user, or channel</i>
     ➡️ Fetch the ID of a group (in group chat), user (in PM), or channel (from forwarded message).
+    
+🔹 <b>/settings</b> - <i> to set some settings according to your group</i>
+    ➡️ Learn how to change group settings based on your audiance and group members.
 
 ✨ Manage your connections easily and stay organized! ✨
 """
@@ -171,7 +174,52 @@ Welcome to the bot! Here are the main help commands you can use to explore the b
 
 🔹 <b>/Chelp</b> - <i>Get help with posting in channels</i>
     ➡️ Learn how to interact with channels and post content through the bot. This will help you post in channels with ease.
+    
+🔹 <b>/Connection_help</b> - <i>Get help on connecting group to your PM</i>
+    ➡️ Learn How to connect Bot to Your PM if you are a admin of any group 
 
 ✨ Use these commands to explore the bot's features and enhance your experience! ✨
+"""
+    await message.reply_text(help_text, parse_mode=ParseMode.HTML)
+from pyrogram import Client, filters
+from pyrogram.types import Message
+from pyrogram.enums import ParseMode
+
+@Client.on_message(filters.command('Index_help'))
+async def index_help(client, message: Message):
+    help_text = """
+<b>📂 File Indexing Commands 📂</b>
+These commands help you manage and request files in the system. Here's how to use them:
+
+🔹 <b>/index</b> - <i>Request a file from the bot</i>
+    ➡️ If you have files stored with the bot, you can use this command to request one. The bot will process your request and provide the file you're looking for.
+
+🔹 <b>/Setskip</b> - <i>Set the index skip number</i>
+    ➡️ This command allows you to adjust the number of steps the bot will skip when indexing files. You can use this to customize how the bot processes requests and skips files in the indexing system.
+
+✨ Use these commands to manage your files more efficiently and streamline your experience with the bot! ✨
+"""
+    await message.reply_text(help_text, parse_mode=ParseMode.HTML)
+
+from pyrogram import Client, filters
+from pyrogram.types import Message
+from pyrogram.enums import ParseMode
+
+@Client.on_message(filters.command('fsub_help'))
+async def fsub_help(client, message: Message):
+    help_text = """
+<b>🔐 Force Subscribe Commands 🔐</b>
+These commands allow you to manage force subscription settings for your group:
+
+🔹 <b>/fsub &lt;channel id&gt;</b> - <i>Set a channel to force subscribe users in your group</i>
+    ➡️ Use this command to set a channel that users must subscribe to in order to interact with your group. Simply replace `<channel id>` with the actual channel ID.
+
+🔹 <b>/Nofsub</b> - <i>Delete the force subscribe channel</i>
+    ➡️ This command removes the currently set forced subscription channel from your group, allowing users to interact without subscribing to a channel.
+
+🔹 <b>/Id</b> - <i>Get your channel's ID</i>
+    ➡️ This command returns the ID of the channel you're using, which can be useful when setting or deleting the force subscribe channel.
+
+✨ Use these commands to manage subscriptions and ensure users are following the channels you set! ✨
 """
     await message.reply_text(help_text, parse_mode=ParseMode.HTML)
