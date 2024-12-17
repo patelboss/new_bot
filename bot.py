@@ -54,7 +54,7 @@ async def send_alive_message(client: Client):
             final_message = f"#alive\n\nCurrent time: {current_time}\nMy response time: {response_time}ms\nThank you 😊"
             await client.edit_message_text(
                 chat_id=LOG_CHANNEL,
-                message_id=sent_message.message_id,
+                message_id=sent_message.message.id,
                 text=final_message,
                 parse_mode=ParseMode.MARKDOWN
             )
