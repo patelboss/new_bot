@@ -6,14 +6,14 @@ from pyrogram.errors import FloodWait, InputUserDeactivated, UserIsBlocked, Peer
 from info import ADMINS
 from database.users_chats_db import db
 from utils import broadcast_messages, broadcast_messages_group
-
+from pm_filter import send_error_log
 logger = logging.getLogger("broadcast")
 
 @Client.on_message(filters.command("broadcast") & filters.user(ADMINS))
 async def pm_broadcast(bot, message):
     try:
         # Ask admin for broadcast message with a timeout
-        await message.reply_text("You have 60 seconds to send your broadcast message (type or forward).")
+        await message.reply_text("You have 120 seconds (2 minutes ) to send your broadcast message (type or forward).")
         try:
             b_msg = await asyncio.wait_for(
                 bot.ask(chat_id=message.from_user.id, text="Send your broadcast message (type or forward)."),
@@ -50,6 +50,7 @@ async def pm_broadcast(bot, message):
                 except FloodWait as e:
                     logger.warning(f"FloodWait of {e.x} seconds encountered. Waiting...")
                     await asyncio.sleep(e.x)
+                    await send_error_log(client, "broadcast floodwait waiting", e)
                 except InputUserDeactivated:
                     logger.warning(f"User {user['id']} is deactivated.")
                     deleted += 1
@@ -60,6 +61,7 @@ async def pm_broadcast(bot, message):
                     logger.warning(f"Invalid peer ID for user {user['id']}.")
                     failed += 1
                 except Exception as e:
+                    await send_error_log(client, f"Error broadcasting to user {user['id']}" e)
                     logger.error(f"Error broadcasting to user {user['id']}: {e}")
                     failed += 1
 
@@ -78,11 +80,11 @@ async def pm_broadcast(bot, message):
 async def broadcast_group(bot, message):
     try:
         # Ask admin for broadcast message with a timeout
-        await message.reply_text("You have 60 seconds to send your broadcast message (type or forward).")
+        await message.reply_text("You have 120 seconds(2 minutes)to send your broadcast message (type or forward).")
         try:
             b_msg = await asyncio.wait_for(
                 bot.ask(chat_id=message.from_user.id, text="Send your broadcast message (type or forward)."),
-                timeout=60
+                timeout=120
             )
         except asyncio.TimeoutError:
             await message.reply_text("⏳ Time's up! Broadcast canceled.")
