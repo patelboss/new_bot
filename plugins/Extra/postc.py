@@ -148,7 +148,7 @@ async def chelp(client, message):
     # Send the sticker first
     sticker_id = get_random_sticker()
     
-    m = await message.reply_sticker(sticker_id, CAACAgIAAxkBAAEWouFnYZdWgByiIdBga-j3bXRMK7sL3QACYgADTlzSKU6iwxhIxCtxHgQ)  # Default sticker ID if missing
+    m = await message.reply_sticker(sticker_id, 'CAACAgIAAxkBAAEWouFnYZdWgByiIdBga-j3bXRMK7sL3QACYgADTlzSKU6iwxhIxCtxHgQ')  # Default sticker ID if missing
     await asyncio.sleep(2)  # Wait for 2 seconds
     await m.delete()  # Delete the sticker message
 
