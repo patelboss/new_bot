@@ -1,4 +1,4 @@
-import sys, glob, importlib, logging, logging.config, pytz, asyncio
+import sys, glob, importlib, logging, logging.config, pytz, asyncio, time
 from pathlib import Path
 
 # Get logging configurations
@@ -8,12 +8,13 @@ logging.getLogger("pyrogram").setLevel(logging.ERROR)
 logging.getLogger("cinemagoer").setLevel(logging.ERROR)
 
 from pyrogram import Client, idle
+from pyrogram.enums import ParseMode
 from database.users_chats_db import db
 from info import *
 from utils import temp
 from typing import Union, Optional, AsyncGenerator
-from Script import script 
-from datetime import date, datetime 
+from Script import script
+from datetime import date, datetime
 from aiohttp import web
 from plugins import web_server
 from plugins.clone import restart_bots
@@ -26,6 +27,40 @@ ppath = "plugins/*.py"
 files = glob.glob(ppath)
 TechVJBot.start()
 loop = asyncio.get_event_loop()
+
+
+async def send_alive_message(client: Client):
+    while True:
+        try:
+            # Get the current time in IST
+            IST = pytz.timezone('Asia/Kolkata')
+            current_time = datetime.now(IST).strftime('%Y-%m-%d %H:%M:%S')
+
+            # Calculate response time
+            start_time = time.time()
+            message = f"#alive\n\nCurrent time: {current_time}\nMy response time: calculating..."
+            sent_message = await client.send_message(
+                chat_id=BOT_LOG_CHANNEL,
+                text=message,
+                parse_mode=ParseMode.MARKDOWN
+            )
+
+            end_time = time.time()
+            response_time = round((end_time - start_time) * 1000, 2)  # in milliseconds
+
+            # Edit the message with the final response time
+            final_message = f"#alive\n\nCurrent time: {current_time}\nMy response time: {response_time}ms\nThank you 😊"
+            await client.edit_message_text(
+                chat_id=LOG_CHANNEL,
+                message_id=sent_message.message_id,
+                text=final_message,
+                parse_mode=ParseMode.MARKDOWN
+            )
+        except Exception as e:
+            logging.error(f"Error in send_alive_message: {e}")
+
+        # Wait for 5 minutes (300 seconds)
+        await asyncio.sleep(300)
 
 
 async def start():
@@ -69,6 +104,10 @@ async def start():
     await app.setup()
     bind_address = "0.0.0.0"
     await web.TCPSite(app, bind_address, PORT).start()
+
+    # Start send_alive_message as a background task
+    asyncio.create_task(send_alive_message(TechVJBot))
+
     await idle()
 
 
@@ -76,5 +115,4 @@ if __name__ == '__main__':
     try:
         loop.run_until_complete(start())
     except KeyboardInterrupt:
-        logging.info('Service Stopped Bye 👋')
-
+        logging.info('Service Stopped Bye 👋')   #     logging.info('Service Stopped Bye 👋')
