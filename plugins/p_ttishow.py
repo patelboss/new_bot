@@ -126,8 +126,72 @@ async def save_group(bot, message):
 
     except Exception as e:
         logger.error(f"Error processing group {message.chat.id}: {e}")
+@Client.on_message(filters.new_chat_members)
+async def welcome_new_members(bot, message, db):
+    """
+    Welcomes new members in groups stored in the database.
 
+    :param bot: The Pyrogram Client
+    :param message: The incoming message containing new members
+    :param db: The database instance for checking group settings
+    """
+    try:
+        # Log new members in the group
+        logger.info(f"Processing new members in chat {message.chat.id}")
+        
+        # Check if the group is in the database
+        if not await db.get_chat(message.chat.id):
+            logger.info(f"Group {message.chat.id} not found in the database. Skipping.")
+            return
+        
+        # Get the group settings
+        settings = await get_settings(message.chat.id)
+        logger.info(f"Settings for chat {message.chat.id}: {settings}")
 
+        # If welcome messages are enabled
+        if settings.get("welcome", False):
+            logger.info(f"Welcome message is enabled for group {message.chat.id}")
+            for new_member in message.new_chat_members:
+                if new_member.is_bot:
+                    continue  # Ignore bots
+
+                # Delete the previous welcome message if it exists
+                if temp.MELCOW.get("welcome"):
+                    try:
+                        logger.info(f"Deleting previous welcome message for user {new_member.id} in chat {message.chat.id}")
+                        await temp.MELCOW["welcome"].delete()
+                    except Exception as e:
+                        logger.error(f"Error deleting previous welcome message: {e}")
+
+                # Send a welcome message or media
+                logger.info(f"Sending welcome message to user {new_member.id} in chat {message.chat.id}")
+                temp.MELCOW["welcome"] = await message.reply_video(
+                    video=WELCOME_VIDEO_ID,  # Correct file ID here
+                    caption=script.MELCOW_ENG.format(new_member.mention, message.chat.title),
+                    reply_markup=InlineKeyboardMarkup(
+                        [[
+                            InlineKeyboardButton("Sᴜᴘᴘᴏʀᴛ Gʀᴏᴜᴘ", url=GRP_LNK),
+                            InlineKeyboardButton("Uᴘᴅᴀᴛᴇs Cʜᴀɴɴᴇʟ", url=CHNL_LNK)
+                        ], [
+                            InlineKeyboardButton("Bᴏᴛ Oᴡɴᴇʀ", url="t.me/Pankaj_jii")
+                        ]]
+                    ),
+                    parse_mode=enums.ParseMode.HTML
+                )
+
+        # Auto-delete welcome message if enabled
+        if settings.get("auto_delete", False):
+            logger.info(f"Auto-delete enabled for chat {message.chat.id}. Waiting 10 minutes.")
+            await asyncio.sleep(600)
+            if temp.MELCOW.get("welcome"):
+                try:
+                    logger.info(f"Deleting welcome message after 10 minutes in chat {message.chat.id}")
+                    await temp.MELCOW["welcome"].delete()
+                except Exception as e:
+                    logger.error(f"Error deleting auto-deleted welcome message: {e}")
+    
+    except Exception as e:
+        logger.error(f"Error in welcoming new members in chat {message.chat.id}: {e}")
 @Client.on_message(filters.group & filters.new_chat_members)
 
 async def save_group1(bot, message):
