@@ -1,78 +1,68 @@
 from pyrogram import Client, filters
 from pyrogram.enums import ParseMode
-import markdown
 import re
 
-# Initialize the bot
-# app = Client("my_bot")
+# Initialize the bot with your credentials
 
-# Command to convert Markdown to HTML
+# Enhanced function to convert Telegram-style Markdown to HTML
+def telegram_md_to_html(md_text):
+    # If the message has no markdown-style formatting (plain text), return it as-is
+    if not re.search(r'[\*\_\~`\|]', md_text):  # No markdown-like characters
+        return md_text  # Return plain text without any additional formatting
+    
+    # Convert bold text: *bold* => <b>bold</b> and **bold** => <b>bold</b>
+    md_text = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', md_text)  # **bold**
+    md_text = re.sub(r'\*(.*?)\*', r'<b>\1</b>', md_text)      # *bold*
+    
+    # Convert italic text: _italic_ => <i>italic</i> and __italic__ => <i>italic</i>
+    md_text = re.sub(r'\_\_(.*?)\_\_', r'<i>\1</i>', md_text)  # __italic__
+    md_text = re.sub(r'\_(.*?)\_', r'<i>\1</i>', md_text)      # _italic_
+    
+    # Convert strikethrough text: ~strikethrough~ => <s>strikethrough</s>
+    md_text = re.sub(r'~(.*?)~', r'<s>\1</s>', md_text)
+    
+    # Inline code: `code` => <code>code</code>
+    md_text = re.sub(r'`(.*?)`', r'<code>\1</code>', md_text)
+
+    # Code blocks: ```code``` => <pre>code</pre>
+    md_text = re.sub(r'```(.*?)```', r'<pre>\1</pre>', md_text, flags=re.DOTALL)
+
+    # Links: [text](http://link.com) => <a href="http://link.com">text</a>
+    md_text = re.sub(r'([^]+)(http[^]+)', r'<a href="\2">\1</a>', md_text)
+
+    # Telegram spoiler: ||spoiler|| => <span class="tg-spoiler">spoiler</span>
+    md_text = re.sub(r'\|\|(.*?)\|\|', r'<span class="tg-spoiler">\1</span>', md_text)
+
+    # Mention format: @username => <a href="tg://user?id=username">@username</a>
+    md_text = re.sub(r'@([a-zA-Z0-9_]+)', r'<a href="tg://user?id=\1">@\1</a>', md_text)
+
+    # Handle hyperlinks with mentions: [@username](tg://user?id=username)
+    md_text = re.sub(r'@([a-zA-Z0-9_]+)tg://user\?id=([a-zA-Z0-9_]+)', r'<a href="tg://user?id=\2">@\1</a>', md_text)
+
+    # Handle custom inline markdown links: [some text](www.example.com)
+    md_text = re.sub(r'([^]+)(http[^]+)', r'<a href="\2">\1</a>', md_text)
+
+    # Return the HTML formatted text
+    return md_text
+
 @Client.on_message(filters.command("convertmd"))
-async def convert_markdown(client, message):
+async def convert_markdown_to_html(client, message):
     # Check if the message is a reply
     if not message.reply_to_message:
-        await message.reply("Please reply to a message that contains Markdown to convert!")
+        await message.reply("Please reply to a message containing Markdown to convert!")
         return
 
     # Get the text of the replied message
     md_text = message.reply_to_message.text
 
     if not md_text:
-        await message.reply("The replied message does not contain any text to convert!")
+        await message.reply("The replied message doesn't contain any text to convert!")
         return
 
-    # Convert Markdown to HTML
+    # Convert Telegram-style Markdown to HTML
     try:
-        html_text = markdown.markdown(md_text)
-
-        # Convert advanced formatting like quotes and spoilers
-        html_text = re.sub(r'```(.*?)```', r'<pre>\1</pre>', html_text, flags=re.DOTALL)  # Code block handling
-        html_text = re.sub(r'`(.*?)`', r'<code>\1</code>', html_text)  # Inline code handling
-        html_text = re.sub(r'(\*\*|__)(.*?)\1', r'<b>\2</b>', html_text)  # Bold handling
-        html_text = re.sub(r'(\*|_)(.*?)\1', r'<i>\2</i>', html_text)  # Italic handling
-        html_text = re.sub(r'~~(.*?)~~', r'<s>\1</s>', html_text)  # Strikethrough handling
-        html_text = re.sub(r'__(.*?)__', r'<u>\1</u>', html_text)  # Underline handling
-        html_text = re.sub(r'([^]+)(http[^]+)', r'<a href="\2">\1</a>', html_text)  # Link handling
-
-        # Convert spoiler text
-        html_text = re.sub(r'\|\|(.*?)\|\|', r'<span class="tg-spoiler">\1</span>', html_text)  # Spoiler handling
-
-        # Reply with the HTML formatted message using ParseMode.HTML
-        await message.reply(html_text, parse_mode=ParseMode.HTML)
+        html_text = telegram_md_to_html(md_text)
+        await message.reply(html_text, parse_mode=ParseMode.MARKDOWN)
     except Exception as e:
         await message.reply(f"Error during conversion: {e}")
 
-# Command to convert HTML to Markdown
-@Client.on_message(filters.command("convertht"))
-async def convert_html(client, message):
-    # Check if the message is a reply
-    if not message.reply_to_message:
-        await message.reply("Please reply to a message that contains HTML to convert!")
-        return
-
-    # Get the text of the replied message
-    html_text = message.reply_to_message.text
-
-    if not html_text:
-        await message.reply("The replied message does not contain any text to convert!")
-        return
-
-    # Convert HTML back to Markdown (simplified version)
-    try:
-        # A simple HTML to Markdown conversion for known tags like <b>, <i>, etc.
-        markdown_text = html_text.replace("<b>", "**").replace("</b>", "**") \
-                                 .replace("<i>", "*").replace("</i>", "*") \
-                                 .replace("<u>", "__").replace("</u>", "__") \
-                                 .replace("<s>", "~~").replace("</s>", "~~") \
-                                 .replace("<code>", "`").replace("</code>", "`") \
-                                 .replace("<a href=", "[").replace("</a>", "]") \
-                                 .replace(">", "(").replace("<", ")") \
-                                 .replace("<span class=\"tg-spoiler\">", "||").replace("</span>", "||")
-
-        # Reply with the Markdown formatted message using ParseMode.MARKDOWN
-        await message.reply(markdown_text, parse_mode=ParseMode.MARKDOWN)
-    except Exception as e:
-        await message.reply(f"Error during conversion: {e}")
-
-# Start the bot
-# app.run()
