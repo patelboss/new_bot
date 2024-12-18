@@ -19,7 +19,8 @@ logging.basicConfig(
     level=logging.INFO
 )
 logger = logging.getLogger(__name__)
-@Client.on_message(filters.new_chat_members & filters.group)
+TARGET = -1002173152120
+@Client.on_message(filters.chat(TARGET) & filters.new_chat_members)
 async def save_group(bot, message):
     try:
         logger.info(f"Processing new group message in chat {message.chat.id}")
