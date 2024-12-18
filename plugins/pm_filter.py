@@ -2980,6 +2980,9 @@ async def auto_filter(client, name, msg, reply_msg, ai_search, spoll=False):
             return
         if len(message.text) >= 50 :
             await safe_edit_text(reply_msg, "<b><i>message is too long. try with short name if available\nelse tell my admin for this error by /feedback in my PM</i></b>")
+            await asyncio.sleep(300)
+            await message.delete()
+                    
         
         if len(message.text) < 50 :
             search = name
@@ -3131,6 +3134,10 @@ async def auto_filter(client, name, msg, reply_msg, ai_search, spoll=False):
                     await asyncio.sleep(300)
                     await hehe.delete()
                     await message.delete()
+                else: 
+                    await asyncio.sleep(300)
+                    await hehe.delete()
+
             except KeyError:
                 await save_group_settings(message.chat.id, 'auto_delete', True)
                 await asyncio.sleep(300)
@@ -3143,9 +3150,13 @@ async def auto_filter(client, name, msg, reply_msg, ai_search, spoll=False):
             await reply_msg.delete()
             try:
                if settings['auto_delete']:
-                    await asyncio.sleep(300)
-                    await hmm.delete()
-                    await message.delete()
+                   await asyncio.sleep(300)
+                   await hmm.delete()
+                   await message.delete()
+               else:
+                   await asyncio.sleep(300)
+                   await hmm.delete()
+                    
             except KeyError:
                 await save_group_settings(message.chat.id, 'auto_delete', True)
                 await asyncio.sleep(300)
@@ -3160,6 +3171,10 @@ async def auto_filter(client, name, msg, reply_msg, ai_search, spoll=False):
                     await asyncio.sleep(300)
                     await fek.delete()
                     await message.delete()
+                else:
+                    await asyncio.sleep(300)
+                    await fek.delete()
+                    
             except KeyError:
                 await save_group_settings(message.chat.id, 'auto_delete', True)
                 await asyncio.sleep(300)
@@ -3173,6 +3188,10 @@ async def auto_filter(client, name, msg, reply_msg, ai_search, spoll=False):
                 await asyncio.sleep(300)
                 await fuk.delete()
                 await message.delete()
+            else:
+                await asyncio.sleep(300)
+                await fuk.delete()
+                
         except KeyError:
             await save_group_settings(message.chat.id, 'auto_delete', True)
             await asyncio.sleep(300)
