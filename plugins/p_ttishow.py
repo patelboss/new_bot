@@ -14,39 +14,42 @@ from database.connections_mdb import active_connection, mydb
 import logging
 
 # Configure the logging system (this happens once)
-logging.basicConfig(level=logging.INFO)  # You can adjust the logging level as needed
-LOGGER = logging.getLogger(__name__)  # `LOGGER` is the global logger instance (constant)
+logging.basicConfig(
+    format='[%(levelname) 5s/%(asctime)s] %(name)s: %(message)s',
+    level=logging.INFO
+)
+logger = logging.getLogger(__name__)
 @Client.on_message(filters.new_chat_members & filters.group)
 async def save_group(bot, message):
     try:
-        LOGGER(__name__).info(f"Processing new group message in chat {message.chat.id}")
+        logger.info(f"Processing new group message in chat {message.chat.id}")
         
         # Check for new members
         r_j_check = [u.id for u in message.new_chat_members]
-        LOGGER(__name__).info(f"New members added: {[u.id for u in message.new_chat_members]} in chat {message.chat.id}")
+        logger.info(f"New members added: {[u.id for u in message.new_chat_members]} in chat {message.chat.id}")
         
         if temp.ME in r_j_check:
             # Bot added to the group
-            LOGGER(__name__).info(f"Bot added to group {message.chat.id}")
+            logger.info(f"Bot added to group {message.chat.id}")
             
             # Check if the group is already in the database
             if not await db.get_chat(message.chat.id):
-                LOGGER(__name__).info(f"Group {message.chat.id} is not in database. Fetching member count.")
+                logger.info(f"Group {message.chat.id} is not in database. Fetching member count.")
                 total = await bot.get_chat_members_count(message.chat.id)
                 r_j = message.from_user.mention if message.from_user else "Anonymous"
-                LOGGER(__name__).info(f"Sending log to admin channel with group details: {message.chat.title}, {message.chat.id}, {total}, {r_j}")
+                logger.info(f"Sending log to admin channel with group details: {message.chat.title}, {message.chat.id}, {total}, {r_j}")
                 await bot.send_message(
                     LOG_CHANNEL,
                     script.LOG_TEXT_G.format(message.chat.title, message.chat.id, total, r_j)
                 )
-                LOGGER(__name__).info(f"Adding group {message.chat.id} to the database.")
+                logger.info(f"Adding group {message.chat.id} to the database.")
                 await db.add_chat(message.chat.id, message.chat.title)
             else:
-                LOGGER(__name__).info(f"Group {message.chat.id} already exists in the database.")
+                logger.info(f"Group {message.chat.id} already exists in the database.")
             
             # Check if the chat is in banned list
             if message.chat.id in temp.BANNED_CHATS:
-                LOGGER(__name__).info(f"Group {message.chat.id} is in banned chats list.")
+                logger.info(f"Group {message.chat.id} is in banned chats list.")
                 
                 # Handle banned chats
                 buttons = [[
@@ -59,16 +62,16 @@ async def save_group(bot, message):
                     reply_markup=reply_markup,
                 )
                 try:
-                    LOGGER(__name__).info(f"Attempting to pin the message in banned group {message.chat.id}")
+                    logger.info(f"Attempting to pin the message in banned group {message.chat.id}")
                     await k.pin()
                 except Exception as e:
-                    LOGGER(__name__).error(f"Error pinning message in banned group {message.chat.id}: {e}")
-                LOGGER(__name__).info(f"Bot is leaving banned group {message.chat.id}")
+                    logger.error(f"Error pinning message in banned group {message.chat.id}: {e}")
+                logger.info(f"Bot is leaving banned group {message.chat.id}")
                 await bot.leave_chat(message.chat.id)
                 return
             
             # Send welcome message with buttons
-            LOGGER(__name__).info(f"Sending welcome message to group {message.chat.id}")
+            logger.info(f"Sending welcome message to group {message.chat.id}")
             buttons = [[
                 InlineKeyboardButton('Sᴜᴘᴘᴏʀᴛ Gʀᴏᴜᴘ', url=GRP_LNK),
                 InlineKeyboardButton('Uᴘᴅᴀᴛᴇs Cʜᴀɴɴᴇʟ', url=CHNL_LNK)
@@ -82,23 +85,23 @@ async def save_group(bot, message):
             )
         else:
             # Bot not added, handling new members
-            LOGGER(__name__).info(f"Processing new members in group {message.chat.id}.")
+            logger.info(f"Processing new members in group {message.chat.id}.")
             
             settings = await get_settings(message.chat.id)
-            LOGGER(__name__).info(f"Settings for chat {message.chat.id}: {settings}")
+            logger.info(f"Settings for chat {message.chat.id}: {settings}")
             
             if settings["welcome"]:
-                LOGGER(__name__).info(f"Welcome message is enabled for group {message.chat.id}.")
+                logger.info(f"Welcome message is enabled for group {message.chat.id}.")
                 for u in message.new_chat_members:
                     # Check if there's an existing welcome message to delete
                     if temp.MELCOW.get('welcome') is not None:
                         try:
-                            LOGGER(__name__).info(f"Deleting previous welcome message for user {u.id} in group {message.chat.id}.")
+                            logger.info(f"Deleting previous welcome message for user {u.id} in group {message.chat.id}.")
                             await temp.MELCOW['welcome'].delete()
                         except Exception as e:
-                            LOGGER(__name__).error(f"Error deleting previous welcome message in group {message.chat.id}: {e}")
+                            logger.error(f"Error deleting previous welcome message in group {message.chat.id}: {e}")
                     
-                    LOGGER(__name__).info(f"Sending welcome video to user {u.id} in group {message.chat.id}.")
+                    logger.info(f"Sending welcome video to user {u.id} in group {message.chat.id}.")
                     temp.MELCOW['welcome'] = await message.reply_video(
                         video=WELCOME_VIDEO_ID,  # Correct file ID here
                         caption=(script.MELCOW_ENG.format(u.mention, message.chat.title)),
@@ -114,14 +117,14 @@ async def save_group(bot, message):
                     )
             
             if settings["auto_delete"]:
-                LOGGER(__name__).info(f"Auto delete is enabled for group {message.chat.id}. Waiting 10 minutes before deletion.")
+                logger.info(f"Auto delete is enabled for group {message.chat.id}. Waiting 10 minutes before deletion.")
                 await asyncio.sleep(600)
                 if temp.MELCOW.get('welcome'):
-                    LOGGER(__name__).info(f"Deleting welcome message after 10 minutes in group {message.chat.id}.")
+                    logger.info(f"Deleting welcome message after 10 minutes in group {message.chat.id}.")
                     await temp.MELCOW['welcome'].delete()
 
     except Exception as e:
-        LOGGER(__name__).error(f"Error processing group {message.chat.id}: {e}")
+        logger.error(f"Error processing group {message.chat.id}: {e}")
 @Client.on_message(filters.command('leave') & filters.user(ADMINS))
 async def leave_a_chat(bot, message):
     if len(message.command) == 1:
