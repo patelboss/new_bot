@@ -47,10 +47,10 @@ async def pm_broadcast(bot, message):
                         deleted += 1
                     else:
                         failed += 1
-                except FloodWait as e:
-                    logger.warning(f"FloodWait of {e.x} seconds encountered. Waiting...")
-                    await asyncio.sleep(e.x)
-                    await send_error_log(client, "broadcast floodwait waiting", e)
+              #  except FloodWait as e:
+                #    logger.warning(f"FloodWait of {e.x} seconds encountered. Waiting...")
+                 #   await asyncio.sleep(e.x)
+                #    await send_error_log(client, "broadcast floodwait waiting", e)
                 except InputUserDeactivated:
                     logger.warning(f"User {user['id']} is deactivated.")
                     deleted += 1
@@ -66,6 +66,7 @@ async def pm_broadcast(bot, message):
                     failed += 1
 
                 done += 1
+                await asyncio.sleep(2)
                 if not done % 20:
                     await sts.edit(f"Broadcast in progress:\n\nTotal Users: {total_users}\nCompleted: {done}\nSuccess: {success}\nBlocked: {blocked}\nDeleted: {deleted}\nFailed: {failed}")
 
@@ -110,14 +111,15 @@ async def broadcast_group(bot, message):
                         success += 1
                     else:
                         failed += 1
-                except FloodWait as e:
-                    logger.warning(f"FloodWait of {e.x} seconds encountered. Waiting...")
-                    await asyncio.sleep(e.x)
+            #    except FloodWait as e:
+             #       logger.warning(f"FloodWait of {e.x} seconds encountered. Waiting...")
+            #        await asyncio.sleep(e.x)
                 except Exception as e:
                     logger.error(f"Error broadcasting to group {group['id']}: {e}")
                     failed += 1
 
                 done += 1
+                await asyncio.sleep(2)
                 if not done % 20:
                     await sts.edit(f"Broadcast in progress:\n\nTotal Groups: {total_groups}\nCompleted: {done}\nSuccess: {success}\nFailed: {failed}")
 
