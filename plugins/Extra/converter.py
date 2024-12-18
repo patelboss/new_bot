@@ -1,7 +1,7 @@
 from pyrogram import Client, filters
 from pyrogram.enums import ParseMode
 import re
-
+import markdown
 # Initialize the bot with your credentials
 
 # Enhanced function to convert Telegram-style Markdown to HTML
