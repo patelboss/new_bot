@@ -1498,9 +1498,9 @@ async def cb_handler(client: Client, query: CallbackQuery):
         except PeerIdInvalid:
             await query.answer(url=f"https://telegram.me/{temp.U_NAME}?start={ident}_{file_id}")
         except Exception as e:
-            #await send_error_log(client, "1470", e)
-            await query.answer(url=f"https://telegram.me/{temp.U_NAME}?start={ident}_{file_id}")
             await send_error_log(client, "1470", e)
+            await query.answer(url=f"https://telegram.me/{temp.U_NAME}?start={ident}_{file_id}")
+            #await send_error_log(client, "1470", e)
             
     elif query.data.startswith("sendfiles"):
         clicked = query.from_user.id
