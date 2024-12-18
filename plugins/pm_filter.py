@@ -2980,6 +2980,10 @@ async def auto_filter(client, name, msg, reply_msg, ai_search, spoll=False):
             return
         if len(message.text) >= 50 :
             await safe_edit_text(reply_msg, "<b><i>message is too long. try with short name if available\nelse tell my admin for this error by /feedback in my PM</i></b>")
+            if not settings["auto_delete"]:
+                await asyncio.sleep(300)  # Adjust the time as needed
+                await reply_msg.delete()
+            return
         
         if len(message.text) < 50 :
             search = name
@@ -3160,6 +3164,8 @@ async def auto_filter(client, name, msg, reply_msg, ai_search, spoll=False):
                     await asyncio.sleep(300)
                     await fek.delete()
                     await message.delete()
+
+            
             except KeyError:
                 await save_group_settings(message.chat.id, 'auto_delete', True)
                 await asyncio.sleep(300)
@@ -3170,9 +3176,34 @@ async def auto_filter(client, name, msg, reply_msg, ai_search, spoll=False):
         
         try:
             if settings['auto_delete']:
+                
+        # Auto-delete enabled: delete both the bot's and user's messages after 300 seconds
                 await asyncio.sleep(300)
-                await fuk.delete()
-                await message.delete()
+                if fuk:
+                    # If `fuk` is a bot's reply message
+                    await fuk.delete()
+                    await message.delete()
+           else:
+        # Auto-delete disabled: delete only the bot's reply message after 10 seconds
+               await asyncio.sleep(10)  # Adjust the time as needed
+               await reply_msg.delete()
+               
+except Exception as e:
+
+
+    await send_error_log(client, "3194 new delete ", e)
+#LOGGER(__name__).error(f"Error in auto-delete logic: {e}")
+      #  try:
+        #    if settings['auto_delete']:
+         #       await asyncio.sleep(300)
+           #     await fuk.delete()
+            #    await message.delete()
+        #    else:
+                #if not settings["auto_delete"]:
+             #   await asyncio.sleep(10)  # Adjust the time as needed
+          #      await reply_msg.delete()
+            #return
+            
         except KeyError:
             await save_group_settings(message.chat.id, 'auto_delete', True)
             await asyncio.sleep(300)
