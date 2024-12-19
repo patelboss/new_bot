@@ -1,10 +1,13 @@
 import re
 from os import environ
-from Script import script 
+from database.envs import fetch_config  # Ensure this function fetches the MongoDB config properly
 import os
-from database.envs import fatch_config
+
 config = fetch_config("env_config")
+
 id_pattern = re.compile(r'^.\d+$')
+
+# Default function for enabling/disabling based on custom text (true/false)
 def is_enabled(value, default):
     if value.lower() in ["true", "yes", "1", "enable", "y"]:
         return True
@@ -13,141 +16,118 @@ def is_enabled(value, default):
     else:
         return default
 
-# Bot information
+# Bot information with MongoDB and fallback
 SESSION = environ.get('SESSION', 'TechVJBot')
 API_ID = int(environ.get('API_ID', ''))
 API_HASH = environ.get('API_HASH', '')
 BOT_TOKEN = environ.get('BOT_TOKEN', "")
-#DLTTM = 4200
-
-# Fetch config from MongoDB
-
-# API_ID: First try fetching from MongoDB config, if not found, use the environment variable
+DATABASE_URI = environ.get('DATABASE_URI', "")
+# Fetch config from MongoDB or fallback to environment variable
 DLTTM = config.get("dlttm") if config.get("dlttm") else environ.get("DLTTM", "4200")
-# Bot settings
-#CACHE_TIME = int(environ.get('CACHE_TIME', 1800))
+
+# Bot settings with MongoDB fallback
 CACHE_TIME = config.get("cache_time") if config.get("cache_time") else environ.get("CACHE_TIME", "1800")
-#PICS = (environ.get('PICS', 'https://graph.org/file/ce1723991756e48c35aa1.jpg')).split() #SAMPLE PIC
 PICS = config.get("pics") if config.get("pics") else (environ.get("PICS", "https://graph.org/file/ce1723991756e48c35aa1.jpg")).split()
-#NOR_IMG = environ.get("NOR_IMG", "https://graph.org/file/b69af2db776e4e85d21ec.jpg")
 NOR_IMG = config.get("nor_img") if config.get("nor_img") else environ.get("NOR_IMG", "https://graph.org/file/b69af2db776e4e85d21ec.jpg")
 MELCOW_VID = environ.get("MELCOW_VID", "https://t.me/How_To_Open_Linkl")
-#WELCOME_VIDEO_ID = environ.get("MELCOW_VID", "BAACAgQAAxkBAAEWWw5nXJ_bgRy9MY3ZNxpLzbIaysGuswAC2hoAAuLv4VIyB40_JD42Hh4E")
 WELCOME_VIDEO_ID = config.get("welcome_video_id") if config.get("welcome_video_id") else environ.get("MELCOW_VID", "BAACAgQAAxkBAAEWWw5nXJ_bgRy9MY3ZNxpLzbIaysGuswAC2hoAAuLv4VIyB40_JD42Hh4E")
-#SPELL_IMG = environ.get("SPELL_IMG", "https://te.legra.ph/file/15c1ad448dfe472a5cbb8.jpg")
 SPELL_IMG = config.get("spell_img") if config.get("spell_img") else environ.get("SPELL_IMG", "https://te.legra.ph/file/15c1ad448dfe472a5cbb8.jpg")
-#NRF_CHANNEL = int(environ.get('NRF_CHANNEL', '-1001886419650'))
 NRF_CHANNEL = config.get("nrf_channel") if config.get("nrf_channel") else int(environ.get('NRF_CHANNEL', '-1001886419650'))
-#BOT_LOG_CHANNEL = int(environ.get('BOT_LOG_CHANNEL', '-1001886419650'))
 BOT_LOG_CHANNEL = config.get("bot_log_channel") if config.get("bot_log_channel") else int(environ.get('BOT_LOG_CHANNEL', '-1001886419650'))
 
-# Admins, Channels & Users
-#LOG_CHANNEL = int(environ.get('LOG_CHANNEL', ''))
+# Admins, Channels & Users (Admin & Auth Users handled with MongoDB & fallback logic)
 LOG_CHANNEL = config.get("log_channel") if config.get("log_channel") else int(environ.get('LOG_CHANNEL', '-1001886419650'))
-ADMINS = [int(admin) if id_pattern.search(admin) else admin for admin in environ.get('ADMINS', '').split()]
-CHANNELS = [int(ch) if id_pattern.search(ch) else ch for ch in environ.get('CHANNELS', '').split()]
-auth_users = [int(user) if id_pattern.search(user) else user for user in environ.get('AUTH_USERS', '').split()]
-AUTH_USERS = (auth_users + ADMINS) if auth_users else []
 
-# auth_channel means force subscribe channel.
-# if REQUEST_TO_JOIN_MODE is true then force subscribe work like request to join fsub, else if false then work like normal fsub.
-REQUEST_TO_JOIN_MODE = False #bool(environ.get('REQUEST_TO_JOIN_MODE', False)) # Set True Or False
-TRY_AGAIN_BTN = False #bool(environ.get('TRY_AGAIN_BTN', False)) # Set True Or False (This try again button is only for request to join fsub not for normal fsub)
-auth_channel = environ.get('AUTH_CHANNEL', '') # give your force subscribe channel id here else leave it blank
+# Fetch Admins from MongoDB (or environment variables if not available)
+ADMINS = [int(admin) if id_pattern.search(admin) else admin for admin in config.get("admins", "").split()] if config.get("admins") else [int(admin) if id_pattern.search(admin) else admin for admin in environ.get('ADMINS', '').split()]
+
+# Channels (fetch from config or fallback to env)
+CHANNELS = [int(ch) if id_pattern.search(ch) else ch for ch in config.get("channels", "").split()] if config.get("channels") else [int(ch) if id_pattern.search(ch) else ch for ch in environ.get('CHANNELS', '').split()]
+
+auth_users = [int(user) if id_pattern.search(user) else user for user in config.get('auth_users', "").split()] if config.get('auth_users') else [int(user) if id_pattern.search(user) else user for user in environ.get('AUTH_USERS', '').split()]
+AUTH_USERS = (auth_users + ADMINS) if auth_users else ADMINS
+
+# Admin-related settings
+REQUEST_TO_JOIN_MODE = is_enabled(config.get('request_to_join_mode', "false"), False) if config.get('request_to_join_mode') else False
+TRY_AGAIN_BTN = is_enabled(config.get('try_again_btn', "false"), False) if config.get('try_again_btn') else False
+
+# Force subscribe channel (optional)
+auth_channel = config.get('auth_channel', '') if config.get('auth_channel') else environ.get('AUTH_CHANNEL', '')
 AUTH_CHANNEL = int(auth_channel) if auth_channel and id_pattern.search(auth_channel) else None
-AUTH_CHANNELS = environ.get("AUTH_CHANNELS", "").split(",")  
-reqst_channel = environ.get('REQST_CHANNEL_ID', '')
-REQST_CHANNEL = int(reqst_channel) if reqst_channel and id_pattern.search(reqst_channel) else None
-support_chat_id = environ.get('SUPPORT_CHAT_ID', '')
-SUPPORT_CHAT_ID = int(support_chat_id) if support_chat_id and id_pattern.search(support_chat_id) else None
-INDEX_REQ_CHANNEL = int(environ.get('INDEX_REQ_CHANNEL', LOG_CHANNEL))
-FILE_STORE_CHANNEL = [int(ch) for ch in (environ.get('FILE_STORE_CHANNEL', '')).split()]
-DELETE_CHANNELS = [int(dch) if id_pattern.search(dch) else dch for dch in environ.get('DELETE_CHANNELS', '0').split()]
+AUTH_CHANNELS = environ.get("AUTH_CHANNELS", "").split() if config.get("auth_channels") else []
 
-# MongoDB information
-MULTIPLE_DATABASE = False # Set True or False
+# MongoDB settings for handling databases and collections
+MULTIPLE_DATABASE = bool(config.get('multiple_database', False))
 
-DATABASE_URI = environ.get('DATABASE_URI', "") # IF Multiple Database Is False Then Fill Only This Database Url.
-if MULTIPLE_DATABASE == False:
-    USER_DB_URI = DATABASE_URI
-    OTHER_DB_URI = DATABASE_URI
-    FILE_DB_URI = DATABASE_URI
-    SEC_FILE_DB_URI = environ.get('SEC_FILE_DB_URI', "")
-else:
-    USER_DB_URI = DATABASE_URI # This Db is for User Data Store
-    OTHER_DB_URI = environ.get('OTHER_DB_URI', "") # This Db Is For Other Data Store
-    FILE_DB_URI = environ.get('FILE_DB_URI', "") # This Db Is For File Data Store
-    SEC_FILE_DB_URI = environ.get('SEC_FILE_DB_URI', "") # This Db is for File Data Store When First Db Is Going To Be Full.
-    
-DATABASE_NAME = environ.get('DATABASE_NAME', "techvjfilterbot")
-COLLECTION_NAME = environ.get('COLLECTION_NAME', 'vjcollection')
+DATABASE_URI = environ.get('DATABASE_URI', "") if MULTIPLE_DATABASE else config.get('database_uri', "")
+USER_DB_URI = DATABASE_URI if MULTIPLE_DATABASE is False else environ.get('USER_DB_URI', "")
+OTHER_DB_URI = environ.get('OTHER_DB_URI', "") if MULTIPLE_DATABASE else DATABASE_URI
 
-# Premium And Referal Settings
-PREMIUM_AND_REFERAL_MODE = False # Set Ture Or False
+# Payment and Referral related settings (adjusted as per your need)
+PREMIUM_AND_REFERAL_MODE = is_enabled(config.get("premium_and_referal_mode", "false"), False)
+REFERAL_COUNT = int(config.get("referal_count", "20"))
+REFERAL_PREMEIUM_TIME = config.get("referal_premium_time", "1month")
 
-# If PREMIUM_AND_REFERAL_MODE is True Then Fill Below Variable, If Flase Then No Need To Fill.
-REFERAL_COUNT = int(environ.get('REFERAL_COUNT', '20')) # number of referal count
-REFERAL_PREMEIUM_TIME = environ.get('REFERAL_PREMEIUM_TIME', '1month')
-PAYMENT_QR = environ.get('PAYMENT_QR', 'https://envs.sh/3wu.jpg')
-PAYMENT_TEXT = environ.get('PAYMENT_TEXT', '<b> Thank You For Donating Us \nYou can Donate any amount you want. your donation amount will be used in bots future.</b>')
-OWNER_USERNAME = environ.get('OWNER_USERNAME', 'Pankaj_patel_p') # owner username without @
+OWNER_USERNAME = environ.get('OWNER_USERNAME', 'Pankaj_patel_p')
 
-# Clone Information : If Clone Mode Is True Then Bot Clone Other Bots.
-CLONE_MODE = bool(environ.get('CLONE_MODE', False)) # Set True or False
-CLONE_DATABASE_URI = environ.get('CLONE_DATABASE_URI', "") # Necessary If clone mode is true
-PUBLIC_FILE_CHANNEL = environ.get('PUBLIC_FILE_CHANNEL', '') # Public Channel Username Without @ or without https://t.me/ and Bot Is Admin With Full Right.
-BATCH_FILE_CHANNEL = environ.get('BATCH_FILE_CHANNEL', '') # Public Channel Username Without @ or without https://t.me/ and Bot Is Admin With Full Right.
+# Clone-related settings
+
+
+# Bot and Database Configurations
+CLONE_MODE = bool(config.get('clone_mode')) if config.get('clone_mode') else bool(environ.get('CLONE_MODE', False))
+CLONE_DATABASE_URI = config.get('clone_database_uri') if config.get('clone_database_uri') else environ.get('CLONE_DATABASE_URI', '')
+PUBLIC_FILE_CHANNEL = config.get('public_file_channel') if config.get('public_file_channel') else environ.get('PUBLIC_FILE_CHANNEL', '')
+BATCH_FILE_CHANNEL = config.get('batch_file_channel') if config.get('batch_file_channel') else environ.get('BATCH_FILE_CHANNEL', '')
 
 # Links
-GRP_LNK = environ.get('GRP_LNK', 'https://t.me/Filmykeedha/306')
-CHNL_LNK = environ.get('CHNL_LNK', 'https://t.me/filmykeedha')
-Share_msg = environ.get('Share_msg', 'https://t.me/share/url??start=share&text=🎥%20Discover%20the%20Ultimate%20Telegram%20Media%20Bot!%0A%0ALooking%20for%20movies,%20web%20series,%20and%20much%20more?%20%F0%9F%93%9A%20With%20the%20biggest%20media%20database%20on%20Telegram,%20we%27ve%20been%20serving%20users%20since%202021%20and%20promise%20to%20stay%20completely%20free%20in%20the%20future!%0A%0A💻%20Try%20it%20now!%0A👉%20%0A%0A🔗%20Share%20this%20bot%20with%20your%20friends%20and%20let%20them%20enjoy%20unlimited%20access%20to%20premium%20content!%20[Click%20here%20to%20explore%20endless%20entertainment](https://t.me/Rashmika_mandanana_bot?start=share)')
-OFR_CNL = environ.get('OFR_CNL', 'https://t.me/+4dWp2gDjwC43YmJl')
-TUTORIAL = environ.get('TUTORIAL', 'https://bit.ly/3OOoNpP')
-SUPPORT_CHAT = environ.get('SUPPORT_CHAT', 'iAmRashmibot') # Support Chat Link Without https:// or @
+GRP_LNK = config.get('grp_lnk') if config.get('grp_lnk') else environ.get('GRP_LNK', 'https://t.me/Filmykeedha/306')
+CHNL_LNK = config.get('chnl_lnk') if config.get('chnl_lnk') else environ.get('CHNL_LNK', 'https://t.me/filmykeedha')
+Share_msg = config.get('share_msg') if config.get('share_msg') else environ.get('Share_msg', 'https://t.me/share/url??start=share&text=🎥%20Discover%20the%20Ultimate%20Telegram%20Media%20Bot!%0A%0ALooking%20for%20movies,%20web%20series,%20and%20much%20more?%20%F0%9F%93%9A%20With%20the%20biggest%20media%20database%20on%20Telegram,%20we%27ve%20been%20serving%20users%20since%202021%20and%20promise%20to%20stay%20completely%20free%20in%20the%20future!%0A%0A💻%20Try%20it%20now!%0A👉%20%0A%0A🔗%20Share%20this%20bot%20with%20your%20friends%20and%20let%20them%20enjoy%20unlimited%20access%20to%20premium%20content!%20[Click%20here%20to%20explore%20endless%20entertainment](https://t.me/Rashmika_mandanana_bot?start=share)')
+OFR_CNL = config.get('ofr_cnl') if config.get('ofr_cnl') else environ.get('OFR_CNL', 'https://t.me/+4dWp2gDjwC43YmJl')
+TUTORIAL = config.get('tutorial') if config.get('tutorial') else environ.get('TUTORIAL', 'https://bit.ly/3OOoNpP')
+SUPPORT_CHAT = config.get('support_chat') if config.get('support_chat') else environ.get('SUPPORT_CHAT', 'iAmRashmibot')
 
-# True Or False
-AI_SPELL_CHECK = True #bool(environ.get('AI_SPELL_CHECK', True))
-PM_SEARCH = False #bool(environ.get('PM_SEARCH', False))
-IS_SHORTLINK = False #bool(environ.get('IS_SHORTLINK', False))
-MAX_BTN = is_enabled((environ.get('MAX_BTN', "True")), True)
-IS_TUTORIAL = False #bool(environ.get('IS_TUTORIAL', False))
-P_TTI_SHOW_OFF = is_enabled((environ.get('P_TTI_SHOW_OFF', "False")), False)
-IMDB = False #is_enabled((environ.get('IMDB', "False")), False)
-AUTO_FFILTER = True
-AUTO_DELETE = False #is_enabled((environ.get('AUTO_DELETE', "False")), False)
-SINGLE_BUTTON = True
-LONG_IMDB_DESCRIPTION = False
-SPELL_CHECK_REPLY = True #is_enabled(environ.get("SPELL_CHECK_REPLY", "True"), True)
-MELCOW_NEW_USERS = is_enabled((environ.get('MELCOW_NEW_USERS', "True")), True)
-PROTECT_CONTENT = is_enabled((environ.get('PROTECT_CONTENT', "False")), False)
-PUBLIC_FILE_STORE = True #is_enabled((environ.get('PUBLIC_FILE_STORE', "True")), True)
-NO_RESULTS_MSG = True #False #bool(environ.get("NO_RESULTS_MSG", True))
-USE_CAPTION_FILTER = True #bool(environ.get('USE_CAPTION_FILTER', True))
+# True or False Configurations
+AI_SPELL_CHECK = bool(config.get('ai_spell_check')) if config.get('ai_spell_check') else bool(environ.get('AI_SPELL_CHECK', True))
+PM_SEARCH = bool(config.get('pm_search')) if config.get('pm_search') else bool(environ.get('PM_SEARCH', False))
+IS_SHORTLINK = bool(config.get('is_shortlink')) if config.get('is_shortlink') else bool(environ.get('IS_SHORTLINK', False))
+MAX_BTN = is_enabled(config.get('max_btn') if config.get('max_btn') else environ.get('MAX_BTN', "True"), True)
+IS_TUTORIAL = bool(config.get('is_tutorial')) if config.get('is_tutorial') else bool(environ.get('IS_TUTORIAL', False))
+P_TTI_SHOW_OFF = is_enabled(config.get('p_tti_show_off') if config.get('p_tti_show_off') else environ.get('P_TTI_SHOW_OFF', "False"), False)
+IMDB = bool(config.get('imdb')) if config.get('imdb') else bool(environ.get('IMDB', "False"))
+AUTO_FFILTER = bool(config.get('auto_ffilter')) if config.get('auto_ffilter') else bool(environ.get('AUTO_FFILTER', True))
+AUTO_DELETE = bool(config.get('auto_delete')) if config.get('auto_delete') else bool(environ.get('AUTO_DELETE', "False"))
+SINGLE_BUTTON = bool(config.get('single_button')) if config.get('single_button') else bool(environ.get('SINGLE_BUTTON', True))
+LONG_IMDB_DESCRIPTION = bool(config.get('long_imdb_description')) if config.get('long_imdb_description') else bool(environ.get('LONG_IMDB_DESCRIPTION', False))
+SPELL_CHECK_REPLY = bool(config.get('spell_check_reply')) if config.get('spell_check_reply') else bool(environ.get("SPELL_CHECK_REPLY", "True"))
+MELCOWE_NEW_USER = is_enabled(config.get('melcow_new_users') if config.get('melcow_new_users') else environ.get('MELCOW_NEW_USERS', "True"), True)
+PROTECT_CONTENT = bool(config.get('protect_content')) if config.get('protect_content') else bool(environ.get('PROTECT_CONTENT', "False"))
+PUBLIC_FILE_STORE = bool(config.get('public_file_store')) if config.get('public_file_store') else bool(environ.get('PUBLIC_FILE_STORE', "True"))
+NO_RESULTS_MSG = bool(config.get('no_results_msg')) if config.get('no_results_msg') else bool(environ.get("NO_RESULTS_MSG", True))
+USE_CAPTION_FILTER = bool(config.get('use_caption_filter')) if config.get('use_caption_filter') else bool(environ.get('USE_CAPTION_FILTER', True))
 
-# Token Verification Info :
-VERIFY = False
-VERIFY_SECOND_SHORTNER = bool(environ.get('VERIFY_SECOND_SHORTNER', False))
-VERIFY_SHORTLINK_URL = environ.get('VERIFY_SHORTLINK_URL', '')
-VERIFY_SHORTLINK_API = environ.get('VERIFY_SHORTLINK_API', '')
-# if verify second shortner is True then fill below url and api
-VERIFY_SND_SHORTLINK_URL = environ.get('VERIFY_SND_SHORTLINK_URL', '')
-VERIFY_SND_SHORTLINK_API = environ.get('VERIFY_SND_SHORTLINK_API', '')
-VERIFY_TUTORIAL = environ.get('VERIFY_TUTORIAL', 'https://t.me/How_To_Open_Linkl')
+# Token Verification Info
+VERIFY = bool(config.get('verify')) if config.get('verify') else bool(environ.get('VERIFY', False))
+VERIFY_SECOND_SHORTNER = bool(config.get('verify_second_shortner')) if config.get('verify_second_shortner') else bool(environ.get('VERIFY_SECOND_SHORTNER', False))
+VERIFY_SHORTLINK_URL = config.get('verify_shortlink_url') if config.get('verify_shortlink_url') else environ.get('VERIFY_SHORTLINK_URL', '')
+VERIFY_SHORTLINK_API = config.get('verify_shortlink_api') if config.get('verify_shortlink_api') else environ.get('VERIFY_SHORTLINK_API', '')
+VERIFY_SND_SHORTLINK_URL = config.get('verify_snd_shortlink_url') if config.get('verify_snd_shortlink_url') else environ.get('VERIFY_SND_SHORTLINK_URL', '')
+VERIFY_SND_SHORTLINK_API = config.get('verify_snd_shortlink_api') if config.get('verify_snd_shortlink_api') else environ.get('VERIFY_SND_SHORTLINK_API', '')
+VERIFY_TUTORIAL = config.get('verify_tutorial') if config.get('verify_tutorial') else environ.get('VERIFY_TUTORIAL', 'https://t.me/How_To_Open_Linkl')
 
 # Shortlink Info
-SHORTLINK_MODE = bool(environ.get('SHORTLINK_MODE', False))
-SHORTLINK_URL = environ.get('SHORTLINK_URL', '')
-SHORTLINK_API = environ.get('SHORTLINK_API', '')
+SHORTLINK_MODE = bool(config.get('shortlink_mode')) if config.get('shortlink_mode') else bool(environ.get('SHORTLINK_MODE', False))
+SHORTLINK_URL = config.get('shortlink_url') if config.get('shortlink_url') else environ.get('SHORTLINK_URL', '')
+SHORTLINK_API = config.get('shortlink_api') if config.get('shortlink_api') else environ.get('SHORTLINK_API', '')
 
-# Others
-MAX_B_TN = environ.get("MAX_B_TN", "10")
-PORT = environ.get("PORT", "8080")
-MSG_ALRT = environ.get('MSG_ALRT', 'Hello My Dear Friends ❤️')
-CUSTOM_FILE_CAPTION = environ.get("CUSTOM_FILE_CAPTION", f"{script.CAPTION}")
-BATCH_FILE_CAPTION = environ.get("BATCH_FILE_CAPTION", CUSTOM_FILE_CAPTION)
-IMDB_TEMPLATE = environ.get("IMDB_TEMPLATE", f"{script.IMDB_TEMPLATE_TXT}")
-MAX_LIST_ELM = environ.get("MAX_LIST_ELM", None)
+# Other Configurations
+MAX_B_TN = int(config.get("max_b_tn")) if config.get("max_b_tn") else int(environ.get("MAX_B_TN", "10"))
+PORT = int(config.get("port")) if config.get("port") else int(environ.get("PORT", "8080"))
+MSG_ALRT = config.get('msg_alrt') if config.get('msg_alrt') else environ.get('MSG_ALRT', 'Hello My Dear Friends ❤️')
+CUSTOM_FILE_CAPTION = config.get("custom_file_caption") if config.get("custom_file_caption") else environ.get("CUSTOM_FILE_CAPTION", f"{script.CAPTION}")
+BATCH_FILE_CAPTION = config.get("batch_file_caption") if config.get("batch_file_caption") else environ.get("BATCH_FILE_CAPTION", CUSTOM_FILE_CAPTION)
+IMDB_TEMPLATE = config.get("imdb_template") if config.get("imdb_template") else environ.get("IMDB_TEMPLATE", f"{script.IMDB_TEMPLATE_TXT}")
+MAX_LIST_ELM = config.get("max_list_elm") if config.get("max_list_elm") else environ.get("MAX_LIST_ELM", None)
 
 # Choose Option Settings 
 LANGUAGES = ["malayalam", "mal", "tamil", "tam" ,"english", "eng", "hindi", "hin", "telugu", "tel", "kannada", "kan"]
