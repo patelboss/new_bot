@@ -61,11 +61,14 @@ AUTH_CHANNEL = int(auth_channel) if auth_channel and id_pattern.search(auth_chan
 AUTH_CHANNELS = environ.get("AUTH_CHANNELS", "").split() if config.get("auth_channels") else []
 
 # MongoDB settings for handling databases and collections
-MULTIPLE_DATABASE = bool(config.get('multiple_database', False))
+MULTIPLE_DATABASE = bool(config.get('multiple_database', False))  # Read from config
 
-DATABASE_URI = environ.get('DATABASE_URI', "") if MULTIPLE_DATABASE else config.get('database_uri', "")
-USER_DB_URI = DATABASE_URI if MULTIPLE_DATABASE is False else environ.get('USER_DB_URI', "")
-OTHER_DB_URI = environ.get('OTHER_DB_URI', "") if MULTIPLE_DATABASE else DATABASE_URI
+DATABASE_URI = config.get('database_uri', "") if not MULTIPLE_DATABASE else config.get('database_uri', environ.get('DATABASE_URI', ""))
+
+USER_DB_URI = config.get('user_db_uri', DATABASE_URI) if MULTIPLE_DATABASE else DATABASE_URI
+OTHER_DB_URI = config.get('other_db_uri', "") if MULTIPLE_DATABASE else DATABASE_URI
+FILE_DB_URI = config.get('file_db_uri', "") if MULTIPLE_DATABASE else DATABASE_URI
+SEC_FILE_DB_URI = config.get('sec_file_db_uri', "") if MULTIPLE_DATABASE else environ.get('SEC_FILE_DB_URI', "")
 DATABASE_NAME = config.get("database_name") if config.get("database_name") else environ.get('DATABASE_NAME', "Telegram Bot")
 COLLECTION_NAME = config.get("collection_name") if config.get("collection_name") else environ.get('COLLECTION_NAME', "Telegram Bot")
 
