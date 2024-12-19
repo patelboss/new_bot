@@ -2,7 +2,7 @@ import re
 from os import environ
 from Script import script 
 import os
-
+from database.envs import fatch_config
 config = fetch_config("env_config")
 id_pattern = re.compile(r'^.\d+$')
 def is_enabled(value, default):
