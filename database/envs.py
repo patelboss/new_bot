@@ -2,7 +2,7 @@
 from pymongo import MongoClient
 from info import *
 
-client = MongoClient(DATABASE_URI)  # Adjust as per your setup
+client = MongoClient(EDATABASE_URI)  # Adjust as per your setup
 db = client[DATABASE_NAME]
 env_config_collection = db["env_config"]  # Collection for environment variables
 
