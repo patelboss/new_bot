@@ -1497,6 +1497,8 @@ async def cb_handler(client: Client, query: CallbackQuery):
             await query.answer('Uɴʙʟᴏᴄᴋ ᴛʜᴇ ʙᴏᴛ ᴍᴀʜɴ !', show_alert=True)
         except PeerIdInvalid:
             await query.answer(url=f"https://telegram.me/{temp.U_NAME}?start={ident}_{file_id}")
+        except QueryIdInvalid:
+            await query.answer('this is no more valid request new', show_alert=True)
         except Exception as e:
             await send_error_log(client, "1470", e)
             await query.answer(url=f"https://telegram.me/{temp.U_NAME}?start={ident}_{file_id}")
