@@ -37,9 +37,9 @@ def fetch_config(config_name):
         if config:
             return config
         else:
-            logging.warning(f"Configuration {config_name} not found in database. Using default values.")
+   #         logging.warning(f"Configuration {config_name} not found in database. Using default values.")
             return {}
     except Exception as e:
-        logging.error(f"Error fetching {config_name} configuration: {e}")
+ #       logging.error(f"Error fetching {config_name} configuration: {e}")
         return {}
         
