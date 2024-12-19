@@ -3,7 +3,7 @@ from os import environ
 from Script import script 
 import os
 
-config = fetch_config("bot_config")
+config = fetch_config("env_config")
 id_pattern = re.compile(r'^.\d+$')
 def is_enabled(value, default):
     if value.lower() in ["true", "yes", "1", "enable", "y"]:
@@ -18,24 +18,32 @@ SESSION = environ.get('SESSION', 'TechVJBot')
 API_ID = int(environ.get('API_ID', ''))
 API_HASH = environ.get('API_HASH', '')
 BOT_TOKEN = environ.get('BOT_TOKEN', "")
-DLTTM = 4200
+#DLTTM = 4200
 
 # Fetch config from MongoDB
 
 # API_ID: First try fetching from MongoDB config, if not found, use the environment variable
-API_ID = config.get("api_id") if config.get("api_id") else os.getenv("API_ID", "default_api_id")
+DLTTM = config.get("dlttm") if config.get("dlttm") else environ.get("DLTTM", "4200")
 # Bot settings
-CACHE_TIME = int(environ.get('CACHE_TIME', 1800))
-PICS = (environ.get('PICS', 'https://graph.org/file/ce1723991756e48c35aa1.jpg')).split() #SAMPLE PIC
-NOR_IMG = environ.get("NOR_IMG", "https://graph.org/file/b69af2db776e4e85d21ec.jpg")
+#CACHE_TIME = int(environ.get('CACHE_TIME', 1800))
+CACHE_TIME = config.get("cache_time") if config.get("cache_time") else environ.get("CACHE_TIME", "1800")
+#PICS = (environ.get('PICS', 'https://graph.org/file/ce1723991756e48c35aa1.jpg')).split() #SAMPLE PIC
+PICS = config.get("pics") if config.get("pics") else (environ.get("PICS", "https://graph.org/file/ce1723991756e48c35aa1.jpg")).split()
+#NOR_IMG = environ.get("NOR_IMG", "https://graph.org/file/b69af2db776e4e85d21ec.jpg")
+NOR_IMG = config.get("nor_img") if config.get("nor_img") else environ.get("NOR_IMG", "https://graph.org/file/b69af2db776e4e85d21ec.jpg")
 MELCOW_VID = environ.get("MELCOW_VID", "https://t.me/How_To_Open_Linkl")
-WELCOME_VIDEO_ID = environ.get("MELCOW_VID", "BAACAgQAAxkBAAEWWw5nXJ_bgRy9MY3ZNxpLzbIaysGuswAC2hoAAuLv4VIyB40_JD42Hh4E")
-SPELL_IMG = environ.get("SPELL_IMG", "https://te.legra.ph/file/15c1ad448dfe472a5cbb8.jpg")
-NRF_CHANNEL = int(environ.get('NRF_CHANNEL', '-1001886419650'))
-BOT_LOG_CHANNEL = int(environ.get('BOT_LOG_CHANNEL', '-1001886419650'))
+#WELCOME_VIDEO_ID = environ.get("MELCOW_VID", "BAACAgQAAxkBAAEWWw5nXJ_bgRy9MY3ZNxpLzbIaysGuswAC2hoAAuLv4VIyB40_JD42Hh4E")
+WELCOME_VIDEO_ID = config.get("welcome_video_id") if config.get("welcome_video_id") else environ.get("MELCOW_VID", "BAACAgQAAxkBAAEWWw5nXJ_bgRy9MY3ZNxpLzbIaysGuswAC2hoAAuLv4VIyB40_JD42Hh4E")
+#SPELL_IMG = environ.get("SPELL_IMG", "https://te.legra.ph/file/15c1ad448dfe472a5cbb8.jpg")
+SPELL_IMG = config.get("spell_img") if config.get("spell_img") else environ.get("SPELL_IMG", "https://te.legra.ph/file/15c1ad448dfe472a5cbb8.jpg")
+#NRF_CHANNEL = int(environ.get('NRF_CHANNEL', '-1001886419650'))
+NRF_CHANNEL = config.get("nrf_channel") if config.get("nrf_channel") else int(environ.get('NRF_CHANNEL', '-1001886419650'))
+#BOT_LOG_CHANNEL = int(environ.get('BOT_LOG_CHANNEL', '-1001886419650'))
+BOT_LOG_CHANNEL = config.get("bot_log_channel") if config.get("bot_log_channel") else int(environ.get('BOT_LOG_CHANNEL', '-1001886419650'))
 
 # Admins, Channels & Users
-LOG_CHANNEL = int(environ.get('LOG_CHANNEL', ''))
+#LOG_CHANNEL = int(environ.get('LOG_CHANNEL', ''))
+LOG_CHANNEL = config.get("log_channel") if config.get("log_channel") else int(environ.get('LOG_CHANNEL', '-1001886419650'))
 ADMINS = [int(admin) if id_pattern.search(admin) else admin for admin in environ.get('ADMINS', '').split()]
 CHANNELS = [int(ch) if id_pattern.search(ch) else ch for ch in environ.get('CHANNELS', '').split()]
 auth_users = [int(user) if id_pattern.search(user) else user for user in environ.get('AUTH_USERS', '').split()]
