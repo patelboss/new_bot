@@ -21,7 +21,7 @@ SESSION = environ.get('SESSION', 'TechVJBot')
 API_ID = int(environ.get('API_ID', ''))
 API_HASH = environ.get('API_HASH', '')
 BOT_TOKEN = environ.get('BOT_TOKEN', "")
-DATABASE_URI = environ.get('DATABASE_URI', "")
+EDATABASE_URI = environ.get('DATABASE_URI', "")
 # Fetch config from MongoDB or fallback to environment variable
 DLTTM = config.get("dlttm") if config.get("dlttm") else environ.get("DLTTM", "4200")
 
