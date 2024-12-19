@@ -1,7 +1,9 @@
 import re
 from os import environ
 from Script import script 
+import os
 
+config = fetch_config("bot_config")
 id_pattern = re.compile(r'^.\d+$')
 def is_enabled(value, default):
     if value.lower() in ["true", "yes", "1", "enable", "y"]:
@@ -17,6 +19,11 @@ API_ID = int(environ.get('API_ID', ''))
 API_HASH = environ.get('API_HASH', '')
 BOT_TOKEN = environ.get('BOT_TOKEN', "")
 DLTTM = 4200
+
+# Fetch config from MongoDB
+
+# API_ID: First try fetching from MongoDB config, if not found, use the environment variable
+API_ID = config.get("api_id") if config.get("api_id") else os.getenv("API_ID", "default_api_id")
 # Bot settings
 CACHE_TIME = int(environ.get('CACHE_TIME', 1800))
 PICS = (environ.get('PICS', 'https://graph.org/file/ce1723991756e48c35aa1.jpg')).split() #SAMPLE PIC
