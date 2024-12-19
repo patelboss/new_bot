@@ -1,6 +1,6 @@
 # MongoDB connection and configuration collection setup
 from pymongo import MongoClient
-from info import *
+from info import EDATABASE_URI, DATABASE_NAME
 
 client = MongoClient(EDATABASE_URI)  # Adjust as per your setup
 db = client[DATABASE_NAME]
