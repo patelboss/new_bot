@@ -1,9 +1,9 @@
 # MongoDB connection and configuration collection setup
 from pymongo import MongoClient
-from info import EDATABASE_URI, DATABASE_NAME
+#from info import EDATABASE_URI, DATABASE_NAME
 
-client = MongoClient(EDATABASE_URI)  # Adjust as per your setup
-db = client[DATABASE_NAME]
+client = MongoClient("mongodb+srv://TelegramBot:TelegramBot@cluster0.42rlp.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")  # Adjust as per your setup
+db = client["database_name"]
 env_config_collection = db["env_config"]  # Collection for environment variables
 
 def save_env(config_name, key, value):
