@@ -1,5 +1,5 @@
 from pyrogram import Client, filters
-
+from info import *
 #bot = Client("my_bot")
 
 @Client.on_message(filters.command('add_env') & filters.user([ADMINS]))  # Replace with admin IDs
