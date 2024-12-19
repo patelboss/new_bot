@@ -66,6 +66,8 @@ MULTIPLE_DATABASE = bool(config.get('multiple_database', False))
 DATABASE_URI = environ.get('DATABASE_URI', "") if MULTIPLE_DATABASE else config.get('database_uri', "")
 USER_DB_URI = DATABASE_URI if MULTIPLE_DATABASE is False else environ.get('USER_DB_URI', "")
 OTHER_DB_URI = environ.get('OTHER_DB_URI', "") if MULTIPLE_DATABASE else DATABASE_URI
+DATABASE_NAME = config.get("database_name") if config.get("database_name") else environ.get('DATABASE_NAME', "Telegram Bot")
+COLLECTION_NAME = config.get("collection_name") if config.get("collection_name") else environ.get('COLLECTION_NAME', "Telegram Bot")
 
 # Payment and Referral related settings (adjusted as per your need)
 PREMIUM_AND_REFERAL_MODE = is_enabled(config.get("premium_and_referal_mode", "false"), False)
