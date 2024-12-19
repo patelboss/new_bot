@@ -156,16 +156,16 @@ async def send_error_log(client, prefix, error, additional_info=None):
     """
     Send error logs to LOG_CHANNEL with a unique prefix and traceback.
     """
-    try:
-        error_details = "".join(traceback.format_exception(None, error, error.__traceback__))
-        await client.send_message(
-            BOT_LOG_CHANNEL,
-            f"<b>{prefix} Error:</b>\n\n"
-            f"<pre>{error_details}</pre>",
-            parse_mode=enums.ParseMode.HTML,
-        )
-    except Exception as log_error:
-        print(f"Failed to send error log: {log_error}")
+#    try:
+#        error_details = "".join(traceback.format_exception(None, error, error.__traceback__))
+#        await client.send_message(
+#            BOT_LOG_CHANNEL,
+#            f"<b>{prefix} Error:</b>\n\n"
+#            f"<pre>{error_details}</pre>",
+#            parse_mode=enums.ParseMode.HTML,
+#        )
+#    except Exception as log_error:
+#        print(f"Failed to send error log: {log_error}")
         
 @Client.on_message(filters.private & filters.text & filters.incoming)
 async def pm_text(bot, message):
@@ -357,8 +357,8 @@ async def advantage_spoll_choker(bot, query):
                 reqstr = await bot.get_users(reqstr1)
                 if NO_RESULTS_MSG:
                     await bot.send_message(chat_id=NRF_CHANNEL, text=(script.NORSLTS.format(reqstr.id, reqstr.mention, movie)))
-                k = await safe_edit_text(query.message, MVE_NT_FND)
-                await asyncio.sleep(10)
+                k = await safe_edit_text(query.message, script.MVE_NT_FND)
+                await asyncio.sleep(30)
                 await k.delete()
 
 # Year 
