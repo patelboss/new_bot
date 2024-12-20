@@ -79,10 +79,7 @@ PAYMENT_QR = config.get("payment_qr", "https://envs.sh/3wu.jpg") if config.get(p
 PAYMENT_TEXT = config.get("payment_text") if config.get("payment_text") else environ.get('PAYMENT_TEXT', '<b> Thank You For Donating Us \nYou can Donate any amount you want. your donation amount will be used in bots future.</b>')
 REFERAL_PREMEIUM_TIME = config.get("payment_text", "1month") 
 
-
-PAYMENT_QR = environ.get('PAYMENT_QR', 'https://envs.sh/3wu.jpg')
-PAYMENT_TEXT = 
-OWNER_USERNAME = environ.get('OWNER_USERNAME', 'Pankaj_patel_p')
+OWNER_USERNAME = config.get(owner_username) if config.get(owner_username) else environ.get('OWNER_USERNAME', 'Pankaj_patel_p')
 
 # Clone-related settings
 
