@@ -3,7 +3,8 @@ from os import environ
 from database.envs import fetch_config  # Ensure this function fetches the MongoDB config properly
 #import os
 from Script import script 
-
+configname = "env_config"
+config = fetch_config(configname)
 
 id_pattern = re.compile(r'^.\d+$')
 
@@ -24,7 +25,6 @@ BOT_TOKEN = environ.get('BOT_TOKEN', "")
 EDATABASE_URI = environ.get('EDATABASE_URI', "")
 
 
-config = fetch_config("env_config")
 
 # Fetch config from MongoDB or fallback to environment variable
 DLTTM = int(config.get("dlttm")) if config.get("dlttm") else int(environ.get("DLTTM", "4200"))
