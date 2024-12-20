@@ -3,6 +3,7 @@ from info import *
 #bot = Client("my_bot")
 from database.envs import fetch_config, get_env, save_env, fetch_all_configs
 from pyrogram.types import Message
+from pymongo import UpdateOne
 
 @Client.on_message(filters.command('add_env') & filters.user(ADMINS))  # Replace with admin IDs
 async def add_env(client, message):
@@ -82,3 +83,24 @@ async def config_command(client: Client, message: Message):
     
     except Exception as e:
         await message.reply(f"An error occurred while fetching the configuration: {e}")
+
+
+@Client.on_message(filters.command('update_env') & filters.user(ADMINS))  # Only admins can use this
+async def update_env(client, message):
+    args = message.text.split()
+    
+    if len(args) < 4:
+        await message.reply("Usage: /update_env {config_name} {key} {value}")
+        return
+
+    config_name = args[1]
+    key = args[2]
+    value = " ".join(args[3:])  # In case value has spaces
+
+    # Update the environment variable in the DB
+    success = await update_config(config_name, key, value)
+    
+    if success:
+        await message.reply(f"Environment variable {key} updated to {value} in {config_name}.")
+    else:
+        await message.reply(f"Failed to update environment variable {key} in {config_name}.")
