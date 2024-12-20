@@ -27,7 +27,7 @@ EDATABASE_URI = environ.get('EDATABASE_URI', "")
 config = fetch_config("env_config")
 
 # Fetch config from MongoDB or fallback to environment variable
-DLTTM = config.get("dlttm") if config.get("dlttm") else environ.get("DLTTM", "4200")
+DLTTM = int(config.get("dlttm")) if config.get("dlttm") else int(environ.get("DLTTM", "4200"))
 print(f"Config value: {config.get('dlttm')}")
 print(f"Environment variable DLTTM: {environ.get('DLTTM')}")
 # Bot settings with MongoDB fallback
