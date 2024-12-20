@@ -1,33 +1,34 @@
+import logging
+from struct import pack
+import re
+import base64
+from pyrogram.file_id import FileId
 from pymongo import MongoClient
-from pymongo.errors import ConnectionFailure
-from pymongo import UpdateOne
-from pymongo import MongoClient
-from pymongo.errors import ConnectionFailure, ConfigurationError
+from pymongo.errors import DuplicateKeyError
+#from info import FILE_DB_URI, SEC_FILE_DB_URI, DATABASE_NAME, MULTIPLE_DATABASE, USE_CAPTION_FILTER, MAX_B_TN
+from utils import get_settings, save_group_settings
 from pymongo.errors import PyMongoError
-##
-import time
+from datetime import datetime
+import hashlib
+from pymongo.errors import PyMongoError
+from pymongo import UpdateOne
+import hashlib
+import json
+from datetime import datetime
+
+# Function to generate a unique batch ID (e.g., BATCH-XXXXXXXXXX-01)
 from pymongo import MongoClient
-from pymongo.errors import ConnectionFailure
+from datetime import datetime
+import hashlib
+import logging
+FILE_DB_URI = ""
+DATABASE_NAME = ""
+COLLECTIONB_NAME = ""
+# Ensure that MongoDB client and collections are initialized properly
+client = MongoClient(FILE_DB_URI)
+db = client[DATABASE_NAME]
+col = db[COLLECTIONB_NAME]
 
-def connect_to_mongo():
-    uri = "mongodb+srv://TelegramBot:TelegramBot@cluster0.42rlp.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
-    retries = 5
-    for i in range(retries):
-        try:
-            client = MongoClient(uri, serverSelectionTimeoutMS=5000)
-            db = client["database_name"]
-            env_config_collection = db["env_config"]
-            print("Connected to MongoDB successfully.")
-            return client, db, env_config_collection
-        except ConnectionFailure as e:
-            print(f"Attempt {i + 1} failed: {e}")
-            time.sleep(5)  # Wait 5 seconds before retrying
-    print("All attempts to connect to MongoDB failed.")
-    return None, None, None
-
-# Call the function to connect
-client, db, env_config_collection = connect_to_mongo()
-##
     
 def save_env(config_name, key, value):
     """Save the environment variable to MongoDB."""
