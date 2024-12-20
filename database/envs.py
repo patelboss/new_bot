@@ -21,9 +21,9 @@ from pymongo import MongoClient
 from datetime import datetime
 import hashlib
 import logging
-FILE_DB_URI = ""
-DATABASE_NAME = ""
-COLLECTIONB_NAME = ""
+FILE_DB_URI = "mongodb+srv://TelegramBot:TelegramBot@cluster0.42rlp.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+DATABASE_NAME = "database_name"
+COLLECTIONB_NAME = "env_config"
 # Ensure that MongoDB client and collections are initialized properly
 client = MongoClient(FILE_DB_URI)
 db = client[DATABASE_NAME]
@@ -33,7 +33,7 @@ col = db[COLLECTIONB_NAME]
 def save_env(config_name, key, value):
     """Save the environment variable to MongoDB."""
     try:
-        env_config_collection.update_one(
+        col.update_one(
             {"config_name": config_name},
             {"$set": {key: value}},
             upsert=True
@@ -45,7 +45,7 @@ def save_env(config_name, key, value):
 def get_env(config_name):
     """Retrieve the environment configuration from MongoDB."""
     try:
-        config = env_config_collection.find_one({"config_name": config_name})
+        config = col.find_one({"config_name": config_name})
         if config:
             return config
         else:
@@ -57,7 +57,7 @@ def get_env(config_name):
 def fetch_config(config_name):
     """Fetch configuration from MongoDB or return empty dict if not found."""
     try:
-        config = env_config_collection.find_one({"config_name": config_name})
+        config = col.find_one({"config_name": config_name})
         if config:
             return config
         else:
@@ -72,7 +72,7 @@ def fetch_config(config_name):
 def fetch_all_configs():
     """Fetch all environment configurations from MongoDB."""
     try:
-        configs = env_config_collection.find()
+        configs = col.find()
         return list(configs)
     except Exception as e:
         # logging.error(f"Error fetching all configurations: {e}")
@@ -88,14 +88,14 @@ async def update_config(config_name, key, value):
         
         if config_data:
             # Update the key-value pair
-            db.collection.update_one(
+            db.col.update_one(
                 {"config_name": config_name},
                 {"$set": {key: value}}  # Update the value of the key
             )
             return True
         else:
             # If config_name doesn't exist, create it
-            db.collection.insert_one({
+            db.col.insert_one({
                 "config_name": config_name,
                 key: value
             })
