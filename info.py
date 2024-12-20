@@ -30,6 +30,15 @@ EDATABASE_URI = environ.get('EDATABASE_URI', "")
 
 config_name = "env_config"
 config = fetch_config(config_name)
+#MULTIPLE_DATABASE = bool(config.get('multiple_database', False))  # Read from config
+print(f" caps multiple database value: {config.get('MULTIPLE_DATABASE')}")
+#DATABASE_URI = config.get('database_uri') if config.get('database_uri') else environ.get('DATABASE_URI', "")
+print(f" caps database_uri: {config.get('DATABASE_URI')}")
+#DLTTM = int(config.get("dlttm")) if config.get("dlttm") else int(environ.get("DLTTM", "4200"))
+print(f" caps CUSTOM_FILE_CAPTION value: {config.get('CUSTOM_FILE_CAPTION')}")
+print(f" caps SEC_FILE_DB_URI value: {config.get('SEC_FILE_DB_URI')}")
+print(f" caps OTHER_DB_URI value: {config.get('OTHER_DB_URI')}")
+print(f" caps VERIFY value: {config.get('VERIFY')}")
 
 
 # Fetch config from MongoDB or fallback to environment variable
