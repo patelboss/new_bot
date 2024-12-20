@@ -64,9 +64,12 @@ REQST_CHANNEL = int(reqst_channel) if reqst_channel and id_pattern.search(reqst_
 support_chat_id = config.get("SUPPORT_CHAT_ID") if config.get("SUPPORT_CHAT_ID") else environ.get('SUPPORT_CHAT_ID', '')
 SUPPORT_CHAT_ID = int(support_chat_id) if support_chat_id and id_pattern.search(support_chat_id) else None
 INDEX_REQ_CHANNEL = int(config.get("index_req_channel")) if config.get("index_req_channel") else int(environ.get('INDEX_REQ_CHANNEL', LOG_CHANNEL))
-FILE_STORE_CHANNEL = int(ch) for ch in config.get("file_store_channel").split() if config.get("file_store_channel") else environ.get('FILE_STORE_CHANNEL', PUBLIC_FILE_CHANNEL).split()
-DELETE_CHANNELS = int(dch) if id_pattern.search(dch) else dch for dch in config.get("delete_channels").split() if config.get("delete_channels") else environ.get('DELETE_CHANNELS', '0').split()
-
+#FILE_STORE_CHANNEL = int(ch) for ch in config.get("file_store_channel").split() if config.get("file_store_channel") else environ.get('FILE_STORE_CHANNEL', PUBLIC_FILE_CHANNEL).split()
+#DELETE_CHANNELS = int(dch) if id_pattern.search(dch) else dch for dch in config.get("delete_channels").split() if config.get("delete_channels") else environ.get('DELETE_CHANNELS', '0').split()
+raw_file_store_channel = (config.get("file_store_channel").split() if config.get("file_store_channel") else environ.get('FILE_STORE_CHANNEL', PUBLIC_FILE_CHANNEL).split())
+FILE_STORE_CHANNEL = [int(ch) for ch in raw_file_store_channel]
+raw_delete_channels = (config.get("delete_channels").split() if config.get("delete_channels")  else environ.get('DELETE_CHANNELS', '0').split())
+DELETE_CHANNELS = [int(dch) if id_pattern.search(dch) else dch for dch in raw_delete_channels]
 # MongoDB settings for handling databases and collections
 MULTIPLE_DATABASE = bool(config.get('multiple_database', False))  # Read from config
 
