@@ -5,7 +5,6 @@ import base64
 from pyrogram.file_id import FileId
 from pymongo import MongoClient
 from pymongo.errors import DuplicateKeyError
-#from info import FILE_DB_URI, SEC_FILE_DB_URI, DATABASE_NAME, MULTIPLE_DATABASE, USE_CAPTION_FILTER, MAX_B_TN
 from utils import get_settings, save_group_settings
 from pymongo.errors import PyMongoError
 from datetime import datetime
@@ -21,13 +20,13 @@ from pymongo import MongoClient
 from datetime import datetime
 import hashlib
 import logging
-FILE_DB_URI = "mongodb+srv://TelegramBot:TelegramBot@cluster0.42rlp.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
-DATABASE_NAME = "database_name"
-COLLECTIONB_NAME = "env_config"
+FILE_DB_URI1 = "mongodb+srv://TelegramBot:TelegramBot@cluster0.42rlp.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+DATABASE_NAME1 = "database_name"
+COLLECTIONB_NAME1 = "env_config"
 # Ensure that MongoDB client and collections are initialized properly
-client = MongoClient(FILE_DB_URI)
-db = client[DATABASE_NAME]
-col = db[COLLECTIONB_NAME]
+client = MongoClient(FILE_DB_URI1)
+db = client[DATABASE_NAME1]
+col = db[COLLECTIONB_NAME1]
 
     
 def save_env(config_name, key, value):
