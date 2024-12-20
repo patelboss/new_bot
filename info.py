@@ -63,7 +63,7 @@ AUTH_CHANNELS = environ.get("AUTH_CHANNELS", "").split() if config.get("auth_cha
 # MongoDB settings for handling databases and collections
 MULTIPLE_DATABASE = bool(config.get('multiple_database', False))  # Read from config
 
-DATABASE_URI = config.get('database_uri', "") if not MULTIPLE_DATABASE else config.get('database_uri', environ.get('DATABASE_URI', ""))
+DATABASE_URI = config.get('database_uri', "") if config.get('database_uri') else environ.get('DATABASE_URI', ""))
 
 USER_DB_URI = config.get('user_db_uri', "") if MULTIPLE_DATABASE else DATABASE_URI
 OTHER_DB_URI = config.get('other_db_uri', "") if MULTIPLE_DATABASE else DATABASE_URI
