@@ -30,7 +30,7 @@ def get_env(config_name):
         print(f"Error fetching environment configuration: {e}")
         return {}
 
-def fetch_config(config_name):
+def fetch_config(config_name: str):
     """Fetch configuration from MongoDB or return empty dict if not found."""
     try:
         config = env_config_collection.find_one({"config_name": config_name})
