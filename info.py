@@ -58,25 +58,30 @@ TRY_AGAIN_BTN = is_enabled(config.get('try_again_btn', "false"), False) if confi
 # Force subscribe channel (optional)
 auth_channel = config.get('auth_channel', '') if config.get('auth_channel') else environ.get('AUTH_CHANNEL', '')
 AUTH_CHANNEL = int(auth_channel) if auth_channel and id_pattern.search(auth_channel) else None
-AUTH_CHANNELS = environ.get("AUTH_CHANNELS", "").split() if config.get("auth_channels") else []
+AUTH_CHANNELS = environ.get("AUTH_CHANNELS", "").split(,) if config.get("auth_channels") else []
 
 # MongoDB settings for handling databases and collections
 MULTIPLE_DATABASE = bool(config.get('multiple_database', False))  # Read from config
 
 DATABASE_URI = config.get('database_uri', "") if not MULTIPLE_DATABASE else config.get('database_uri', environ.get('DATABASE_URI', ""))
 
-USER_DB_URI = config.get('user_db_uri', DATABASE_URI) if MULTIPLE_DATABASE else DATABASE_URI
-OTHER_DB_URI = config.get('other_db_uri', "") if MULTIPLE_DATABASE else DATABASE_URI
-FILE_DB_URI = config.get('file_db_uri', "") if MULTIPLE_DATABASE else DATABASE_URI
-SEC_FILE_DB_URI = config.get('sec_file_db_uri', "") if MULTIPLE_DATABASE else environ.get('SEC_FILE_DB_URI', "")
+USER_DB_URI = config.get('user_db_uri') if MULTIPLE_DATABASE else DATABASE_URI
+OTHER_DB_URI = config.get('other_db_uri') if MULTIPLE_DATABASE else DATABASE_URI
+FILE_DB_URI = config.get('file_db_uri') if MULTIPLE_DATABASE else DATABASE_URI
+SEC_FILE_DB_URI = config.get("sec_file_db_uri") if MULTIPLE_DATABASE else environ.get('SEC_FILE_DB_URI', "")
 DATABASE_NAME = config.get("database_name") if config.get("database_name") else environ.get('DATABASE_NAME', "Telegram Bot")
 COLLECTION_NAME = config.get("collection_name") if config.get("collection_name") else environ.get('COLLECTION_NAME', "Telegram Bot")
 
 # Payment and Referral related settings (adjusted as per your need)
 PREMIUM_AND_REFERAL_MODE = is_enabled(config.get("premium_and_referal_mode", "false"), False)
 REFERAL_COUNT = int(config.get("referal_count", "20"))
-REFERAL_PREMEIUM_TIME = config.get("referal_premium_time", "1month")
+PAYMENT_QR = config.get("payment_qr", "https://envs.sh/3wu.jpg") if config.get(payment_qr) else environ.get('PAYMENT_QR', 'https://envs.sh/3wu.jpg')
+PAYMENT_TEXT = config.get("payment_text") if config.get("payment_text") else environ.get('PAYMENT_TEXT', '<b> Thank You For Donating Us \nYou can Donate any amount you want. your donation amount will be used in bots future.</b>')
+REFERAL_PREMEIUM_TIME = config.get("payment_text", "1month") 
 
+
+PAYMENT_QR = environ.get('PAYMENT_QR', 'https://envs.sh/3wu.jpg')
+PAYMENT_TEXT = 
 OWNER_USERNAME = environ.get('OWNER_USERNAME', 'Pankaj_patel_p')
 
 # Clone-related settings
