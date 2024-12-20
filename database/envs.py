@@ -2,7 +2,6 @@ import logging
 from struct import pack
 import re
 import base64
-from pyrogram.file_id import FileId
 from pymongo import MongoClient
 from pymongo.errors import DuplicateKeyError
 from pymongo.errors import PyMongoError
@@ -26,6 +25,36 @@ COLLECTIONB_NAME1 = "env_config"
 client = MongoClient(FILE_DB_URI1)
 db = client[DATABASE_NAME1]
 col = db[COLLECTIONB_NAME1]
+
+
+# Configure logger
+logging.basicConfig(
+    level=logging.DEBUG,  # Set the logging level (DEBUG, INFO, etc.)
+    format='%(asctime)s - %(levelname)s - %(message)s',  # Log message format
+    handlers=[
+        logging.StreamHandler(),  # Output logs to console
+        logging.FileHandler("app.log")  # Output logs to a file named 'app.log'
+    ]
+)
+
+# Create logger
+logger = logging.getLogger(__name__)
+
+
+# Fetch configuration from MongoDB
+def fetch_config(config_name):
+    """Fetch configuration from MongoDB or return empty dict if not found."""
+    try:
+        config = col.find_one({"config_name": config_name})
+        if config:
+            logger.info(f"Configuration {config_name} fetched successfully.")
+            return config
+        else:
+            logger.warning(f"Configuration {config_name} not found in database. Using default values.")
+            return {}  # Return an empty dict if the config is not found
+    except Exception as e:
+        logger.error(f"Error fetching {config_name} configuration: {e}")
+        return {}
 
     
 def save_env(config_name, key, value):
@@ -52,19 +81,6 @@ def get_env(config_name):
         print(f"Error fetching environment configuration: {e}")
         return {}
 
-def fetch_config(config_name):
-    """Fetch configuration from MongoDB or return empty dict if not found."""
-    try:
-        config = col.find_one({"config_name": config_name})
-        if config:
-            return config
-        else:
-   #         logging.warning(f"Configuration {config_name} not found in database. Using default values.")
-            return {}
-    except Exception as e:
-        print(f"Error fetching environment configuration: {e}")
- #       logging.error(f"Error fetching {config_name} configuration: {e}")
-        return {}
 
 
 def fetch_all_configs():
