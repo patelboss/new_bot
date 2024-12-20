@@ -22,9 +22,9 @@ FILE_DB_URI1 = "mongodb+srv://TelegramBot:TelegramBot@cluster0.42rlp.mongodb.net
 DATABASE_NAME1 = "database_name"
 COLLECTIONB_NAME1 = "env_config"
 # Ensure that MongoDB client and collections are initialized properly
-client = MongoClient(FILE_DB_URI1)
-db = client[DATABASE_NAME1]
-col = db[COLLECTIONB_NAME1]
+#client = MongoClient(FILE_DB_URI1)
+#db = client[DATABASE_NAME1]
+#col = db[COLLECTIONB_NAME1]
 ##
 from pymongo.errors import ConnectionFailure, ConfigurationError
 from pymongo.errors import PyMongoError
@@ -37,7 +37,7 @@ try:
     db = client[DATABASE_NAME1]
     
     # Accessing a specific collection
-    env_config_collection = db[COLLECTIONB_NAME1]
+    col = db[COLLECTIONB_NAME1]
     
     print("Connected to MongoDB successfully.")
 
