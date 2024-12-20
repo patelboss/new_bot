@@ -7,7 +7,7 @@ from Script import script
 
 config_name = "env_config"
 config = fetch_config(config_name)
-
+print(config)
 
 
 id_pattern = re.compile(r'^.\d+$')
@@ -79,8 +79,10 @@ raw_delete_channels = (config.get("delete_channels").split() if config.get("dele
 DELETE_CHANNELS = [int(dch) if id_pattern.search(dch) else dch for dch in raw_delete_channels]
 # MongoDB settings for handling databases and collections
 MULTIPLE_DATABASE = bool(config.get('multiple_database', False))  # Read from config
+print(f"multiple database value: {config.get('multiple_database')}")
 
 DATABASE_URI = config.get('database_uri') if config.get('database_uri') else environ.get('DATABASE_URI', "")
+print(f"database_uri: {config.get('database_uri')}")
 
 USER_DB_URI = config.get('user_db_uri', "") if MULTIPLE_DATABASE else DATABASE_URI
 OTHER_DB_URI = config.get('other_db_uri', "") if MULTIPLE_DATABASE else DATABASE_URI
