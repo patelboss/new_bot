@@ -5,7 +5,6 @@ import base64
 from pyrogram.file_id import FileId
 from pymongo import MongoClient
 from pymongo.errors import DuplicateKeyError
-from utils import get_settings, save_group_settings
 from pymongo.errors import PyMongoError
 from datetime import datetime
 import hashlib
