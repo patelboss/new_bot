@@ -25,7 +25,32 @@ COLLECTIONB_NAME1 = "env_config"
 client = MongoClient(FILE_DB_URI1)
 db = client[DATABASE_NAME1]
 col = db[COLLECTIONB_NAME1]
+##
+from pymongo.errors import ConnectionFailure, ConfigurationError
+from pymongo.errors import PyMongoError
 
+try:
+    # MongoDB connection setup
+    client = MongoClient(FILE_DB_URI1)
+    
+    # Accessing the database
+    db = client[DATABASE_NAME1]
+    
+    # Accessing a specific collection
+    env_config_collection = db[COLLECTIONB_NAME1]
+    
+    print("Connected to MongoDB successfully.")
+
+except ConnectionFailure as e:
+    # Handle connection-related errors
+    print(f"Failed to connect to MongoDB: {e}")
+except ConfigurationError as e:
+    # Handle configuration-related errors
+    print(f"MongoDB configuration error: {e}")
+except Exception as e:
+    # Handle any other unforeseen errors
+    print(f"An unexpected error occurred: {e}")
+    
 
 # Configure logger
 logging.basicConfig(
