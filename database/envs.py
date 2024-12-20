@@ -72,10 +72,11 @@ def fetch_config(config_name):
     try:
         config = col.find_one({"config_name": config_name})
         if config:
-            logger.info(f"Configuration {config_name} fetched successfully.")
+            
+            logger.info(f"Configuration {config_name} & config: {config}  fetched successfully.")
             return config
         else:
-            logger.warning(f"Configuration {config_name} not found in database. Using default values.")
+            logger.warning(f"Configuration {config_name} & config: {config} not found in database. Using default values.")
             return {}  # Return an empty dict if the config is not found
     except Exception as e:
         logger.error(f"Error fetching {config_name} configuration: {e}")
