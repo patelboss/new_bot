@@ -1,6 +1,6 @@
 import re
 from os import environ
-from database.envs import fetch_config  # Ensure this function fetches the MongoDB config properly
+from database.envs import *  # Ensure this function fetches the MongoDB config properly
 #import os
 from Script import script 
 configname = "env_config"
