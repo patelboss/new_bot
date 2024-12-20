@@ -2,7 +2,7 @@ from pyrogram import Client, filters
 from info import *
 #bot = Client("my_bot")
 
-@Client.on_message(filters.command('add_env') & filters.user([ADMINS]))  # Replace with admin IDs
+@Client.on_message(filters.command('add_env') & filters.user(ADMINS))  # Replace with admin IDs
 async def add_env(client, message):
     args = message.text.split()
     if len(args) < 3:
@@ -14,7 +14,7 @@ async def add_env(client, message):
     save_env(config_name, key, value)  # Save the environment variable to the DB
     await message.reply(f"Environment variable {key} added to {config_name}.")
 
-@Client.on_message(filters.command('get_envs') & filters.user([ADMINS]))  # Replace with admin IDs
+@Client.on_message(filters.command('get_envs') & filters.user(ADMINS))  # Replace with admin IDs
 async def get_envs(client, message):
     args = message.text.split()
     if len(args) < 2:
