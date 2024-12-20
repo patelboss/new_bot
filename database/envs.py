@@ -4,28 +4,30 @@ from pymongo import UpdateOne
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure, ConfigurationError
 from pymongo.errors import PyMongoError
+##
+import time
+from pymongo import MongoClient
+from pymongo.errors import ConnectionFailure
 
-try:
-    # MongoDB connection setup
-    client = MongoClient("mongodb+srv://TelegramBot:TelegramBot@cluster0.42rlp.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
-    
-    # Accessing the database
-    db = client["database_name"]
-    
-    # Accessing a specific collection
-    env_config_collection = db["env_config"]
-    
-    print("Connected to MongoDB successfully.")
+def connect_to_mongo():
+    uri = "mongodb+srv://TelegramBot:TelegramBot@cluster0.42rlp.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+    retries = 5
+    for i in range(retries):
+        try:
+            client = MongoClient(uri, serverSelectionTimeoutMS=5000)
+            db = client["database_name"]
+            env_config_collection = db["env_config"]
+            print("Connected to MongoDB successfully.")
+            return client, db, env_config_collection
+        except ConnectionFailure as e:
+            print(f"Attempt {i + 1} failed: {e}")
+            time.sleep(5)  # Wait 5 seconds before retrying
+    print("All attempts to connect to MongoDB failed.")
+    return None, None, None
 
-except ConnectionFailure as e:
-    # Handle connection-related errors
-    print(f"Failed to connect to MongoDB: {e}")
-except ConfigurationError as e:
-    # Handle configuration-related errors
-    print(f"MongoDB configuration error: {e}")
-except Exception as e:
-    # Handle any other unforeseen errors
-    print(f"An unexpected error occurred: {e}")
+# Call the function to connect
+client, db, env_config_collection = connect_to_mongo()
+##
     
 def save_env(config_name, key, value):
     """Save the environment variable to MongoDB."""
