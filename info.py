@@ -63,7 +63,7 @@ AUTH_CHANNELS = environ.get("AUTH_CHANNELS", "").split() if config.get("auth_cha
 # MongoDB settings for handling databases and collections
 MULTIPLE_DATABASE = bool(config.get('multiple_database', False))  # Read from config
 
-DATABASE_URI = config.get('database_uri', "") if config.get('database_uri') else environ.get('DATABASE_URI', ""))
+DATABASE_URI = config.get('database_uri') if config.get('database_uri') else environ.get('DATABASE_URI', "")
 
 USER_DB_URI = config.get('user_db_uri', "") if MULTIPLE_DATABASE else DATABASE_URI
 OTHER_DB_URI = config.get('other_db_uri', "") if MULTIPLE_DATABASE else DATABASE_URI
@@ -75,7 +75,7 @@ COLLECTION_NAME = config.get("collection_name") if config.get("collection_name")
 # Payment and Referral related settings (adjusted as per your need)
 PREMIUM_AND_REFERAL_MODE = is_enabled(config.get("premium_and_referal_mode", "false"), False)
 REFERAL_COUNT = int(config.get("referal_count", "20"))
-PAYMENT_QR = config.get("payment_qr", "https://envs.sh/3wu.jpg") if config.get(payment_qr) else environ.get('PAYMENT_QR', 'https://envs.sh/3wu.jpg')
+PAYMENT_QR = config.get("payment_qr") if config.get(payment_qr) else environ.get('PAYMENT_QR', 'https://envs.sh/3wu.jpg')
 PAYMENT_TEXT = config.get("payment_text") if config.get("payment_text") else environ.get('PAYMENT_TEXT', '<b> Thank You For Donating Us \nYou can Donate any amount you want. your donation amount will be used in bots future.</b>')
 REFERAL_PREMEIUM_TIME = config.get("payment_text", "1month") 
 
