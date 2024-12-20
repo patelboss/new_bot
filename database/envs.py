@@ -1,11 +1,31 @@
-# MongoDB connection and configuration collection setup
 from pymongo import MongoClient
-#from info import EDATABASE_URI, DATABASE_NAME
+from pymongo.errors import ConnectionFailure
 
-client = MongoClient("mongodb+srv://TelegramBot:TelegramBot@cluster0.42rlp.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")  # Adjust as per your setup
-db = client["database_name"]
-env_config_collection = db["env_config"]  # Collection for environment variables
+from pymongo import MongoClient
+from pymongo.errors import ConnectionFailure, ConfigurationError
 
+try:
+    # MongoDB connection setup
+    client = MongoClient("mongodb+srv://TelegramBot:TelegramBot@cluster0.42rlp.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+    
+    # Accessing the database
+    db = client["database_name"]
+    
+    # Accessing a specific collection
+    env_config_collection = db["env_config"]
+    
+    print("Connected to MongoDB successfully.")
+
+except ConnectionFailure as e:
+    # Handle connection-related errors
+    print(f"Failed to connect to MongoDB: {e}")
+except ConfigurationError as e:
+    # Handle configuration-related errors
+    print(f"MongoDB configuration error: {e}")
+except Exception as e:
+    # Handle any other unforeseen errors
+    print(f"An unexpected error occurred: {e}")
+    
 def save_env(config_name, key, value):
     """Save the environment variable to MongoDB."""
     try:
