@@ -1,7 +1,8 @@
 from pyrogram import Client, filters
 from info import *
 #bot = Client("my_bot")
-from database.envs import fetch_config, get_env, save_env
+from database.envs import fetch_config, get_env, save_env, fetch_all_configs
+from pyrogram.types import Message
 
 @Client.on_message(filters.command('add_env') & filters.user(ADMINS))  # Replace with admin IDs
 async def add_env(client, message):
@@ -31,4 +32,53 @@ async def get_envs(client, message):
         env_str = "\n".join([f"{key}: {value}" for key, value in env_data.items()])
         await message.reply(f"Current environment variables for {config_name}:\n{env_str}")
 
-#bot.run()
+@Client.on_message(filters.command("all_envs") & filters.user(ADMINS))
+async def envs_command(client: Client, message: Message):
+    """
+    Handle the /envs command to fetch and display all environment configurations.
+    """
+    try:
+        # Fetch all configurations
+        configs = fetch_all_configs()
+
+        if configs:
+            # Format all configurations
+            response = "Current Environment Configurations:\n\n"
+            for config in configs:
+                config_name = config.get("config_name", "Unknown")
+                details = "\n".join(f"{key}: {value}" for key, value in config.items() if key != "_id")
+                response += f"<b>{config_name}</b>:\n{details}\n\n"
+            
+            # Send the formatted response
+            await message.reply(response)
+        else:
+            await message.reply("No environment configurations found.")
+    
+    except Exception as e:
+        await message.reply(f"An error occurred while fetching configurations: {e}")
+
+@Client.on_message(filters.command("check_config") & filters.user(ADMINS))
+async def config_command(client: Client, message: Message):
+    """
+    Handle the /config command to fetch and display configuration data from MongoDB.
+    """
+    try:
+        # Extract config_name from the command arguments
+        command_args = message.text.split(maxsplit=1)
+        if len(command_args) < 2:
+            await message.reply("Usage: /config <config_name>")
+            return
+        
+        config_name = command_args[1]
+        
+        # Fetch the configuration from the database
+        config = fetch_config(config_name)
+        if config:
+            # Format and send the configuration data
+            config_details = "\n".join(f"{key}: {value}" for key, value in config.items())
+            await message.reply(f"Configuration for <b>{config_name}</b>:\n\n{config_details}")
+        else:
+            await message.reply(f"No configuration found for <b>{config_name}</b>.")
+    
+    except Exception as e:
+        await message.reply(f"An error occurred while fetching the configuration: {e}")
