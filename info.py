@@ -3,8 +3,8 @@ from os import environ
 from database.envs import *  # Ensure this function fetches the MongoDB config properly
 #import os
 from Script import script 
-configname = "env_config"
-config = fetch_config(configname)
+ 
+config = fetch_config("env_config")
 
 id_pattern = re.compile(r'^.\d+$')
 
