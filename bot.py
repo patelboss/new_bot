@@ -1,9 +1,5 @@
 import sys, glob, importlib, logging, logging.config, pytz, asyncio, time
 from pathlib import Path
-from database.envs import *
-config = fetch_config("env_config")
-print('Initalizing config')
-
 # Get logging configurations
 logging.config.fileConfig('logging.conf')
 logging.getLogger().setLevel(logging.INFO)
