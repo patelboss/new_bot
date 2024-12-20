@@ -118,28 +118,33 @@ def fetch_all_configs():
         # logging.error(f"Error fetching all configurations: {e}")
         return []
 
+
+
 async def update_config(config_name, key, value):
     """
     Update a specific key-value pair in the environment configuration.
     """
     try:
         # Find the configuration document by config_name
-        config_data = db.collection.find_one({"config_name": config_name})
+        config_data = col.find_one({"config_name": config_name})
         
         if config_data:
             # Update the key-value pair
-            db.col.update_one(
+            col.update_one(
                 {"config_name": config_name},
                 {"$set": {key: value}}  # Update the value of the key
             )
+            logger.info(f"Updated {key} to {value} in config {config_name}")
             return True
         else:
             # If config_name doesn't exist, create it
-            db.col.insert_one({
+            col.insert_one({
                 "config_name": config_name,
                 key: value
             })
+            logger.info(f"Created new config {config_name} with {key}={value}")
             return True
     except Exception as e:
-        print(f"Error while updating config: {e}")
+        logger.error(f"Error while updating config: {e}")
         return False
+
