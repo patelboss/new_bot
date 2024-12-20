@@ -10,6 +10,9 @@ logging.getLogger("cinemagoer").setLevel(logging.ERROR)
 from pyrogram import Client, idle
 from pyrogram.enums import ParseMode
 from database.users_chats_db import db
+from database.envs import *
+config = fetch_config("env_config")
+print('Initalizing config')
 from info import *
 from utils import temp
 from typing import Union, Optional, AsyncGenerator
@@ -18,7 +21,6 @@ from datetime import date, datetime
 from aiohttp import web
 from plugins import web_server
 from plugins.clone import restart_bots
-from database.envs import *
 from TechVJ.bot import TechVJBot
 from TechVJ.util.keepalive import ping_server
 from TechVJ.bot.clients import initialize_clients
@@ -74,8 +76,8 @@ async def send_alive_message(client: Client):
 async def start():
     print('\n')
     print('Initalizing Your Bot')
-    config = fetch_config(config_name)
-    print('Initalizing config')
+    
+    
     bot_info = await TechVJBot.get_me()
     await initialize_clients()
     for name in files:
