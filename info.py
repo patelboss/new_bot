@@ -59,6 +59,13 @@ TRY_AGAIN_BTN = is_enabled(config.get('try_again_btn', "false"), False) if confi
 auth_channel = config.get('auth_channel', '') if config.get('auth_channel') else environ.get('AUTH_CHANNEL', '')
 AUTH_CHANNEL = int(auth_channel) if auth_channel and id_pattern.search(auth_channel) else None
 AUTH_CHANNELS = environ.get("AUTH_CHANNELS", "").split() if config.get("auth_channels") else []
+reqst_channel = config.get("REQST_CHANNEL_ID") if config.get("REQST_CHANNEL_ID") else environ.get('REQST_CHANNEL_ID', '')
+REQST_CHANNEL = int(reqst_channel) if reqst_channel and id_pattern.search(reqst_channel) else None
+support_chat_id = config.get("SUPPORT_CHAT_ID") if config.get("SUPPORT_CHAT_ID") else environ.get('SUPPORT_CHAT_ID', '')
+SUPPORT_CHAT_ID = int(support_chat_id) if support_chat_id and id_pattern.search(support_chat_id) else None
+INDEX_REQ_CHANNEL = int(config.get("index_req_channel")) if config.get("index_req_channel") else int(environ.get('INDEX_REQ_CHANNEL', LOG_CHANNEL))
+FILE_STORE_CHANNEL = [int(ch) for ch in config.get("file_store_channel").split() if config.get("file_store_channel") else environ.get('FILE_STORE_CHANNEL', PUBLIC_FILE_CHANNEL).split()]
+DELETE_CHANNELS = [int(dch) if id_pattern.search(dch) else dch for dch in config.get("delete_channels").split() if config.get("delete_channels") else environ.get('DELETE_CHANNELS', '0').split()]
 
 # MongoDB settings for handling databases and collections
 MULTIPLE_DATABASE = bool(config.get('multiple_database', False))  # Read from config
