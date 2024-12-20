@@ -8,8 +8,8 @@ logging.getLogger("cinemagoer").setLevel(logging.ERROR)
 
 from pyrogram import Client, idle
 from pyrogram.enums import ParseMode
-from database.users_chats_db import db
 from info import *
+from database.users_chats_db import db
 from utils import temp
 from typing import Union, Optional, AsyncGenerator
 from Script import script
