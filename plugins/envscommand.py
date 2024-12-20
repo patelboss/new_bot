@@ -4,6 +4,12 @@ from info import *
 from database.envs import fetch_config, get_env, save_env, fetch_all_configs, update_config
 from pyrogram.types import Message
 from pymongo import UpdateOne
+import logging
+
+# Set up logger
+LOG_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
+logger = logging.getLogger(__name__)
 
 @Client.on_message(filters.command('add_env') & filters.user(ADMINS))  # Replace with admin IDs
 async def add_env(client, message):
