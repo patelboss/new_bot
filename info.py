@@ -63,7 +63,7 @@ reqst_channel = config.get("REQST_CHANNEL_ID") if config.get("REQST_CHANNEL_ID")
 REQST_CHANNEL = int(reqst_channel) if reqst_channel and id_pattern.search(reqst_channel) else None
 support_chat_id = config.get("SUPPORT_CHAT_ID") if config.get("SUPPORT_CHAT_ID") else environ.get('SUPPORT_CHAT_ID', '')
 SUPPORT_CHAT_ID = int(support_chat_id) if support_chat_id and id_pattern.search(support_chat_id) else None
-INDEX_REQ_CHANNEL = int(config.get("index_req_channel")) if config.get("index_req_channel") else int(environ.get('INDEX_REQ_CHANNEL', 'LOG_CHANNEL'))
+INDEX_REQ_CHANNEL = int(config.get("index_req_channel")) if config.get("index_req_channel") else int(environ.get('INDEX_REQ_CHANNEL', '-1001886419650'))
 #FILE_STORE_CHANNEL = int(ch) for ch in config.get("file_store_channel").split() if config.get("file_store_channel") else environ.get('FILE_STORE_CHANNEL', PUBLIC_FILE_CHANNEL).split()
 #DELETE_CHANNELS = int(dch) if id_pattern.search(dch) else dch for dch in config.get("delete_channels").split() if config.get("delete_channels") else environ.get('DELETE_CHANNELS', '0').split()
 raw_file_store_channel = (config.get("file_store_channel").split() if config.get("file_store_channel") else environ.get('FILE_STORE_CHANNEL', '').split())
@@ -146,7 +146,7 @@ MAX_B_TN = int(config.get("max_b_tn")) if config.get("max_b_tn") else int(enviro
 PORT = int(config.get("port")) if config.get("port") else int(environ.get("PORT", "8080"))
 MSG_ALRT = config.get('msg_alrt') if config.get('msg_alrt') else environ.get('MSG_ALRT', 'Hello My Dear Friends ❤️')
 CUSTOM_FILE_CAPTION = config.get("custom_file_caption") if config.get("custom_file_caption") else environ.get("CUSTOM_FILE_CAPTION", f"{script.CAPTION}")
-BATCH_FILE_CAPTION = config.get("batch_file_caption") if config.get("batch_file_caption") else environ.get("BATCH_FILE_CAPTION", CUSTOM_FILE_CAPTION)
+BATCH_FILE_CAPTION = config.get("batch_file_caption") if config.get("batch_file_caption") else environ.get("BATCH_FILE_CAPTION", f"{script.CAPTION}")
 IMDB_TEMPLATE = config.get("imdb_template") if config.get("imdb_template") else environ.get("IMDB_TEMPLATE", f"{script.IMDB_TEMPLATE_TXT}")
 MAX_LIST_ELM = config.get("max_list_elm") if config.get("max_list_elm") else environ.get("MAX_LIST_ELM", None)
 
