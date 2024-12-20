@@ -28,7 +28,8 @@ config = fetch_config("env_config")
 
 # Fetch config from MongoDB or fallback to environment variable
 DLTTM = config.get("dlttm") if config.get("dlttm") else environ.get("DLTTM", "4200")
-
+print(f"Config value: {config.get('dlttm')}")
+print(f"Environment variable DLTTM: {environ.get('DLTTM')}")
 # Bot settings with MongoDB fallback
 CACHE_TIME = config.get("cache_time") if config.get("cache_time") else environ.get("CACHE_TIME", "1800")
 PICS = config.get("pics") if config.get("pics") else (environ.get("PICS", "https://graph.org/file/ce1723991756e48c35aa1.jpg")).split()
