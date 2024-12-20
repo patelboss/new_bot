@@ -1,10 +1,10 @@
 import re
 from os import environ
-from database.envs import *  # Ensure this function fetches the MongoDB config properly
+from database.envs import fetch_config # Ensure this function fetches the MongoDB config properly
 #import os
 from Script import script 
- 
-config = fetch_config("env_config")
+config_name = "env_config"
+config = fetch_config(config_name)
 
 id_pattern = re.compile(r'^.\d+$')
 
