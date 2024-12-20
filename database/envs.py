@@ -42,4 +42,13 @@ def fetch_config(config_name):
     except Exception as e:
  #       logging.error(f"Error fetching {config_name} configuration: {e}")
         return {}
-        
+
+
+def fetch_all_configs():
+    """Fetch all environment configurations from MongoDB."""
+    try:
+        configs = env_config_collection.find()
+        return list(configs)
+    except Exception as e:
+        # logging.error(f"Error fetching all configurations: {e}")
+        return []
