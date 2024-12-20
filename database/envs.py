@@ -1,8 +1,9 @@
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure
-
+from pymongo import UpdateOne
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure, ConfigurationError
+from pymongo.errors import PyMongoError
 
 try:
     # MongoDB connection setup
