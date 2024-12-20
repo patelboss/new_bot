@@ -1,104 +1,12 @@
 import re
 from os import environ
-#from database.envs import fetch_config # Ensure this function fetches the MongoDB config properly
+from database.envs import fetch_config # Ensure this function fetches the MongoDB config properly
 #import os
 from Script import script 
 
 
-import logging
-from pymongo import MongoClient
-from pymongo.errors import ConnectionError, ServerSelectionTimeoutError
-import traceback
-
-# MongoDB connection parameters
-FILE_DB_URI1 = "mongodb+srv://TelegramBot:TelegramBot@cluster0.42rlp.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
-DATABASE_NAME1 = "database_name"
-COLLECTIONB_NAME1 = "env_config"
-
-# Configure logger
-logging.basicConfig(
-    level=logging.DEBUG,  # Set the logging level (DEBUG, INFO, etc.)
-    format='%(asctime)s - %(levelname)s - %(message)s',  # Log message format
-    handlers=[
-        logging.StreamHandler(),  # Output logs to console
-        logging.FileHandler("app.log")  # Output logs to a file named 'app.log'
-    ]
-)
-
-# Create logger
-logger = logging.getLogger(__name__)
-
-# Initialize the MongoDB client and collection
-client = None
-db = None
-col = None
-
-# Function to verify MongoDB connection
-def verify_mongo_connection():
-    try:
-        # Attempt to get the server info to verify the connection
-        client.server_info()  # This will raise an exception if the connection fails
-        logger.info("Successfully connected to MongoDB.")
-    except (ConnectionError, ServerSelectionTimeoutError) as e:
-        logger.error(f"MongoDB connection error: {e}")
-        logger.debug(f"Detailed error traceback: {traceback.format_exc()}")
-        return False
-    except Exception as e:
-        logger.error(f"Unexpected error while verifying MongoDB connection: {e}")
-        logger.debug(f"Detailed error traceback: {traceback.format_exc()}")
-        return False
-    return True
-
-# Connect to MongoDB and initialize the collection
-def initialize_mongo():
-    global client, db, col
-    try:
-        # Initialize the MongoDB client and database
-        client = MongoClient(FILE_DB_URI1)
-        db = client[DATABASE_NAME1]
-        col = db[COLLECTIONB_NAME1]
-
-        # Verify the MongoDB connection
-        if not verify_mongo_connection():
-            return False
-        return True
-    except Exception as e:
-        logger.error(f"Error initializing MongoDB connection: {e}")
-        logger.debug(f"Detailed error traceback: {traceback.format_exc()}")
-        return False
-
-# Fetch configuration from MongoDB
-def fetch_config(config_name):
-    """Fetch configuration from MongoDB or return empty dict if not found."""
-    try:
-        config = col.find_one({"config_name": config_name})
-        if config:
-            logger.info(f"Configuration {config_name} fetched successfully.")
-            return config
-        else:
-            logger.warning(f"Configuration {config_name} not found in database. Using default values.")
-            return {}  # Return an empty dict if the config is not found
-    except Exception as e:
-        logger.error(f"Error fetching {config_name} configuration: {e}")
-        logger.debug(f"Detailed error traceback: {traceback.format_exc()}")
-        return {}
-
-# Fetch the configuration for "env_config"
-#config_name = "env_config"
-
-# Initialize MongoDB connection and collection
-if initialize_mongo():
-    # Fetch the configuration for "env_config" if the MongoDB connection is successful
-    config = fetch_config(config_name)
-
-    # Safely access 'dlttm' with a default value in case it's missing
-    DLTTM = int(config.get("dlttm", 0))  # Default to 0 if 'dlttm' is not found
-
-    # Log the DLTTM value
-    logger.info(f"DLTTM value: {DLTTM}")
-else:
-    logger.error("MongoDB connection failed. Unable to proceed with fetching configuration.")
-
+config_name = "env_config"
+config = fetch_config(config_name)
 
 
 
