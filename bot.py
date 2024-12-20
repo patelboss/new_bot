@@ -1,5 +1,8 @@
 import sys, glob, importlib, logging, logging.config, pytz, asyncio, time
 from pathlib import Path
+from database.envs import *
+config = fetch_config("env_config")
+print('Initalizing config')
 
 # Get logging configurations
 logging.config.fileConfig('logging.conf')
@@ -10,9 +13,6 @@ logging.getLogger("cinemagoer").setLevel(logging.ERROR)
 from pyrogram import Client, idle
 from pyrogram.enums import ParseMode
 from database.users_chats_db import db
-from database.envs import *
-config = fetch_config("env_config")
-print('Initalizing config')
 from info import *
 from utils import temp
 from typing import Union, Optional, AsyncGenerator
