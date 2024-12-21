@@ -1,5 +1,5 @@
 from pyrogram import Client
-import logger
+#import logger
 import time
 from pyrogram import Client, idle
 from pyrogram.enums import ParseMode
@@ -25,7 +25,7 @@ async def send_alive_message(client: Client):
 
                 end_time = time.time()
                 response_time = round((end_time - start_time) * 1000, 2)  # in milliseconds
-                await asyncio.sleep(1)
+                #await asyncio.sleep(1)
 
             # Edit the message with the final response time
                 final_message = f"#alive\n\nCurrent time: {current_time}\nMy response time: {response_time}ms\nThank you 😊"
@@ -38,11 +38,11 @@ async def send_alive_message(client: Client):
 
             except PeerIdInvalid:
             # Handle the PeerIdInvalid error and continue
-                logging.warning("PeerIdInvalid error occurred, skipping this iteration.")
+               # logging.warning("PeerIdInvalid error occurred, skipping this iteration.")
                 pass  # Simply skip this iteration without interrupting the loop
 
             except Exception as e:
-                logging.error(f"Error in send_alive_message: {e}")
+              #  logging.error(f"Error in send_alive_message: {e}")
                 await asyncio.sleep(60)  # Retry after a delay if another exception occurs
         # Wait for 5 minutes (300 seconds)
         #logging.info("Waiting for 5 minutes before sending the next alive message...")
