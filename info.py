@@ -31,6 +31,7 @@ EDATABASE_URI = environ.get('EDATABASE_URI', "")
 config_name = "env_config"
 config = fetch_config(config_name)
 
+SEND_ALIVE = bool(config.get('SEND_ALIVE')) if config.get('SEND_ALIVE') else bool(environ.get('SEND_ALIVE', False))
 
 # Fetch config from MongoDB or fallback to environment variable
 DLTTM = int(config.get("DLTTM")) if config.get("DLTTM") else int(environ.get("DLTTM", "4200"))
