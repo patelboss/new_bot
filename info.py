@@ -30,9 +30,14 @@ EDATABASE_URI = environ.get('EDATABASE_URI', "")
 
 config_name = "env_config"
 config = fetch_config(config_name)
-
+ALIVE_FREQUENCY
 SEND_ALIVE = bool(config.get('SEND_ALIVE')) if config.get('SEND_ALIVE') else bool(environ.get('SEND_ALIVE', False))
 print(f"SEND_ALIVE: {config.get('SEND_ALIVE')}")
+ALIVE_FREQUENCY = int(config.get("ALIVE_FREQUENCY")) if config.get("ALIVE_FREQUENCY") else int(environ.get("ALIVE_FREQUENCY", "600"))
+print(f"ALIVE_FREQUENCY: {config.get('ALIVE_FREQUENCY')}")
+
+
+
 DLT2 = int(config.get("DLT2")) if config.get("DLT2") else int(environ.get("DLT2", "4200"))
 print(f"DLT2: {config.get('DLT2')}")
 
