@@ -1,6 +1,11 @@
 from pyrogram import Client
 import logger
 import time
+from pyrogram import Client, idle
+from pyrogram.enums import ParseMode
+from info import *
+import sys, glob, importlib, logging, logging.config, pytz, asyncio, time
+from datetime import date, datetime
 
 async def send_alive_message(client: Client):
     while True:
@@ -41,5 +46,5 @@ async def send_alive_message(client: Client):
                 await asyncio.sleep(60)  # Retry after a delay if another exception occurs
         # Wait for 5 minutes (300 seconds)
         #logging.info("Waiting for 5 minutes before sending the next alive message...")
-            await asyncio.sleep(1800)
+            await asyncio.sleep(ALIVE_FREQUENCY)
               
