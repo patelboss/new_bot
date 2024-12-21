@@ -1506,8 +1506,8 @@ async def cb_handler(client: Client, query: CallbackQuery):
             await query.answer('Uɴʙʟᴏᴄᴋ ᴛʜᴇ ʙᴏᴛ ᴍᴀʜɴ !', show_alert=True)
         except PeerIdInvalid:
             await query.answer(url=f"https://telegram.me/{temp.U_NAME}?start={ident}_{file_id}")
-        except QueryIdInvalid:
-            await query.answer()
+      #  except QueryIdInvalid:
+       #     await query.answer()
         except Exception as e:
             await send_error_log(client, "1470", e)
             await query.answer(url=f"https://telegram.me/{temp.U_NAME}?start={ident}_{file_id}")
@@ -3015,7 +3015,7 @@ async def auto_filter(client, name, msg, reply_msg, ai_search, spoll=False):
             settings = await get_settings(message.chat.id)
             if not files:
                 if settings["spell_check"]:
-                    return await advantage_spell_chok(client, name, msg, reply_msg, ai_search)
+                    return await advantage_spell_chok(client, name, msg, None, ai_search)
                 else:
                     return
         else:
