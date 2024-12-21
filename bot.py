@@ -30,7 +30,7 @@ loop = asyncio.get_event_loop()
 async def send_alive_message(client: Client):
     while True:
         try:
-            logging.info("Preparing to send alive message...")
+           # logging.info("Preparing to send alive message...")
             
             # Get the current time in IST
             IST = pytz.timezone('Asia/Kolkata')
@@ -66,7 +66,7 @@ async def send_alive_message(client: Client):
 
         # Wait for 5 minutes (300 seconds)
         #logging.info("Waiting for 5 minutes before sending the next alive message...")
-        await asyncio.sleep(300)
+        await asyncio.sleep(1800)
 
 
 async def start():
