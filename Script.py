@@ -331,7 +331,9 @@ Aᴠᴀɪʟᴀʙʟᴇ ᴄᴏᴍᴍᴀɴᴅs:
 • /batch - <code>Tᴏ ᴄʀᴇᴀᴛᴇ ᴀ ʙᴀᴛᴄʜ ʟɪɴᴋ ᴏғ ᴍᴜʟᴛɪᴘʟᴇ ғɪʟᴇs.</code>
 • /link - <code>Tᴏ ᴄʀᴇᴀᴛᴇ ᴀ sɪɴɢʟᴇ ғɪʟᴇ sᴛᴏʀᴇ ʟɪɴᴋ.</code>
 • /pbatch - <code>Jᴜsᴛ ʟɪᴋᴇ /batch, ʙᴜᴛ ᴛʜᴇ ғɪʟᴇs ᴡɪʟʟ ʙᴇ sᴇɴᴅ ᴡɪᴛʜ ғᴏʀᴡᴀʀᴅ ʀᴇsᴛʀɪᴄᴛɪᴏɴs.</code>
-• /plink - <code>Jᴜsᴛ ʟɪᴋᴇ /link, ʙᴜᴛ ᴛʜᴇ ғɪʟᴇ ᴡɪʟʟ ʙᴇ sᴇɴᴅ ᴡɪᴛʜ ғᴏʀᴡᴀʀᴅ ʀᴇsᴛʀɪᴄᴛɪᴏɴ.</code>"""
+• /plink - <code>Jᴜsᴛ ʟɪᴋᴇ /link, ʙᴜᴛ ᴛʜᴇ ғɪʟᴇ ᴡɪʟʟ ʙᴇ sᴇɴᴅ ᴡɪᴛʜ ғᴏʀᴡᴀʀᴅ ʀᴇsᴛʀɪᴄᴛɪᴏɴ.</code>
+ ⚠️ ᴛʜɪꜱ ꜱᴇʀᴠɪᴄᴇ ʜᴀꜱ ʙᴇᴇɴ ꜱᴛᴏᴩᴩᴇᴅ 
+ """
 
     SONG_TXT = """<b>ꜱᴏɴɢ ᴅᴏᴡɴʟᴏᴀᴅ ᴍᴏᴅᴜʟᴇ</b> 
       
@@ -386,7 +388,7 @@ Aᴠᴀɪʟᴀʙʟᴇ ᴄᴏᴍᴍᴀɴᴅs:
  </b>""" 
 
     PROGRESS_BAR = """\n
-╭━━━━❰ Tech VJ Renaming... ❱━➣
+╭━━━━❰ Renaming... ❱━➣
 ┣⪼ 🗂️ : {1} | {2}
 ┣⪼ ⏳️ : {0}%
 ┣⪼ 🚀 : {3}/s
@@ -761,12 +763,12 @@ Also your tutorial will be Added Your Group..."""
 এছাড়াও আপনার দল ভিডিও সংগ্রহের প্রশিক্ষণ দেবে..."""
 
     DELETEMSG = """
-<b><u>❗️❗️❗️IMPORTANT❗️️❗️❗️</u></b>
-ɴᴏᴛᴇ:- ʏᴇ ꜰɪʟᴇꜱ 1 ɢʜᴀɴᴛᴇ ᴍᴇ ᴅᴇʟᴇᴛᴇ ʜᴏ ᴊᴀᴇɢɪ.
-ɪꜱʟɪʏᴇ ɪꜱᴋᴏ ᴅᴜᴍʙ ɢʀᴏᴜᴘ ᴍᴇ ꜰᴏʀᴡᴀʀᴅ ᴋʀᴋᴇ ᴠᴀʜᴀ ꜱᴇ ᴅᴏᴡɴʟᴏᴀᴅ ᴋᴀʀᴇ
-ᴅᴜᴍʙ ɢʀᴏᴜᴘ: https://t.me/+4U2PRD2nYwQyNWM1
-
-"""
+<blockquote><b>⏳Deleting In 60 Minutes 🗑️</b></blockquote>
+<pre>To save your files, do one of the following 👇🏻
+├── 📤 Forward to your friends
+├── 📲 Forward to saved message
+├── 👥 Forward to our dumb group</pre>
+<a href="https://t.me/+4U2PRD2nYwQyNWM1">👉🏻ᴅᴜᴍʙ ɢʀᴏᴜᴘ👈🏻</a>"""
 
     DEVELOPER_TXT = """
 special Thanks To ❤️ Developers -
