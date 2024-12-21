@@ -21,7 +21,7 @@ async def add_env(client, message):
     config_name, key, value = args[1], args[2], " ".join(args[3:])
     
     save_env(config_name, key, value)  # Save the environment variable to the DB
-    await message.reply(f"Environment variable {key} added to {config_name}.")
+    await message.reply(f"Environment variable <pre> {key} = {value} </pre> added to {config_name}.", parse_mode=ParseMode.HTML)
 
 @Client.on_message(filters.command('get_envs') & filters.user(ADMINS))  # Replace with admin IDs
 async def get_envs(client, message):
@@ -64,31 +64,6 @@ async def envs_command(client: Client, message: Message):
     except Exception as e:
         await message.reply(f"An error occurred while fetching configurations: {e}")
 
-@Client.on_message(filters.command("check_config") & filters.user(ADMINS))
-async def config_command(client: Client, message: Message):
-    """
-    Handle the /config command to fetch and display configuration data from MongoDB.
-    """
-    try:
-        # Extract config_name from the command arguments
-        command_args = message.text.split(maxsplit=1)
-        if len(command_args) < 2:
-            await message.reply("Usage: /config <config_name>")
-            return
-        
-        config_name = command_args[1]
-        
-        # Fetch the configuration from the database
-        config = fetch_config(config_name)
-        if config:
-            # Format and send the configuration data
-            config_details = "\n".join(f"{key}: {value}" for key, value in config.items())
-            await message.reply(f"Configuration for <b>{config_name}</b>:\n\n{config_details}")
-        else:
-            await message.reply(f"No configuration found for <b>{config_name}</b>.")
-    
-    except Exception as e:
-        await message.reply(f"An error occurred while fetching the configuration: {e}")
 
 
 @Client.on_message(filters.command('update_env') & filters.user(ADMINS))  # Only admins can use this
