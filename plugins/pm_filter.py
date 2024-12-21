@@ -89,7 +89,7 @@ async def give_filter(client, message):
                 ai_search = True
                 #reply_msg = await message.reply_text(f"<b><i>Searching for {message.text} 🔍</i></b>")
                 await asyncio.sleep(1)
-                await auto_filter(client, message.text, message, ai_search)
+                await auto_filter(client, message.text, message, None, ai_search)
                 #await auto_filter(client, message.text, message, reply_msg, ai_search)
 
         # If from the support chat
@@ -2990,7 +2990,7 @@ async def auto_filter(client, name, msg, reply_msg, ai_search, spoll=False):
         if re.findall("((^\/|^,|^!|^\.|^[\U0001F600-\U000E007F]).*)", message.text):
             return
         if len(message.text) >= 50 :
-            await safe_edit_text(reply_msg, "<b><i>message is too long. try with short name if available\nelse tell my admin for this error by /feedback in my PM</i></b>")
+            #await safe_edit_text(reply_msg, "<b><i>message is too long. try with short name if available\nelse tell my admin for this error by /feedback in my PM</i></b>")
             await asyncio.sleep(DLT2)
             await message.delete()
                     
