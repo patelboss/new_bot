@@ -3,13 +3,13 @@ from pyrogram import Client
 import time
 from pyrogram import Client, idle
 from pyrogram.enums import ParseMode
-from info import *
+from info import SEND_ALIVE, ALIVE_FREQUENCY
 import sys, glob, importlib, logging, logging.config, pytz, asyncio, time
 from datetime import date, datetime
 
 async def send_alive_message(client: Client):
     while True:
-        if SEND_ALIVE :
+        if SEND_ALIVE == True:
             try:
                 IST = pytz.timezone('Asia/Kolkata')
                 current_time = datetime.now(IST).strftime('%Y-%m-%d %H:%M:%S')
@@ -47,4 +47,6 @@ async def send_alive_message(client: Client):
         # Wait for 5 minutes (300 seconds)
         #logging.info("Waiting for 5 minutes before sending the next alive message...")
             await asyncio.sleep(ALIVE_FREQUENCY)
-              
+
+        else:
+            return
