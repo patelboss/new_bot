@@ -3052,6 +3052,11 @@ async def auto_filter(client, name, msg, reply_msg, ai_search, spoll=False):
             InlineKeyboardButton("ʟᴀɴɢᴜᴀɢᴇs", callback_data=f"languages#{key}"),
             InlineKeyboardButton("ʏᴇᴀʀs", callback_data=f"years#{key}")
         ])
+        btn.insert(0, [
+            InlineKeyboardButton("Check PM", callback_data=f"sendfiles#{key}"),
+            InlineKeyboardButton("Get Offers", callback_data=f"languages#{key}"),
+            InlineKeyboardButton("Main Channel", callback_data=f"years#{key}")
+        ])
     else:
         btn = []
         btn.insert(0, 
@@ -3065,6 +3070,11 @@ async def auto_filter(client, name, msg, reply_msg, ai_search, spoll=False):
             InlineKeyboardButton("𝐒𝐞𝐧𝐝 𝐀𝐥𝐥", callback_data=f"sendfiles#{key}"),
             InlineKeyboardButton("ʟᴀɴɢᴜᴀɢᴇs", callback_data=f"languages#{key}"),
             InlineKeyboardButton("ʏᴇᴀʀs", callback_data=f"years#{key}")
+        ])
+        btn.insert(0, [
+            InlineKeyboardButton("Check PM", callback_data=f"sendfiles#{key}"),
+            InlineKeyboardButton("Get Best Offers", callback_data=f"languages#{key}"),
+            InlineKeyboardButton("Main Channel", callback_data=f"years#{key}")
         ])
     if offset != "":
         try:
@@ -3129,9 +3139,9 @@ async def auto_filter(client, name, msg, reply_msg, ai_search, spoll=False):
                 cap += f"<b>\n📁 <a href='https://telegram.me/{temp.U_NAME}?start=files_{file['file_id']}'>[{get_size(file['file_size'])}] {clean_file_name(file['file_name'])}\n</a></b>"
     else:
         if settings["button"]:
-            cap = f"<b>Tʜᴇ Rᴇꜱᴜʟᴛꜱ Fᴏʀ ☞ {search}\n\nRᴇǫᴜᴇsᴛᴇᴅ Bʏ ☞ {message.from_user.mention}\nʀᴇsᴜʟᴛ sʜᴏᴡ ɪɴ ☞ {remaining_seconds} sᴇᴄᴏɴᴅs\n\nᴘᴏᴡᴇʀᴇᴅ ʙʏ ☞ : <b> @FILMYKEEDHA</b> \n\nWait little bit before tapping again</b>"
+            cap = f"<b>Ye Tune Search Kiya ☞ {search}\n\nOr Mujhe Ye Sab Mila Hai Udhar Khokche Me</b>"
         else:
-            cap = f"<b>Tʜᴇ Rᴇꜱᴜʟᴛꜱ Fᴏʀ ☞ {search}\n\nRᴇǫᴜᴇsᴛᴇᴅ Bʏ ☞ {message.from_user.mention}\nʀᴇsᴜʟᴛ sʜᴏᴡ ɪɴ ☞ {remaining_seconds} sᴇᴄᴏɴᴅs\n\nᴘᴏᴡᴇʀᴇᴅ ʙʏ ☞ : <b> @FILMYKEEDHA</b> \n\nWait little bit before tapping again</b>"
+            cap = f"<b>Ye Tune Search Kiya ☞ {search}\n\nOr Mujhe Ye Sab Mila Hai Udhar Khokche Me</b>"
             cap+="<b><u>🍿 Your Movie Files 👇</u></b>\n\n"
             for file in files:
                 cap += f"<b>📁 <a href='https://telegram.me/{temp.U_NAME}?start=files_{file['file_id']}'>[{get_size(file['file_size'])}] {clean_file_name(file['file_name'])}\n\n</a></b>"
@@ -3146,7 +3156,7 @@ async def auto_filter(client, name, msg, reply_msg, ai_search, spoll=False):
                     await hehe.delete()
                     await message.delete()
                 else: 
-                    await asyncio.sleep(300)
+                    await asyncio.sleep(600)
                     await hehe.delete()
 
             except KeyError:
@@ -3176,7 +3186,7 @@ async def auto_filter(client, name, msg, reply_msg, ai_search, spoll=False):
         except Exception as e:
             await send_error_log(client, "3119", e)
             logger.exception(e) 
-            fek = await reply_msg.edit_text(text=cap, reply_markup=InlineKeyboardMarkup(btn))
+            fek = await message.reply_text(text=cap, reply_markup=InlineKeyboardMarkup(btn))
             try:
                 if settings['auto_delete']:
                     await asyncio.sleep(300)
@@ -3192,7 +3202,7 @@ async def auto_filter(client, name, msg, reply_msg, ai_search, spoll=False):
                 await fek.delete()
                 await message.delete()
     else:
-        fuk = await reply_msg.edit_text(text=cap, reply_markup=InlineKeyboardMarkup(btn), disable_web_page_preview=True)
+        fuk = await message.reply_text(text=cap, reply_markup=InlineKeyboardMarkup(btn), disable_web_page_preview=True)
         
         try:
             if settings['auto_delete']:
