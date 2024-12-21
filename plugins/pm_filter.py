@@ -87,9 +87,10 @@ async def give_filter(client, message):
             manual = await manual_filters(client, message)
             if not manual and settings.get("auto_ffilter", False):
                 ai_search = True
-                reply_msg = await message.reply_text(f"<b><i>Searching for {message.text} 🔍</i></b>")
+                #reply_msg = await message.reply_text(f"<b><i>Searching for {message.text} 🔍</i></b>")
                 await asyncio.sleep(1)
-                await auto_filter(client, message.text, message, reply_msg, ai_search)
+                await auto_filter(client, message.text, message, ai_search)
+                #await auto_filter(client, message.text, message, reply_msg, ai_search)
 
         # If from the support chat
         else:
