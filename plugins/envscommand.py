@@ -5,7 +5,7 @@ from database.envs import fetch_config, get_env, save_env, fetch_all_configs, up
 from pyrogram.types import Message
 from pymongo import UpdateOne
 import logging
-
+from pyrogram.enums import ParseMode
 # Set up logger
 LOG_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
@@ -36,8 +36,8 @@ async def get_envs(client, message):
     if not env_data:
         await message.reply(f"No environment variables found for {config_name}.")
     else:
-        env_str = "\n".join([f"{key}: {value}" for key, value in env_data.items()])
-        await message.reply(f"Current environment variables for {config_name}:\n{env_str}")
+        env_str = "\n\n".join([f"{key} = {value}" for key, value in env_data.items()])
+        await message.reply(f"Current environment variables for {config_name}:\n<pre>{env_str}</pre>", parse_mode=ParseMode.HTML)
 
 @Client.on_message(filters.command("all_envs") & filters.user(ADMINS))
 async def envs_command(client: Client, message: Message):
@@ -53,8 +53,8 @@ async def envs_command(client: Client, message: Message):
             response = "Current Environment Configurations:\n\n"
             for config in configs:
                 config_name = config.get("config_name", "Unknown")
-                details = "\n".join(f"{key}: {value}" for key, value in config.items() if key != "_id")
-                response += f"<b>{config_name}</b>:\n{details}\n\n"
+                details = "\n\n".join(f"{key}: {value}" for key, value in config.items() if key != "_id")
+                response += f"<b>{config_name}</b>:\n<pre>{details}</pre>\n\n"
             
             # Send the formatted response
             await message.reply(response)
