@@ -53,7 +53,7 @@ async def envs_command(client: Client, message: Message):
             response = "Current Environment Configurations:\n\n"
             for config in configs:
                 config_name = config.get("config_name", "Unknown")
-                details = "\n\n".join(f"{key}: {value}" for key, value in config.items() if key != "_id")
+                details = "\n\n".join(f"{key} = {value}" for key, value in config.items() if key != "_id")
                 response += f"<b>{config_name}</b>:\n<pre>{details}</pre>\n\n"
             
             # Send the formatted response
