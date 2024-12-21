@@ -20,7 +20,7 @@ from plugins.clone import restart_bots
 from TechVJ.bot import TechVJBot
 from TechVJ.util.keepalive import ping_server
 from TechVJ.bot.clients import initialize_clients
-from plugins import stayalive
+from plugins.stayalive import send_alive_message
 ppath = "plugins/*.py"
 files = glob.glob(ppath)
 TechVJBot.start()
