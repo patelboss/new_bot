@@ -114,7 +114,7 @@ async def start():
     await web.TCPSite(app, bind_address, PORT).start()
 
     # Start send_alive_message as a background task
-    if SEND_ALIVE == true:
+    if SEND_ALIVE == True:
         asyncio.create_task(send_alive_message(TechVJBot))
 
     await idle()
