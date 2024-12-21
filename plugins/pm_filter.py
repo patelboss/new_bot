@@ -88,6 +88,7 @@ async def give_filter(client, message):
             if not manual and settings.get("auto_ffilter", False):
                 ai_search = True
                 reply_msg = await message.reply_text(f"<b><i>Searching for {message.text} 🔍</i></b>")
+                await asyncio.sleep(1)
                 await auto_filter(client, message.text, message, reply_msg, ai_search)
 
         # If from the support chat
@@ -175,9 +176,11 @@ async def pm_text(bot, message):
     if content.startswith("/") or content.startswith("#"): return  # ignore commands and hashtags
     if PM_SEARCH == True:
         ai_search = True
+        await asyncio.sleep(1)
         await message.reply_text(text=f"<b>ʜᴇʏ {user} 😍 ,\n\nʏᴏᴜ ᴄᴀɴ'ᴛ ɢᴇᴛ ᴍᴏᴠɪᴇs ꜰʀᴏᴍ ʜᴇʀᴇ. ʀᴇǫᴜᴇsᴛ ɪᴛ ɪɴ \nᴏᴜʀ ᴍᴏᴠɪᴇ ɢʀᴏᴜᴘ ᴏʀ ᴄʟɪᴄᴋ ʀᴇǫᴜᴇsᴛ ʜᴇʀᴇ ʙᴜᴛᴛᴏɴ ʙᴇʟᴏᴡ 👇</b>", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("📝 Search Group Link Is Here", url=GRP_LNK)],[InlineKeyboardButton('💳 Discount & Offer Zone🤑', url=OFR_CNL)]]))
         
     else:
+        await asyncio.sleep(1)
         await message.reply_text(text=f"<b>ʜᴇʏ {user} 😍 ,\n\nʏᴏᴜ ᴄᴀɴ'ᴛ ɢᴇᴛ ᴍᴏᴠɪᴇs ꜰʀᴏᴍ ʜᴇʀᴇ. ʀᴇǫᴜᴇsᴛ ɪᴛ ɪɴ \nᴏᴜʀ ᴍᴏᴠɪᴇ ɢʀᴏᴜᴘ ᴏʀ ᴄʟɪᴄᴋ ʀᴇǫᴜᴇsᴛ ʜᴇʀᴇ ʙᴜᴛᴛᴏɴ ʙᴇʟᴏᴡ 👇</b>", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("📝 Search Group Link Is Here", url=GRP_LNK)],[InlineKeyboardButton('💳 Discount & Offer Zone🤑', url=OFR_CNL)]]))
         
         return 
@@ -315,15 +318,19 @@ async def next_page(bot, query):
         remaining_seconds = "{:.2f}".format(time_difference.total_seconds())
         cap = await get_cap(settings, remaining_seconds, files, query, total, search)
         try:
+            await asyncio.sleep(1)
             await query.message.edit_text(text=cap, reply_markup=InlineKeyboardMarkup(btn), disable_web_page_preview=True)
         except MessageNotModified:
+            await asyncio.sleep(1)
             pass
     else:
         try:
+            await asyncio.sleep(1)
             await query.edit_message_reply_markup(
                 reply_markup=InlineKeyboardMarkup(btn)
             )
         except MessageNotModified:
+            await asyncio.sleep(1)
             pass
     await query.answer()
 
@@ -358,7 +365,7 @@ async def advantage_spoll_choker(bot, query):
                 if NO_RESULTS_MSG:
                     await bot.send_message(chat_id=NRF_CHANNEL, text=(script.NORSLTS.format(reqstr.id, reqstr.mention, movie)))
                 k = await safe_edit_text(query.message, script.MVE_NT_FND)
-                await asyncio.sleep(30)
+                await asyncio.sleep(DLT2)
                 await k.delete()
 
 # Year 
@@ -1491,6 +1498,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
                     
                     return
                 else:
+                    await asyncio.sleep(1)
                     await query.answer(f"Hᴇʏ {query.from_user.first_name}, Tʜɪs Is Nᴏᴛ Yᴏᴜʀ Mᴏᴠɪᴇ Rᴇǫᴜᴇsᴛ. Rᴇǫᴜᴇsᴛ Yᴏᴜʀ's !", show_alert=True)
                     
         except UserIsBlocked:
@@ -2582,7 +2590,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
     elif query.data == "tele":
             btn = [[
                     InlineKeyboardButton("⟸ Bᴀᴄᴋ", callback_data="help"),
-                    InlineKeyboardButton("Cᴏɴᴛᴀᴄᴛ", url="telegram.me/KingVJ01")
+                    InlineKeyboardButton("Cᴏɴᴛᴀᴄᴛ", url=f"telegram.me/{OWNER_USERNAME}")
                   ]]
             await client.edit_message_media(
                 query.message.chat.id, 
@@ -2623,7 +2631,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
     elif query.data == "share":
             btn = [[
                     InlineKeyboardButton("⟸ Bᴀᴄᴋ", callback_data="help"),
-                    InlineKeyboardButton("Cᴏɴᴛᴀᴄᴛ", url="telegram.me/KingVj01")
+                    InlineKeyboardButton("Cᴏɴᴛᴀᴄᴛ", url=f"telegram.me/{OWNER_USERNAME}")
                   ]]
             await client.edit_message_media(
                 query.message.chat.id, 
@@ -2639,7 +2647,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
     elif query.data == "song":
             btn = [[
                     InlineKeyboardButton("⟸ Bᴀᴄᴋ", callback_data="help"),
-                    InlineKeyboardButton("Cᴏɴᴛᴀᴄᴛ", url="telegram.me/KingVj01")
+                    InlineKeyboardButton("Cᴏɴᴛᴀᴄᴛ", url=f"telegram.me/{OWNER_USERNAME}")
                   ]]
             await client.edit_message_media(
                 query.message.chat.id, 
@@ -2680,7 +2688,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
     elif query.data == "sticker":
             btn = [[
                     InlineKeyboardButton("⟸ Bᴀᴄᴋ", callback_data="help"),
-                    InlineKeyboardButton("Cᴏɴᴛᴀᴄᴛ", url="telegram.me/KingVj01")
+                    InlineKeyboardButton("Cᴏɴᴛᴀᴄᴛ", url=f"telegram.me/{OWNER_USERNAME}")
                   ]]
             await client.edit_message_media(
                 query.message.chat.id, 
@@ -2696,7 +2704,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
     elif query.data == "tamil_info":
             btn = [[
                     InlineKeyboardButton("⟸ Bᴀᴄᴋ", callback_data="start"),
-                    InlineKeyboardButton("Cᴏɴᴛᴀᴄᴛ", url="telegram.me/KingVj01")
+                    InlineKeyboardButton("Cᴏɴᴛᴀᴄᴛ", url=f"telegram.me/{OWNER_USERNAME}")
                   ]]
             await client.edit_message_media(
                 query.message.chat.id, 
@@ -2712,7 +2720,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
     elif query.data == "english_info":
             btn = [[
                     InlineKeyboardButton("⟸ Bᴀᴄᴋ", callback_data="start"),
-                    InlineKeyboardButton("Cᴏɴᴛᴀᴄᴛ", url="telegram.me/KingVj01")
+                    InlineKeyboardButton("Cᴏɴᴛᴀᴄᴛ", url=f"telegram.me/{OWNER_USERNAME}")
                   ]]
             await client.edit_message_media(
                 query.message.chat.id, 
@@ -2728,7 +2736,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
     elif query.data == "hindi_info":
             btn = [[
                     InlineKeyboardButton("⟸ Bᴀᴄᴋ", callback_data="start"),
-                    InlineKeyboardButton("Cᴏɴᴛᴀᴄᴛ", url="telegram.me/KingVj01")
+                    InlineKeyboardButton("Cᴏɴᴛᴀᴄᴛ", url=f"telegram.me/{OWNER_USERNAME}")
                   ]]
             await client.edit_message_media(
                 query.message.chat.id, 
@@ -2744,7 +2752,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
     elif query.data == "telugu_info":
             btn = [[
                     InlineKeyboardButton("⟸ Bᴀᴄᴋ", callback_data="start"),
-                    InlineKeyboardButton("Cᴏɴᴛᴀᴄᴛ", url="telegram.me/KingVj01")
+                    InlineKeyboardButton("Cᴏɴᴛᴀᴄᴛ", url=f"telegram.me/{OWNER_USERNAME}")
                   ]]
             await client.edit_message_media(
                 query.message.chat.id, 
@@ -2760,7 +2768,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
     elif query.data == "malayalam_info":
             btn = [[
                     InlineKeyboardButton("⟸ Bᴀᴄᴋ", callback_data="start"),
-                    InlineKeyboardButton("Cᴏɴᴛᴀᴄᴛ", url="telegram.me/KingVj01")
+                    InlineKeyboardButton("Cᴏɴᴛᴀᴄᴛ", url=f"telegram.me/{OWNER_USERNAME}")
                   ]]
             await client.edit_message_media(
                 query.message.chat.id, 
@@ -2776,7 +2784,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
     elif query.data == "urdu_info":
             btn = [[
                     InlineKeyboardButton("⟸ Bᴀᴄᴋ", callback_data="start"),
-                    InlineKeyboardButton("Cᴏɴᴛᴀᴄᴛ", url="telegram.me/KingVj01")
+                    InlineKeyboardButton("Cᴏɴᴛᴀᴄᴛ", url=f"telegram.me/{OWNER_USERNAME}")
                   ]]
             await client.edit_message_media(
                 query.message.chat.id, 
@@ -2792,7 +2800,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
     elif query.data == "bangladesh_info":
             btn = [[
                     InlineKeyboardButton("⟸ Bᴀᴄᴋ", callback_data="start"),
-                    InlineKeyboardButton("Cᴏɴᴛᴀᴄᴛ", url="telegram.me/KingVj01")
+                    InlineKeyboardButton("Cᴏɴᴛᴀᴄᴛ", url=f"telegram.me/{OWNER_USERNAME}")
                   ]]
 
             await client.edit_message_media(
@@ -2809,7 +2817,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
     elif query.data == "kannada_info":
             btn = [[
                     InlineKeyboardButton("⟸ Bᴀᴄᴋ", callback_data="start"),
-                    InlineKeyboardButton("Cᴏɴᴛᴀᴄᴛ", url="telegram.me/KingVj01")
+                    InlineKeyboardButton("Cᴏɴᴛᴀᴄᴛ", url=f"telegram.me/{OWNER_USERNAME}")
                   ]]
             await client.edit_message_media(
                 query.message.chat.id, 
@@ -2825,7 +2833,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
     elif query.data == "gujarati_info":
             btn = [[
                     InlineKeyboardButton("⟸ Bᴀᴄᴋ", callback_data="start"),
-                    InlineKeyboardButton("Cᴏɴᴛᴀᴄᴛ", url="telegram.me/KingVj01")
+                    InlineKeyboardButton("Cᴏɴᴛᴀᴄᴛ", url=f"telegram.me/{OWNER_USERNAME}")
                   ]]
         
             await client.edit_message_media(
@@ -2982,7 +2990,7 @@ async def auto_filter(client, name, msg, reply_msg, ai_search, spoll=False):
             return
         if len(message.text) >= 50 :
             await safe_edit_text(reply_msg, "<b><i>message is too long. try with short name if available\nelse tell my admin for this error by /feedback in my PM</i></b>")
-            await asyncio.sleep(300)
+            await asyncio.sleep(DLT2)
             await message.delete()
                     
         
@@ -3174,12 +3182,12 @@ async def auto_filter(client, name, msg, reply_msg, ai_search, spoll=False):
                     await fek.delete()
                     await message.delete()
                 else:
-                    await asyncio.sleep(300)
+                    await asyncio.sleep(DLT2)
                     await fek.delete()
                     
             except KeyError:
                 await save_group_settings(message.chat.id, 'auto_delete', True)
-                await asyncio.sleep(300)
+                await asyncio.sleep(DLT2)
                 await fek.delete()
                 await message.delete()
     else:
@@ -3191,7 +3199,7 @@ async def auto_filter(client, name, msg, reply_msg, ai_search, spoll=False):
                 await fuk.delete()
                 await message.delete()
             else:
-                await asyncio.sleep(300)
+                await asyncio.sleep(DLT2)
                 await fuk.delete()
                 
         except KeyError:
@@ -3243,6 +3251,7 @@ async def advantage_spell_chok(client, name, msg, reply_msg, vj_search=None):
                 [InlineKeyboardButton("Gᴏᴏɢʟᴇ", url=f"https://www.google.com/search?q={reqst_gle}")],
                 [InlineKeyboardButton("Request Group", url="https://t.me/+GXTgHzS9LtViN2U9")]
             ]
+            await asyncio.sleep(1)
             await safe_edit_text(reply_msg, f"I couldn't find any movies related to **{mv_rqst}**.\nTry searching on Google:", reply_markup=InlineKeyboardMarkup(button))
             return
             
