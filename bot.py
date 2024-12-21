@@ -68,7 +68,7 @@ async def send_alive_message(client: Client):
 
         # Wait for 5 minutes (300 seconds)
         #logging.info("Waiting for 5 minutes before sending the next alive message...")
-        await asyncio.sleep(300)
+        await asyncio.sleep(60)
 
 
 async def start():
