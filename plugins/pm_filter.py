@@ -3243,6 +3243,7 @@ async def safe_edit_text(msg, new_text, **kwargs):
 
 async def advantage_spell_chok(client, name, msg, reply_msg, vj_search=None):
     mv_id = msg.id
+    message = msg
     mv_rqst = name
     reqstr1 = msg.from_user.id if msg.from_user else 0
     reqstr = await client.get_users(reqstr1)
@@ -3263,7 +3264,7 @@ async def advantage_spell_chok(client, name, msg, reply_msg, vj_search=None):
                 [InlineKeyboardButton("Request Group", url="https://t.me/+GXTgHzS9LtViN2U9")]
             ]
             await asyncio.sleep(1)
-            await safe_edit_text(reply_msg, f"I couldn't find any movies related to **{mv_rqst}**.\nTry searching on Google:", reply_markup=InlineKeyboardMarkup(button))
+            #await safe_edit_text(reply_msg, f"I couldn't find any movies related to **{mv_rqst}**.\nTry searching on Google:", reply_markup=InlineKeyboardMarkup(button))
             return
             
             #raise ValueError("No movies found")
@@ -3277,7 +3278,8 @@ async def advantage_spell_chok(client, name, msg, reply_msg, vj_search=None):
         ]
         if NO_RESULTS_MSG:
             await client.send_message(chat_id=NRF_CHANNEL, text=(script.NORSLTS.format(reqstr.id, reqstr.mention, mv_rqst)))
-        k = await safe_edit_text(reply_msg, script.I_CUDNT.format(mv_rqst), reply_markup=InlineKeyboardMarkup(button))
+        k = await message.reply_text(f"sorry brother request it in request group")
+        #k = await safe_edit_text(reply_msg, script.I_CUDNT.format(mv_rqst), reply_markup=InlineKeyboardMarkup(button))
         await asyncio.sleep(30)
         await k.delete()
         return
@@ -3293,7 +3295,8 @@ async def advantage_spell_chok(client, name, msg, reply_msg, vj_search=None):
     if AI_SPELL_CHECK and vj_search:
         try:
             vj_search_new = False
-            vj_ai_msg = await safe_edit_text(reply_msg, "<b><i>Advanced AI is trying to find the best match for your request. Wait...</i></b>")
+            vj_ai_msg = await message.reply_text(f"Checking if i found it else check correct name on Google and search again")
+            #vj_ai_msg = await safe_edit_text(message, "<b><i>Advanced AI is trying to find the best match for your request. Wait...</i></b>")
             matched_movie = None
             for techvj in movielist:
                 ratio = fuzz.ratio(mv_rqst.lower(), techvj.lower())
@@ -3311,7 +3314,9 @@ async def advantage_spell_chok(client, name, msg, reply_msg, vj_search=None):
                 ]
                 if NO_RESULTS_MSG:
                     await client.send_message(chat_id=NRF_CHANNEL, text=(script.NORSLTS.format(reqstr.id, reqstr.mention, mv_rqst)))
-                k = await safe_edit_text(reply_msg, script.I_CUDNT.format(mv_rqst), reply_markup=InlineKeyboardMarkup(button))
+                k = await message.reply_text(f"sorry brother request it in request group")
+        
+               # k = await safe_edit_text(reply_msg, script.I_CUDNT.format(mv_rqst), reply_markup=InlineKeyboardMarkup(button))
                 await asyncio.sleep(30)
                 await k.delete()
                 return
@@ -3325,6 +3330,7 @@ async def advantage_spell_chok(client, name, msg, reply_msg, vj_search=None):
                 for k, movie_name in enumerate(movielist)
             ]
             btn.append([InlineKeyboardButton(text="Close", callback_data=f'spol#{reqstr1}#close_spellcheck')])
+            spell_check_del = await message.reply_txt(f"sorry i didn't find anything on internet")
             spell_check_del = await safe_edit_text(reply_msg, script.CUDNT_FND.format(mv_rqst), reply_markup=InlineKeyboardMarkup(btn))
 
             if settings.get('auto_delete', False):
