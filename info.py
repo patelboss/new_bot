@@ -23,9 +23,9 @@ def is_enabled(value, default):
 
 # Bot information with MongoDB and fallback
 SESSION = environ.get('SESSION', 'TechVJBot')
-API_ID = int(environ.get('API_ID', '4063950'))
-API_HASH = environ.get('API_HASH', '5ebe4b5c0a2af776bf5d2e52d7f5aaa4')
-BOT_TOKEN = environ.get('BOT_TOKEN', "1829969794:AAE7BRLnznbiLmWcI8qmw_GoudeGzSzZqHo")
+API_ID = int(environ.get('API_ID', ''))
+API_HASH = environ.get('API_HASH', '')
+BOT_TOKEN = environ.get('BOT_TOKEN', "")
 EDATABASE_URI = environ.get('EDATABASE_URI', "")
 
 config_name = "env_config"
