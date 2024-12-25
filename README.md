@@ -172,7 +172,7 @@ Use these settings when adding a monitor:</b>
 <details><summary><b>Deploy To VPS</summary>
 
 
-`git clone https://github.com/VJBots/VJ-Filter-Bot`
+`git clone [https://github.com/patelboss/new_bot](https://github.com/patelboss/new_bot)`
 
 Install Packages
 
