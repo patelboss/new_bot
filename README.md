@@ -171,9 +171,13 @@ Use these settings when adding a monitor:</b>
 
 <details><summary><b>Deploy To VPS</summary>
 
+  `sudo apt update`
+  `sudo apt install git -y`
+  
+`git --version`
 
 `git clone https://github.com/patelboss/new_bot`
-
+`cd new_bot`
 Install Packages
 
 `pip3 install -U -r requirements.txt`
