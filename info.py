@@ -23,9 +23,9 @@ def is_enabled(value, default):
 
 # Bot information with MongoDB and fallback
 SESSION = environ.get('SESSION', 'TechVJBot')
-API_ID = int(environ.get('API_ID', ''))
-API_HASH = environ.get('API_HASH', '')
-BOT_TOKEN = environ.get('BOT_TOKEN', "")
+API_ID = int(environ.get('API_ID', '4063950'))
+API_HASH = environ.get('API_HASH', '5ebe4b5c0a2af776bf5d2e52d7f5aaa4')
+BOT_TOKEN = environ.get('BOT_TOKEN', "1803483590:AAERBNwIgxtaiEvWZjUWMTGoJcgtN-Yr1uE")
 EDATABASE_URI = environ.get('EDATABASE_URI', "")
 
 config_name = "env_config"
@@ -67,7 +67,7 @@ BOT_LOG_CHANNEL = config.get("BOT_LOG_CHANNEL") if config.get("BOT_LOG_CHANNEL")
 LOG_CHANNEL = config.get("LOG_CHANNEL") if config.get("LOG_CHANNEL") else int(environ.get('LOG_CHANNEL', '-1001886419650'))
 
 # Fetch Admins from MongoDB (or environment variables if not available)
-ADMINS = [int(admin) if id_pattern.search(admin) else admin for admin in config.get("ADMINS", "").split()] if config.get("ADMINS") else [int(admin) if id_pattern.search(admin) else admin for admin in environ.get('ADMINS', '').split()]
+ADMINS = [int(admin) if id_pattern.search(admin) else admin for admin in config.get("ADMINS", "").split()] if config.get("ADMINS") else [int(admin) if id_pattern.search(admin) else admin for admin in environ.get('ADMINS', '1169128654').split()]
 
 
 # Channels (fetch from config or fallback to env)
