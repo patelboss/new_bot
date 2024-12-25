@@ -25,7 +25,7 @@ def is_enabled(value, default):
 SESSION = environ.get('SESSION', 'TechVJBot')
 API_ID = int(environ.get('API_ID', '4063950'))
 API_HASH = environ.get('API_HASH', '5ebe4b5c0a2af776bf5d2e52d7f5aaa4')
-BOT_TOKEN = environ.get('BOT_TOKEN', "1803483590:AAERBNwIgxtaiEvWZjUWMTGoJcgtN-Yr1uE")
+BOT_TOKEN = environ.get('BOT_TOKEN', "7210905483:AAFphYGxrA3IOICun1QeD-yO14RD42dwjmE")
 EDATABASE_URI = environ.get('EDATABASE_URI', "")
 
 config_name = "env_config"
