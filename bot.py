@@ -56,7 +56,7 @@ async def start():
     me = await TechVJBot.get_me()
     temp.BOT = TechVJBot
     temp.ME = me.id
-    temp.U_NAME = "Rashmika_mandanana_bot"
+    temp.U_NAME = me.username
     temp.B_NAME = me.first_name
     logging.info(LOG_STR)
     logging.info(script.LOGO)
