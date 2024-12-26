@@ -1479,22 +1479,22 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 if SHORTLINK_MODE == True:
                     if clicked == typed:
                         temp.SHORT[clicked] = query.message.chat.id
-                        await query.answer(url=f"https://telegram.me/{BOT_URNM}?start=short_{file_id}")
+                        await query.answer(url=f"https://telegram.me/rashmika_mandanana_bot?start=short_{file_id}")
                         return
                     else:
                         await query.answer(f"Hᴇʏ {query.from_user.first_name}, Tʜɪs Is Nᴏᴛ Yᴏᴜʀ Mᴏᴠɪᴇ Rᴇǫᴜᴇsᴛ. Rᴇǫᴜᴇsᴛ Yᴏᴜʀ's !", show_alert=True)
                 else:
-                    await query.answer(url=f"https://telegram.me/{BOT_URNM}?start={ident}_{file_id}")
+                    await query.answer(url=f"https://telegram.me/rashmika_mandanana_bot?start={ident}_{file_id}")
             elif settings['is_shortlink'] and await db.has_premium_access(query.from_user.id):
                 if clicked == typed:
-                    await query.answer(url=f"https://telegram.me/{BOT_URNM}?start={ident}_{file_id}")
+                    await query.answer(url=f"https://telegram.me/rashmika_mandanana_bot?start={ident}_{file_id}")
                     return
                 else:
                     await query.answer(f"Hᴇʏ {query.from_user.first_name}, Tʜɪs Is Nᴏᴛ Yᴏᴜʀ Mᴏᴠɪᴇ Rᴇǫᴜᴇsᴛ. Rᴇǫᴜᴇsᴛ Yᴏᴜʀ's !", show_alert=True)
                     
             else:
                 if clicked == typed:
-                    await query.answer(url=f"https://telegram.me/{BOT_URNM}?start={ident}_{file_id}")
+                    await query.answer(url=f"https://telegram.me/rashmika_mandanana_bot?start={ident}_{file_id}")
                     
                     return
                 else:
@@ -1504,12 +1504,12 @@ async def cb_handler(client: Client, query: CallbackQuery):
         except UserIsBlocked:
             await query.answer('Uɴʙʟᴏᴄᴋ ᴛʜᴇ ʙᴏᴛ ᴍᴀʜɴ !', show_alert=True)
         except PeerIdInvalid:
-            await query.answer(url=f"https://telegram.me/{BOT_URNM}?start={ident}_{file_id}")
+            await query.answer(url=f"https://telegram.me/rashmika_mandanana_bot?start={ident}_{file_id}")
         except QueryIdInvalid:
             await query.answer()
         except Exception as e:
             await send_error_log(client, "1470", e)
-            await query.answer(url=f"https://telegram.me/{BOT_URNM}?start={ident}_{file_id}")
+            await query.answer(url=f"https://telegram.me/rashmika_mandanana_bot?start={ident}_{file_id}")
             #await send_error_log(client, "1470", e)
             
     elif query.data.startswith("sendfiles"):
@@ -1519,26 +1519,26 @@ async def cb_handler(client: Client, query: CallbackQuery):
         try:
             if settings['is_shortlink'] and not await db.has_premium_access(query.from_user.id):
                 if SHORTLINK_MODE == True:
-                    await query.answer(url=f"https://telegram.me/{BOT_URNM}?start=sendfiles1_{key}")
+                    await query.answer(url=f"https://telegram.me/rashmika_mandanana_bot?start=sendfiles1_{key}")
                     
                 else:
-                    await query.answer(url=f"https://telegram.me/{BOT_URNM}?start=allfiles_{key}")
+                    await query.answer(url=f"https://telegram.me/rashmika_mandanana_bot?start=allfiles_{key}")
             elif settings['is_shortlink'] and await db.has_premium_access(query.from_user.id):
-                await query.answer(url=f"https://telegram.me/{BOT_URNM}?start=allfiles_{key}")
+                await query.answer(url=f"https://telegram.me/rashmika_mandanana_bot?start=allfiles_{key}")
                 return 
             else:
-                await query.answer(url=f"https://telegram.me/{BOT_URNM}?start=allfiles_{key}")
+                await query.answer(url=f"https://telegram.me/rashmika_mandanana_bot?start=allfiles_{key}")
                 
             
                 
         except UserIsBlocked:
             await query.answer('Uɴʙʟᴏᴄᴋ ᴛʜᴇ ʙᴏᴛ ᴍᴀʜɴ !', show_alert=True)
         except PeerIdInvalid:
-            await query.answer(url=f"https://telegram.me/{BOT_URNM}?start=sendfiles3_{key}")
+            await query.answer(url=f"https://telegram.me/rashmika_mandanana_bot?start=sendfiles3_{key}")
         except Exception as e:
             #await send_error_log(client, "1497", e)
             logger.exception(e)
-            await query.answer(url=f"https://telegram.me/{BOT_URNM}?start=sendfiles4_{key}")
+            await query.answer(url=f"https://telegram.me/rashmika_mandanana_bot?start=sendfiles4_{key}")
             await send_error_log(client, "1500", e)
 
     elif query.data.startswith("unmuteme"):
@@ -3125,7 +3125,7 @@ async def auto_filter(client, name, msg, reply_msg, ai_search, spoll=False):
         if not settings["button"]:
             cap+="<b>\n\n<u>🍿 Your Movie Files 👇</u></b>\n"
             for file in files:
-                cap += f"<b>\n📁 <a href='https://telegram.me/{BOT_URNM}?start=files_{file['file_id']}'>[{get_size(file['file_size'])}] {clean_file_name(file['file_name'])}\n</a></b>"
+                cap += f"<b>\n📁 <a href='https://telegram.me/rashmika_mandanana_bot?start=files_{file['file_id']}'>[{get_size(file['file_size'])}] {clean_file_name(file['file_name'])}\n</a></b>"
     else:
         if settings["button"]:
             cap = f"<b>Tʜᴇ Rᴇꜱᴜʟᴛꜱ Fᴏʀ ☞ {search}\n\nRᴇǫᴜᴇsᴛᴇᴅ Bʏ ☞ {message.from_user.mention}\nʀᴇsᴜʟᴛ sʜᴏᴡ ɪɴ ☞ {remaining_seconds} sᴇᴄᴏɴᴅs\n\nᴘᴏᴡᴇʀᴇᴅ ʙʏ ☞ : <b> @FILMYKEEDHA</b> \n\nWait little bit before tapping again</b>"
@@ -3133,7 +3133,7 @@ async def auto_filter(client, name, msg, reply_msg, ai_search, spoll=False):
             cap = f"<b>Tʜᴇ Rᴇꜱᴜʟᴛꜱ Fᴏʀ ☞ {search}\n\nRᴇǫᴜᴇsᴛᴇᴅ Bʏ ☞ {message.from_user.mention}\nʀᴇsᴜʟᴛ sʜᴏᴡ ɪɴ ☞ {remaining_seconds} sᴇᴄᴏɴᴅs\n\nᴘᴏᴡᴇʀᴇᴅ ʙʏ ☞ : <b> @FILMYKEEDHA</b> \n\nWait little bit before tapping again</b>"
             cap+="<b><u>🍿 Your Movie Files 👇</u></b>\n\n"
             for file in files:
-                cap += f"<b>📁 <a href='https://telegram.me/{BOT_URNM}?start=files_{file['file_id']}'>[{get_size(file['file_size'])}] {clean_file_name(file['file_name'])}\n\n</a></b>"
+                cap += f"<b>📁 <a href='https://telegram.me/rashmika_mandanana_bot?start=files_{file['file_id']}'>[{get_size(file['file_size'])}] {clean_file_name(file['file_name'])}\n\n</a></b>"
 
     if imdb and imdb.get('poster'):
         try:
