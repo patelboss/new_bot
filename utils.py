@@ -27,7 +27,7 @@ SECOND_SHORTENER = {}
 SMART_OPEN = '“'
 SMART_CLOSE = '”'
 START_CHAR = ('\'', '"', SMART_OPEN)
-
+#temp.U_Namw
 # temp db for banned 
 class temp(object):
     BANNED_USERS = []
@@ -37,7 +37,7 @@ class temp(object):
     CURRENT=int(os.environ.get("SKIP", 2))
     CANCEL = False
     MELCOW = {}
-    U_NAME = None
+    U_NAME = "Rashmika_mandanana_bot"
     B_NAME = None
     GETALL = {}
     SHORT = {}
