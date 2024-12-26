@@ -55,16 +55,16 @@ async def start():
     me = await TechVJBot.get_me()
     temp.BOT = TechVJBot
     temp.ME = me.id
-    temp.U_NAME = me.username
+    temp.U_NAME = "Rashmika_mandanana_bot"
     print(f" ☞username is {temp.U_NAME} ")
-    temp.B_NAME = me.first_name
+    temp.B_NAME = "ᏒᏗᏕᏂᎷᎥ's Helper"
     logging.info(LOG_STR)
     logging.info(script.LOGO)
     tz = pytz.timezone('Asia/Kolkata')
     today = date.today()
     now = datetime.now(tz)
     time = now.strftime("%H:%M:%S %p")
-    await TechVJBot.send_message(chat_id=LOG_CHANNEL, text=script.RESTART_TXT.format(today, time))
+    #await TechVJBot.send_message(chat_id=LOG_CHANNEL, text=script.RESTART_TXT.format(today, time))
     if CLONE_MODE == True:
         print("Restarting All Clone Bots.......")
         await restart_bots()
@@ -75,11 +75,11 @@ async def start():
     await web.TCPSite(app, bind_address, PORT).start()
 
     # Start send_alive_message as a background task
-    if SEND_ALIVE == True:
-        logging.info("Starting send_alive_message task.")
-        asyncio.create_task(send_alive_message(TechVJBot))
-    else:
-        logging.info("SEND_ALIVE is False. Task not started.")
+   # if SEND_ALIVE == True:
+   #     logging.info("Starting send_alive_message task.")
+   #     asyncio.create_task(send_alive_message(TechVJBot))
+   # else:
+   #     logging.info("SEND_ALIVE is False. Task not started.")
     await idle()
 
 
