@@ -23,7 +23,7 @@ from utils import clean_file_name
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.ERROR)
 lock = asyncio.Lock()
-
+BOT_URNM = 'rashmika_mandanana_bot'
 BUTTON = {}
 BUTTONS = {}
 FRESH = {}
