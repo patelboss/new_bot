@@ -47,6 +47,7 @@ async def start():
             spec.loader.exec_module(load)
             sys.modules["plugins." + plugin_name] = load
             print("Tech VJ Imported => " + plugin_name)
+            
     if ON_HEROKU:
         asyncio.create_task(ping_server())
     b_users, b_chats = await db.get_banned()
@@ -55,7 +56,7 @@ async def start():
     me = await TechVJBot.get_me()
     temp.BOT = TechVJBot
     temp.ME = me.id
-    temp.U_NAME = me.username
+    temp.U_NAME = "Rashmika_mandanana_bot"
     temp.B_NAME = me.first_name
     logging.info(LOG_STR)
     logging.info(script.LOGO)
