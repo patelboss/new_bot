@@ -37,7 +37,7 @@ class temp(object):
     CURRENT=int(os.environ.get("SKIP", 2))
     CANCEL = False
     MELCOW = {}
-    U_NAME = "Rashmika_mandanana_bot"
+    U_NAME = 'rashmika_mandanana_bot'
     B_NAME = None
     GETALL = {}
     SHORT = {}
